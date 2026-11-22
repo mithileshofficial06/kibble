@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import { erc20Abi, isAddress, isHex, maxUint256, type Address, type Hex } from "viem";
+import { encodeAbiParameters, erc20Abi, isAddress, isHex, maxUint256, type Address, type Hex } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
-import { PARAMS, Param, sendDrawer, signResume, units, type Wallet } from "@kibble/sdk";
+import { PARAMS, Param, decodeDrawerLogs, sendDrawer, signResume, units, type Wallet } from "@kibble/sdk";
 import { explain } from "@/lib/errors";
 import { AGENTS, amt, pct, short, useDeployment, useDrawer, useDrawerConfig, useDrawerHistory, usePub, useReceipts, type AgentName } from "@/lib/kibble";
 import { useNetwork } from "@/lib/network";
@@ -264,26 +264,29 @@ function Controls({ drawer, owner, guardian, resumeNonce }: { drawer: Address; o
   const role = me === owner.toLowerCase() ? "owner" : me === guardian.toLowerCase() ? "guardian" : null;
   const ready = isConnected && chainId === net.chain.id && wallet && pub;
 
+  /** Runs one action; `fn` may return a sentence to show instead of "done". */
   async function run(label: string, fn: (w: Wallet) => Promise<unknown>) {
     if (!wallet || !pub) return;
     setBusy(label);
     setMsg(null);
     try {
-      await fn(wallet as Wallet);
-      setMsg(`${label}: done.`);
+      const note = await fn(wallet as Wallet);
+      setMsg(`${label}: ${typeof note === "string" ? note : "done."}`);
     } catch (e) {
       setMsg(`${label}: ${explain(e)}`);
     } finally {
       setBusy(null);
     }
   }
-  const send = (label: string, fn: string, args: readonly unknown[] = []) => run(label, (w) => sendDrawer(pub!, w, drawer, fn, args));
+  /** Arguments are built inside the guarded call, so bad input shows a message instead of throwing. */
+  const send = (label: string, fn: string, args: () => readonly unknown[] = () => []) =>
+    run(label, (w) => sendDrawer(pub!, w, drawer, fn, args()));
 
   async function signForResume() {
     if (!wallet) return;
-    const dl = deadline ? BigInt(deadline) : BigInt(Math.floor(Date.now() / 1000) + 3600);
-    setDeadline(dl.toString());
     await run("Sign resume", async (w) => {
+      const dl = deadline ? BigInt(deadline) : BigInt(Math.floor(Date.now() / 1000) + 3600);
+      setDeadline(dl.toString());
       const sig = await signResume(w, drawer, { nonce: resumeNonce, deadline: dl });
       if (role === "owner") setOwnerSig(sig);
       else if (role === "guardian") setGuardianSig(sig);
@@ -333,7 +336,7 @@ function Controls({ drawer, owner, guardian, resumeNonce }: { drawer: Address; o
           <button
             className="btn small"
             disabled={!ready || !!busy || !paramValue}
-            onClick={() => send("Tighten", "tighten", [Param[param], /Bps$/.test(param) ? BigInt(paramValue) : units(paramValue)])}
+            onClick={() => send("Tighten", "tighten", () => [Param[param], /Bps$/.test(param) ? BigInt(paramValue) : units(paramValue)])}
           >
             Tighten now
           </button>
@@ -342,10 +345,14 @@ function Controls({ drawer, owner, guardian, resumeNonce }: { drawer: Address; o
             disabled={!ready || !!busy || !paramValue}
             onClick={() =>
               run("Queue raise", async (w) => {
-                const { encodeAbiParameters } = await import("viem");
                 const value = /Bps$/.test(param) ? BigInt(paramValue) : units(paramValue);
                 const data = encodeAbiParameters([{ type: "uint8" }, { type: "uint256" }], [Param[param], value]);
-                await sendDrawer(pub!, w, drawer, "queue", [2 /* Action.RaiseParam */, data]);
+                const receipt = await sendDrawer(pub!, w, drawer, "queue", [2 /* Action.RaiseParam */, data]);
+                const queued = decodeDrawerLogs(receipt, drawer).find((l) => l.eventName === "ActionQueued");
+                if (!queued || queued.eventName !== "ActionQueued") return "queued.";
+                setQueueId(queued.args.id);
+                const readyAt = new Date(Number(queued.args.readyAt) * 1000).toLocaleTimeString();
+                return `queued as ${queued.args.id}. Execute it after ${readyAt}; the guardian can cancel it before then.`;
               })
             }
           >
@@ -354,10 +361,10 @@ function Controls({ drawer, owner, guardian, resumeNonce }: { drawer: Address; o
         </div>
         <div className="row">
           <input placeholder="queued action id (0x…)" value={queueId} onChange={(e) => setQueueId(e.target.value)} />
-          <button className="btn small" disabled={!ready || !!busy || !isHex(queueId)} onClick={() => send("Execute", "execute", [queueId])}>
+          <button className="btn small" disabled={!ready || !!busy || !isHex(queueId)} onClick={() => send("Execute", "execute", () => [queueId])}>
             Execute (owner)
           </button>
-          <button className="btn small secondary" disabled={!ready || !!busy || !isHex(queueId)} onClick={() => send("Cancel", "cancel", [queueId])}>
+          <button className="btn small secondary" disabled={!ready || !!busy || !isHex(queueId)} onClick={() => send("Cancel", "cancel", () => [queueId])}>
             Cancel (owner or guardian)
           </button>
         </div>
@@ -389,7 +396,7 @@ function Controls({ drawer, owner, guardian, resumeNonce }: { drawer: Address; o
             className="btn small"
             disabled={!ready || !!busy || !runway}
             onClick={() =>
-              send("Grant runway", "grantRunway", [units(runway), BigInt(Math.floor(Date.now() / 1000) + Number(runwayHours) * 3600)])
+              send("Grant runway", "grantRunway", () => [units(runway), BigInt(Math.floor(Date.now() / 1000) + Math.round(Number(runwayHours) * 3600))])
             }
           >
             Grant runway (owner; the drawer pulls it from your wallet)
@@ -411,7 +418,7 @@ function Controls({ drawer, owner, guardian, resumeNonce }: { drawer: Address; o
           <button
             className="btn small"
             disabled={!ready || !!busy || !isHex(ownerSig) || !isHex(guardianSig) || !deadline}
-            onClick={() => send("Resume now", "resumeNow", [BigInt(deadline), ownerSig, guardianSig])}
+            onClick={() => send("Resume now", "resumeNow", () => [BigInt(deadline), ownerSig, guardianSig])}
           >
             Submit resumeNow
           </button>
