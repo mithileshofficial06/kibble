@@ -20,8 +20,9 @@ their own LICENSE files, and the JavaScript packages are installed from npm.
 | @rainbow-me/rainbowkit | 2.2.11 | MIT | web |
 | wagmi | 2.19.5 | MIT | web |
 | @tanstack/react-query | 5.90.2 | MIT | web |
-| viem | 2.57.12 | MIT | web, examples, packages/aevum |
-| tsx | 4.23.15 | MIT | examples (dev) |
+| viem | 2.57.12 | MIT | web, examples, agents, packages/aevum, packages/kibble |
+| tsx | 4.23.15 | MIT | examples, agents (dev) |
+| @anthropic-ai/sdk | ^1.12.0 | MIT | agents (injection beat) |
 | typescript | 5.9.3 | Apache-2.0 | all (dev) |
 
 Their own dependencies carry their own licenses. To list them all, run `pnpm licenses list` in the repo root.
