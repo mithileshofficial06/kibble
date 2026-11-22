@@ -92,6 +92,23 @@ Log: [docs/runs/testnet-run1-20s-windows-2026-11-22.txt](docs/runs/testnet-run1-
 - **Controls:** threshold lowered instantly, owner-signed payment paid (receipt #13), signature replay refused, guardian freeze, owner + guardian `resumeNow`.
 - **What it taught us:** on a real chain each sale is about four transactions, so a 20-second window held only 2–3 sales. Most windows fell below `minActivity`, so Kibble A never finished Learning and its T stayed at 0.200. On a fork, time only moves when the script moves it, which hid this. Run 2 uses 2-minute windows.
 
-### Run 2: 2-minute windows
+### Run 2: 2-minute windows (the current drawers)
 
-Pending (in progress).
+Log: [docs/runs/testnet-run2-2026-11-22.txt](docs/runs/testnet-run2-2026-11-22.txt). Drawers: [`deployments/44005.json`](deployments/44005.json): Kibble A [`0xa924b7f7…902B`](https://explorer-test.qday.info/address/0xa924b7f72f33c0A99dD81e3B2C7E3437D9FA902B), fixed A′ [`0xd2a188A5…7e56`](https://explorer-test.qday.info/address/0xd2a188A5C035529Dc17e739159B685511a1F7e56), Kibble B [`0x6A22c5b4…b9F2`](https://explorer-test.qday.info/address/0x6A22c5b44C3c3f428FDa104910B6cEab8325b9F2), fixed B′ [`0xA181dEeb…2aEa`](https://explorer-test.qday.info/address/0xA181dEebaC5D135Cf4f683cd2738C4d513b62aEa), W [`0x4Db4e932…5142`](https://explorer-test.qday.info/address/0x4Db4e932A84643f19CCa498AB3962efeF2a15142).
+
+**Time-lapse, 10 windows, the same demand on both sides** (sell at 0.010, buy the model call at 0.004):
+
+|  | Fixed A′ (flat limit 0.050) | Kibble A |
+|---|---|---|
+| Sales served / turned away | 63 / 0 | 63 / 0 |
+| Limit after 10 windows | 0.050 | **0.260** (earned, from 0.200) |
+| Profit in the vault | 0.000 | **0.327** |
+| Hijack exposure (`maxLossNow`) | 0.578 | 0.251 |
+| Learned cost share | n/a | 41.37%, so the ceiling is 51.37% |
+
+Windows 1–2 (4 sales each) were below `minActivity` and didn't count; Learning finished at window 7, and T grew in windows 8, 9 and 10. Ten windows at real speed are too few for the fixed side to start turning customers away (on the fork that happens at window 16), so that part of the story is in the fork run above.
+
+- **Bad strategy:** fixed B′ stayed Healthy and lost 0.018 every window. **Kibble B went to Paused on its own 65 s after the price jump**, in the first window, with 1 payment made; its exposure went to 0.
+- **Hijack:** both sides refused the injected 0.5 payment and the stranger probes. Overbuying from the real supplier: **fixed A′ paid out 0.100 and stayed Healthy, still exposed for 0.478; Kibble A paid 0.000 and paused 4 s in**, `maxLossNow` 0.251 → 0.000. The vault held 1.263 tUSD8 the agent key could never reach.
+- **Work credits:** five accepted reports grew W's T from 0.200 to 0.302 (with a 0.120 runway for the first report); the first report not accepted dropped it to Watch at 0.182.
+- **Controls:** threshold lowered to 0.100 instantly; a 0.150 payment refused, then paid with the owner's signature (receipt #13); the replayed signature refused; guardian freeze; owner + guardian `resumeNow` back to Watch.
