@@ -66,20 +66,14 @@ export async function payOnce(opts: {
   for (let i = 0; i < tries; i++) {
     try {
       const hash = opts.approval
-        ? await wallet.writeContract({
-            ...TX,
-            address: drawer,
-            abi: kibbleDrawerAbi,
-            functionName: "payWithApproval",
-            args: [payee, amount, billRef, opts.approval.deadline, opts.approval.ownerSig],
-          })
-        : await wallet.writeContract({
-            ...TX,
-            address: drawer,
-            abi: kibbleDrawerAbi,
-            functionName: "pay",
-            args: [payee, amount, billRef],
-          });
+        ? await writeDrawer(pub, wallet, drawer, "payWithApproval", [
+            payee,
+            amount,
+            billRef,
+            opts.approval.deadline,
+            opts.approval.ownerSig,
+          ])
+        : await writeDrawer(pub, wallet, drawer, "pay", [payee, amount, billRef]);
       const receipt = await pub.waitForTransactionReceipt({ hash, timeout: opts.timeoutMs ?? 60_000 });
       if (receipt.status !== "success") throw new Error(`pay reverted: ${hash}`);
       return outcome(receipt, drawer, fp);
@@ -95,6 +89,24 @@ export async function payOnce(opts: {
   throw lastError;
 }
 
+/**
+ * Estimate, then send with a 2x margin. Any call can close a window, finish learning or clear income in
+ * the block it lands in, which the estimate (made against the previous block) doesn't see. Unused gas
+ * isn't charged.
+ */
+export async function writeDrawer(
+  pub: PublicClient,
+  wallet: Wallet,
+  drawer: Address,
+  functionName: string,
+  args: readonly unknown[] = [],
+): Promise<Hex> {
+  // viem can't narrow a runtime function name; the ABI still encodes and checks the arguments.
+  const req = { address: drawer, abi: kibbleDrawerAbi, functionName, args, account: wallet.account } as never;
+  const gas = (await pub.estimateContractGas(req)) * 2n + 100_000n;
+  return wallet.writeContract({ ...TX, ...(req as object), gas } as never);
+}
+
 export async function sendDrawer(
   pub: PublicClient,
   wallet: Wallet,
@@ -102,14 +114,7 @@ export async function sendDrawer(
   functionName: string,
   args: readonly unknown[] = [],
 ): Promise<TransactionReceipt> {
-  const hash = await wallet.writeContract({
-    ...TX,
-    address: drawer,
-    abi: kibbleDrawerAbi,
-    // viem can't narrow a runtime function name; the ABI still encodes and checks the arguments.
-    functionName: functionName as never,
-    args: args as never,
-  });
+  const hash = await writeDrawer(pub, wallet, drawer, functionName, args);
   const receipt = await pub.waitForTransactionReceipt({ hash });
   if (receipt.status !== "success") throw new Error(`${functionName} reverted: ${hash}`);
   return receipt;

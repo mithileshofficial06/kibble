@@ -46,7 +46,7 @@ export const REASON_TEXT: Record<ReasonName, string> = {
   ApprovalExpired: "Refused: the owner's approval expired",
   OverSupplierPayment: "Refused: over this supplier's per-payment cap",
   OverSupplierWindow: "Refused: over this supplier's cap for the window",
-  OverUnknownBudget: "Refused: not an approved payee, and the 1 tUSD8 stranger budget is used up",
+  OverUnknownBudget: "Refused: not an approved payee, and no stranger budget is left",
   OverAllowance: "Refused: over the allowance the agent has earned",
   OverCeiling: "Refused: over the cost ceiling (spend too high for the value earned)",
   Strike: "Strike: spending ran above the agent's normal cost share",

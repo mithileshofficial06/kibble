@@ -3,7 +3,7 @@
 //   RPC_URL=http://127.0.0.1:8555 pnpm --filter agents setup-demo     # `make fork` (default)
 //   RPC_URL=https://rpc-test.qday.info pnpm --filter agents setup-demo # Aevum testnet (needs funded wallets)
 //
-// Add --fresh to create new drawers even if a deployment file exists.
+// --fresh creates new drawers; --redeploy also redeploys the contracts (after a contract change).
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { encodeFunctionData, erc20Abi, parseEventLogs, type Address, type Hex } from "viem";
@@ -33,7 +33,7 @@ async function deployContract(ctx: Ctx, name: string, args: unknown[] = []): Pro
 /** Local chains only: gas for every role, and tUSD8 for the owner and buyer. */
 async function dealLocal(ctx: Ctx, token: Address) {
   const t = testClient(ctx);
-  for (const role of ROLES) await t.setBalance({ address: ctx.address(role), value: 10n ** 19n });
+  for (const role of ROLES) await t.setBalance({ address: ctx.address(role), value: 10n ** 24n });
   const code = await ctx.pub.getCode({ address: TUSD8 });
   if (code && token === TUSD8) {
     // `make fork`: mint real tUSD8 by impersonating its master minter (works only on a local fork)
@@ -73,17 +73,18 @@ async function write(ctx: Ctx, role: "OWNER" | "BUYER", address: Address, abi: r
 }
 
 async function main() {
-  const fresh = process.argv.includes("--fresh");
+  const redeploy = process.argv.includes("--redeploy");
+  const fresh = redeploy || process.argv.includes("--fresh");
   const ctx = await connect();
   console.log(`Network: ${ctx.chain.name} (chain ${ctx.chain.id})${ctx.local ? " [local]" : ""}`);
 
   let dep = loadDeployment(ctx.chain.id);
   const roles = Object.fromEntries(ROLES.map((r) => [r, ctx.address(r)]));
 
-  if (!dep || !(await ctx.pub.getCode({ address: dep.factory }))) {
+  if (redeploy || !dep || !(await ctx.pub.getCode({ address: dep.factory }))) {
     console.log("Deploying Kibble contracts:");
     const tusd8Code = await ctx.pub.getCode({ address: TUSD8 });
-    if (ctx.local) await testClient(ctx).setBalance({ address: ctx.address("OWNER"), value: 10n ** 19n });
+    if (ctx.local) await testClient(ctx).setBalance({ address: ctx.address("OWNER"), value: 10n ** 24n });
     const token = tusd8Code ? TUSD8 : await deployContract(ctx, "MockUSD8");
     const adminModule = await deployContract(ctx, "KibbleAdmin");
     const drawerImpl = await deployContract(ctx, "KibbleDrawer", [adminModule]);
@@ -100,7 +101,7 @@ async function main() {
   console.log(`Owner tUSD8: ${fmt(ownerBal)}`);
 
   // vault: one per owner, `home` = guardian
-  if (!dep.vault) {
+  if (!dep.vault || redeploy) {
     dep.vault = (await ctx.pub.readContract({ address: dep.factory, abi: kibbleFactoryAbi, functionName: "vaultOf", args: [ctx.address("OWNER")] })) as Address;
     if (dep.vault === "0x0000000000000000000000000000000000000000") {
       const delay = ctx.local ? 120n : 86_400n;

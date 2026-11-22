@@ -9,7 +9,7 @@
     "setup-demo": "tsx src/setup.ts",
     "scenario": "tsx src/run.ts",
     "supplier": "tsx src/supplier-server.ts",
-    "status": "tsx src/status.ts",
+    "status": "tsx src/run.ts status",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
