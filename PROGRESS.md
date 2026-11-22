@@ -14,7 +14,7 @@ Not done:
 - Demo video, outside test agents, DoraHacks submission.
 
 ## Next steps
-1. Fund the wallets, then `RPC_URL=https://rpc-test.qday.info pnpm --filter agents setup-demo`, run the scenarios on testnet, and put the addresses and tx hashes in README + EVIDENCE.md (commit `deployments/44005.json`).
+1. Fund the wallets, then `RPC_URL=https://rpc-test.qday.info pnpm --filter @kibble/agents setup-demo`, run the scenarios on testnet, and put the addresses and tx hashes in README + EVIDENCE.md (commit `deployments/44005.json`).
 2. Dashboard (split screen, time-lapse, scoreboard, receipts, controls) once the user gives the UI direction.
 3. Public playground relayer with limits (report section 13.3).
 4. Record the video; dry run from a logged-out browser; submit by 10 Dec.

@@ -21,7 +21,8 @@ export type Role = (typeof ROLES)[number];
 
 /** Where the demo keys live. Override with KIBBLE_WALLETS=<path to .env>. */
 const WALLETS_FILE = process.env.KIBBLE_WALLETS ?? "D:/Tools/kibble-wallets/.env";
-if (existsSync(WALLETS_FILE)) process.loadEnvFile(WALLETS_FILE);
+// Read at run time only (turbopackIgnore keeps the web build from tracing the whole project).
+if (existsSync(/*turbopackIgnore: true*/ WALLETS_FILE)) process.loadEnvFile(/*turbopackIgnore: true*/ WALLETS_FILE);
 
 export type Ctx = {
   chain: Chain;

@@ -1,13 +1,13 @@
 // Deploys Kibble (if needed) and the demo: one owner vault and five drawers.
 //
-//   RPC_URL=http://127.0.0.1:8555 pnpm --filter agents setup-demo     # `make fork` (default)
-//   RPC_URL=https://rpc-test.qday.info pnpm --filter agents setup-demo # Aevum testnet (needs funded wallets)
+//   RPC_URL=http://127.0.0.1:8555 pnpm --filter @kibble/agents setup-demo     # `make fork` (default)
+//   RPC_URL=https://rpc-test.qday.info pnpm --filter @kibble/agents setup-demo # Aevum testnet (needs funded wallets)
 //
 // --fresh creates new drawers; --redeploy also redeploys the contracts (after a contract change).
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { encodeFunctionData, erc20Abi, parseEventLogs, type Address, type Hex } from "viem";
-import { kibbleFactoryAbi, kibbleDrawerAbi, fmt, Mode, units, sendDrawer } from "@kibble/sdk";
+import { kibbleFactoryAbi, kibbleDrawerAbi, kibbleVaultAbi, fmt, Mode, units, sendDrawer } from "@kibble/sdk";
 
 /** maxWeeklyLoss L, the owner's one setting: 20 tUSD8 at demo scale 1 (2 on testnet). */
 const maxWeeklyLoss = (ctx: Ctx) => ctx.u(20);
@@ -67,7 +67,7 @@ function encode(abi: readonly unknown[], functionName: string, args: readonly un
   return encodeFunctionData({ abi, functionName, args } as never);
 }
 
-async function write(ctx: Ctx, role: "OWNER" | "BUYER", address: Address, abi: readonly unknown[], functionName: string, args: readonly unknown[]) {
+async function write(ctx: Ctx, role: Role, address: Address, abi: readonly unknown[], functionName: string, args: readonly unknown[]) {
   const hash = await ctx.wallet(role).writeContract({ address, abi, functionName, args, type: "legacy" } as never);
   const r = await ctx.pub.waitForTransactionReceipt({ hash });
   if (r.status !== "success") throw new Error(`${functionName} reverted (${hash})`);
@@ -98,7 +98,10 @@ async function main() {
   dep.roles = roles;
 
   if (ctx.local) await dealLocal(ctx, dep.token);
-  else if (needDrawersFor(dep, fresh)) await shareOut(ctx, dep.token);
+  else if (needDrawersFor(dep, fresh)) {
+    if (dep.drawers.A) await reclaim(ctx, dep);
+    await shareOut(ctx, dep.token);
+  }
 
   const ownerBal = await ctx.pub.readContract({ address: dep.token, abi: erc20Abi, functionName: "balanceOf", args: [ctx.address("OWNER")] });
   console.log(`Owner tUSD8: ${fmt(ownerBal)}`);
@@ -132,12 +135,12 @@ function needDrawersFor(dep: Deployment, fresh: boolean) {
  * per person, so the fixed sides start with a smaller reserve and W with a smaller work budget.
  */
 const PLAN = {
-  fixedSeed: (ctx: Ctx) => (ctx.local ? 10 : 3),
+  fixedSeed: (ctx: Ctx) => (ctx.local ? 10 : 2),
   workBudget: (ctx: Ctx) => (ctx.local ? 30 : 16),
   /** tUSD8 the owner puts in: five drawer seeds, W's work budget, and W's 1.2 runway grant later. */
   ownerNeeds: (ctx: Ctx) => ctx.u(2 + PLAN.fixedSeed(ctx) + 2 + PLAN.fixedSeed(ctx) + 2 + PLAN.workBudget(ctx) + 1.2),
-  /** tUSD8 the buyer spends: an 8-window time-lapse (~9.2 before scaling) plus bad-strategy (~4.2). */
-  buyerNeeds: (ctx: Ctx) => ctx.u(16),
+  /** tUSD8 the buyer spends: a 10-window time-lapse (~12.6 before scaling) plus bad-strategy (~4.2). */
+  buyerNeeds: (ctx: Ctx) => ctx.u(18),
 };
 
 /** tQDAY each role needs for gas on testnet (1 gwei; a payment is ~250k gas = 0.00025). */
@@ -149,6 +152,28 @@ const GAS: Record<Exclude<Role, "OWNER">, bigint> = {
   GUARDIAN: 30n * 10n ** 15n,
   SUPPLIER: 10n * 10n ** 15n,
 };
+
+/**
+ * Testnet, before fresh drawers: bring the demo's tUSD8 back to the owner. The old drawers are revoked
+ * (everything sweeps to the vault), the vault pays out to its home (the guardian), and the guardian and
+ * the supplier hand their tUSD8 to the owner. Every token stays inside the demo's own wallets.
+ */
+async function reclaim(ctx: Ctx, dep: Deployment) {
+  console.log("Reclaiming tUSD8 from the previous demo drawers:");
+  for (const [name, drawer] of Object.entries(dep.drawers) as [AgentName, Address][]) {
+    const state = await ctx.pub.readContract({ address: drawer, abi: kibbleDrawerAbi, functionName: "state" });
+    if (state !== 5 /* Revoked */) await sendDrawer(ctx.pub, ctx.wallet("OWNER"), drawer, "revoke");
+    console.log(`  revoked ${name}`);
+  }
+  const bal = (a: Address) => ctx.pub.readContract({ address: dep.token, abi: erc20Abi, functionName: "balanceOf", args: [a] });
+  const inVault = await bal(dep.vault!);
+  if (inVault > 0n) await write(ctx, "OWNER", dep.vault!, kibbleVaultAbi, "withdrawHome", [inVault]);
+  for (const role of ["GUARDIAN", "SUPPLIER"] as const) {
+    const have = await bal(ctx.address(role));
+    if (have > 0n) await write(ctx, role, dep.token, erc20Abi, "transfer", [ctx.address("OWNER"), have]);
+    console.log(`  ${role} returned ${ctx.f(have)}`);
+  }
+}
 
 /**
  * Testnet: the faucet funds only the owner, so the owner tops up every other role with gas and gives the
@@ -184,6 +209,8 @@ async function createDrawers(ctx: Ctx, dep: Deployment) {
   // demoConfig is written for scale 1; scale its amounts with the demo (timings stay the same)
   const base = {
     ...demo,
+    // On testnet each sale is ~4 real transactions, so a window needs to be long enough to hold a batch.
+    windowLength: ctx.local ? demo.windowLength : 120n,
     tMin: scaled(ctx, demo.tMin),
     maxStep: scaled(ctx, demo.maxStep),
     minActivity: scaled(ctx, demo.minActivity),

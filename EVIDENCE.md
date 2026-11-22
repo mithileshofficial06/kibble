@@ -3,7 +3,7 @@
 Every feature, the test that proves it, and where it shows up in a run.
 
 - **Tests:** `make test` (unit, fuzz, invariants) and `make test-fork` (real tUSD8 on a fork of Aevum). Test files are in [`contracts/test`](contracts/test).
-- **Scenarios:** `pnpm --filter agents scenario <name>` ([`agents/src/scenarios.ts`](agents/src/scenarios.ts)).
+- **Scenarios:** `pnpm --filter @kibble/agents scenario <name>` ([`agents/src/scenarios.ts`](agents/src/scenarios.ts)).
 - **Explorer links:** Aevum testnet transactions will be added here after the testnet deployment (the demo wallets need faucet funds first). Until then the run below is from a local fork of Aevum with the real tUSD8 contract.
 
 ## Feature → test
@@ -78,4 +78,4 @@ Kibble A spent its first 6 windows in Learning (window 1 was quiet), then grew T
 
 ## Aevum testnet
 
-Pending: the demo wallets need tQDAY and tUSD8 from the faucet. Then `RPC_URL=https://rpc-test.qday.info pnpm --filter agents setup-demo` deploys everything, and this section gets the contract addresses and transaction links on https://explorer-test.qday.info.
+Pending: the demo wallets need tQDAY and tUSD8 from the faucet. Then `RPC_URL=https://rpc-test.qday.info pnpm --filter @kibble/agents setup-demo` deploys everything, and this section gets the contract addresses and transaction links on https://explorer-test.qday.info.

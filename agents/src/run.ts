@@ -1,4 +1,4 @@
-// pnpm --filter agents scenario <name> [arg]
+// pnpm --filter @kibble/agents scenario <name> [arg]
 //
 //   timelapse [windows]   30 windows of the same demand through fixed A' and Kibble A
 //   bad-strategy          B's supplier price jumps; fixed keeps paying, Kibble brakes itself
@@ -18,8 +18,8 @@ const [name = "status", arg] = process.argv.slice(2);
 const ctx = await connect();
 const dep = requireDeployment(ctx.chain.id);
 const n = arg ? Number(arg) : undefined;
-// On testnet a window takes 20 s of real time and faucet tUSD8 is scarce: 8 windows by default.
-const windows = n ?? (ctx.local ? 30 : 8);
+// On testnet a window is 2 minutes of real time and faucet tUSD8 is scarce: 10 windows by default.
+const windows = n ?? (ctx.local ? 30 : 10);
 
 const scenarios: Record<string, () => Promise<unknown>> = {
   timelapse: () => timelapse(ctx, dep, windows),

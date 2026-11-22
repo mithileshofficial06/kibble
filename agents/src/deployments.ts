@@ -34,13 +34,13 @@ export function deploymentPath(chainId: number) {
 
 export function loadDeployment(chainId: number): Deployment | undefined {
   const p = deploymentPath(chainId);
-  return existsSync(p) ? (JSON.parse(readFileSync(p, "utf8")) as Deployment) : undefined;
+  return existsSync(/*turbopackIgnore: true*/ p) ? (JSON.parse(readFileSync(/*turbopackIgnore: true*/ p, "utf8")) as Deployment) : undefined;
 }
 
 export function requireDeployment(chainId: number): Deployment {
   const d = loadDeployment(chainId);
   if (!d?.vault || !d.drawers.A) {
-    throw new Error(`No demo deployment for chain ${chainId}. Run: pnpm --filter agents setup-demo`);
+    throw new Error(`No demo deployment for chain ${chainId}. Run: pnpm --filter @kibble/agents setup-demo`);
   }
   return d;
 }

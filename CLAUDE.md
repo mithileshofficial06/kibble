@@ -14,7 +14,7 @@ Earned spending limit for AI agents: a per-agent "drawer" contract, an owner vau
 
 ## Commands
 - `make install`, `make build`, `make test` (unit + fuzz + invariants, ~2 min), `make test-fork`, `make abi` (after build).
-- Local demo: `make fork` (or `anvil --fork-url https://rpc-test.qday.info --hardfork shanghai --chain-id 440050 --port 8555`), then `pnpm --filter agents setup-demo [--fresh|--redeploy]` and `pnpm --filter agents scenario <timelapse|bad-strategy|hijack|work|controls|resume X|status|all>`.
+- Local demo: `make fork` (or `anvil --fork-url https://rpc-test.qday.info --hardfork shanghai --chain-id 440050 --port 8555`), then `pnpm --filter @kibble/agents setup-demo [--fresh|--redeploy]` and `pnpm --filter @kibble/agents scenario <timelapse|bad-strategy|hijack|work|controls|resume X|status|all>`.
 - `RPC_URL` picks the network (default: the fork on 8555). `KIBBLE_LLM=off` forces the scripted model.
 - pnpm: `setup` is a built-in pnpm command, so the script is `setup-demo`.
 - GNU Make 4.4.1 via winget; the Makefile uses `/bin/bash`, so run it from Git Bash.

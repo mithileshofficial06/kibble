@@ -131,9 +131,9 @@ make test-fork                   # fork tests against the real tUSD8 on Aevum
 
 ```bash
 make fork                                     # terminal 1: Aevum fork on 127.0.0.1:8555
-pnpm --filter agents setup-demo               # terminal 2: deploy Kibble + vault + 5 drawers
-pnpm --filter agents scenario all             # time-lapse, bad strategy, hijack, work, controls
-pnpm --filter agents scenario status
+pnpm --filter @kibble/agents setup-demo               # terminal 2: deploy Kibble + vault + 5 drawers
+pnpm --filter @kibble/agents scenario all             # time-lapse, bad strategy, hijack, work, controls
+pnpm --filter @kibble/agents scenario status
 ```
 
 On a local chain the scripts make throwaway keys. To use your own, put `OWNER_PRIVATE_KEY`, `GUARDIAN_PRIVATE_KEY`, `AGENT_A_PRIVATE_KEY`, `AGENT_B_PRIVATE_KEY`, `SUPPLIER_PRIVATE_KEY`, `BUYER_PRIVATE_KEY` and `RELAYER_PRIVATE_KEY` in a `.env` file **outside the repo** and point `KIBBLE_WALLETS` at it.
@@ -141,8 +141,8 @@ On a local chain the scripts make throwaway keys. To use your own, put `OWNER_PR
 **On Aevum testnet:** fund those wallets from the faucet (tQDAY for gas; about 60 tUSD8 for the owner and 20 for the buyer), then:
 
 ```bash
-RPC_URL=https://rpc-test.qday.info pnpm --filter agents setup-demo
-RPC_URL=https://rpc-test.qday.info pnpm --filter agents scenario hijack
+RPC_URL=https://rpc-test.qday.info pnpm --filter @kibble/agents setup-demo
+RPC_URL=https://rpc-test.qday.info pnpm --filter @kibble/agents scenario hijack
 ```
 
 Windows are 20 s in the demo config, so on the real testnet a scenario takes real minutes.
@@ -151,7 +151,7 @@ Windows are 20 s in the demo config, so on the real testnet a scenario takes rea
 
 ## Demo scenarios
 
-`pnpm --filter agents scenario <name>`:
+`pnpm --filter @kibble/agents scenario <name>`:
 
 | Scenario | What it shows |
 |---|---|
@@ -204,7 +204,7 @@ Events: `Paid`, `Refused(fp, reason, …)`, `ReceiptIssued`, `StateChanged(from,
 | Network | Factory | Notes |
 |---|---|---|
 | Aevum testnet (44005) | pending | The demo wallets need faucet funds first. Addresses land in `deployments/44005.json` and here |
-| Local fork (440050) | per run | `pnpm --filter agents setup-demo` |
+| Local fork (440050) | per run | `pnpm --filter @kibble/agents setup-demo` |
 
 Explorer verification on Aevum doesn't work yet (see the starter kit). Addresses and the exact commit will be listed here instead.
 
