@@ -112,7 +112,7 @@ contract KibbleDrawer is KibbleCore, Initializable {
             tMax = c.fixedLimit;
             costBps = BPS; // unused in FIXED
             unknownRemaining = 0; // allowlist only
-            incomeHold = 0;
+            incomeHold = c.incomeHold; // same hold as EARNED, so refunds work on both sides
             state = State.Healthy;
         } else {
             tMax = c.maxWeeklyLoss / 2;

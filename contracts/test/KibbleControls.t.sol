@@ -231,7 +231,7 @@ contract KibbleControlsTest is KibbleBase {
     function test_fixed_incomeGoesToReserve() public {
         KibbleDrawer f = fixedDrawer(3e6);
         sell(f, 1e6);
-        f.sync();
+        clearHold(f);
         assertEq(f.reserve(), 28e6);
         assertBuckets(f);
     }
