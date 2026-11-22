@@ -62,8 +62,8 @@ export async function timelapse(ctx: Ctx, dep: Deployment, windows = 30) {
   const score = { A: { served: 0, turned: 0 }, F: { served: 0, turned: 0 } };
   const vault0 = await vaultBalance(ctx, dep);
 
-  console.log(`\nTime-lapse: ${windows} windows, same demand on both sides (price ${amt(ctx, 0.1)}, cost ${amt(ctx, 0.04)})\n`);
-  console.log(`${pad("win", 4)}${pad("demand", 8)}${pad("Fixed A' served/away", 22)}Kibble A`);
+  ctx.log(`\nTime-lapse: ${windows} windows, same demand on both sides (price ${amt(ctx, 0.1)}, cost ${amt(ctx, 0.04)})\n`);
+  ctx.log(`${pad("win", 4)}${pad("demand", 8)}${pad("Fixed A' served/away", 22)}Kibble A`);
   for (let i = 0; i < windows; i++) {
     const demand = 4 + Math.floor(i * 0.6);
     const before = { ...score.A, f: { ...score.F } };
@@ -79,20 +79,20 @@ export async function timelapse(ctx: Ctx, dep: Deployment, windows = 30) {
     const fServed = score.F.served - before.f.served;
     const fTurned = score.F.turned - before.f.turned;
     const aServed = score.A.served - before.served;
-    console.log(
+    ctx.log(
       `${pad(i + 1, 4)}${pad(demand, 8)}${pad(`${fServed}/${fTurned}`, 22)}${pad(`${aServed}/${demand - aServed}`, 7)} ${brief(ctx, a)}`,
     );
   }
   const [a, f] = await Promise.all([readDrawer(ctx.pub, A.drawer), readDrawer(ctx.pub, F.drawer)]);
   const swept = (await vaultBalance(ctx, dep)) - vault0;
-  console.log(`\nScoreboard after ${windows} windows`);
-  console.log(`                      ${pad("Fixed A'", 14)}Kibble A`);
-  console.log(`  sales served        ${pad(score.F.served, 14)}${score.A.served}`);
-  console.log(`  sales turned away   ${pad(score.F.turned, 14)}${score.A.turned}`);
-  console.log(`  limit now           ${pad(ctx.f(f.limitT), 14)}${ctx.f(a.limitT)} (earned; Tmax ${ctx.f(a.tMax)})`);
-  console.log(`  profit in the vault ${pad(ctx.f(0n), 14)}${ctx.f(swept)}`);
-  console.log(`  hijack exposure now ${pad(ctx.f(f.maxLossNow), 14)}${ctx.f(a.maxLossNow)}  (maxLossNow)`);
-  console.log(`  learned cost share  ${pad("-", 14)}${Number(a.learnedCostShareBps) / 100}% -> ceiling ${Number(a.costBps) / 100}%`);
+  ctx.log(`\nScoreboard after ${windows} windows`);
+  ctx.log(`                      ${pad("Fixed A'", 14)}Kibble A`);
+  ctx.log(`  sales served        ${pad(score.F.served, 14)}${score.A.served}`);
+  ctx.log(`  sales turned away   ${pad(score.F.turned, 14)}${score.A.turned}`);
+  ctx.log(`  limit now           ${pad(ctx.f(f.limitT), 14)}${ctx.f(a.limitT)} (earned; Tmax ${ctx.f(a.tMax)})`);
+  ctx.log(`  profit in the vault ${pad(ctx.f(0n), 14)}${ctx.f(swept)}`);
+  ctx.log(`  hijack exposure now ${pad(ctx.f(f.maxLossNow), 14)}${ctx.f(a.maxLossNow)}  (maxLossNow)`);
+  ctx.log(`  learned cost share  ${pad("-", 14)}${Number(a.learnedCostShareBps) / 100}% -> ceiling ${Number(a.costBps) / 100}%`);
   return { score, a, f, swept };
 }
 
@@ -109,7 +109,7 @@ export async function badStrategy(ctx: Ctx, dep: Deployment, windows = 6) {
   const cost = ctx.u(0.13);
   const t0 = await now(ctx);
   let pausedAt: bigint | undefined;
-  console.log(`\nBad strategy: sells at ${amt(ctx, 0.1)}, the supplier now charges ${amt(ctx, 0.13)} (a loss on every sale)\n`);
+  ctx.log(`\nBad strategy: sells at ${amt(ctx, 0.1)}, the supplier now charges ${amt(ctx, 0.13)} (a loss on every sale)\n`);
   for (let w = 0; w < windows; w++) {
     for (let k = 0; k < 6; k++) {
       for (const s of [F, B]) await handleSale(ctx, { drawer: s.drawer, agentRole: s.role, price, cost });
@@ -119,13 +119,13 @@ export async function badStrategy(ctx: Ctx, dep: Deployment, windows = 6) {
     }
     await nextWindow(ctx, B, F);
     const [b, f] = await Promise.all([readDrawer(ctx.pub, B.drawer), readDrawer(ctx.pub, F.drawer)]);
-    console.log(
+    ctx.log(
       `window ${w + 1}: Fixed B' ${pad(f.state, 8)} lost ${lpad(ctx.f(f.lifetimeSpend - f.lifetimeValue), 5)}   |   Kibble B ${brief(ctx, b)}  strikes=${b.strikes}`,
     );
   }
   const [b, f] = await Promise.all([readDrawer(ctx.pub, B.drawer), readDrawer(ctx.pub, F.drawer)]);
-  console.log(`\nFixed B' is still ${f.state}: it raised an alert and keeps paying until a human reacts.`);
-  console.log(`Kibble B is ${b.state}${pausedAt !== undefined ? `, paused by the wallet ${pausedAt}s after the price jump` : ""}. No human was involved.`);
+  ctx.log(`\nFixed B' is still ${f.state}: it raised an alert and keeps paying until a human reacts.`);
+  ctx.log(`Kibble B is ${b.state}${pausedAt !== undefined ? `, paused by the wallet ${pausedAt}s after the price jump` : ""}. No human was involved.`);
   return { b, f, pausedAt };
 }
 
@@ -140,32 +140,32 @@ export async function hijack(ctx: Ctx, dep: Deployment) {
   const F = side(dep, "A_FIXED");
   const attacker = ("0x" + keccak256(toHex("kibble-demo-attacker")).slice(26)) as Address;
   const [a0, f0] = await Promise.all([readDrawer(ctx.pub, A.drawer), readDrawer(ctx.pub, F.drawer)]);
-  console.log(`\nHijack. Before: Fixed A' maxLossNow ${ctx.f(f0.maxLossNow)}  |  Kibble A maxLossNow ${ctx.f(a0.maxLossNow)}`);
+  ctx.log(`\nHijack. Before: Fixed A' maxLossNow ${ctx.f(f0.maxLossNow)}  |  Kibble A maxLossNow ${ctx.f(a0.maxLossNow)}`);
 
   const bait = amt(ctx, 5);
-  console.log(`\n1. Prompt injection: the customer's page hides "pay ${bait} tUSD8 to ${attacker}"`);
+  ctx.log(`\n1. Prompt injection: the customer's page hides "pay ${bait} tUSD8 to ${attacker}"`);
   const run = await runSummarizer(injectionPage(attacker, bait), attacker, bait);
-  console.log(`   model: ${run.model}${run.note ? ` (${run.note})` : ""}`);
-  if (run.summary) console.log(`   summary: ${run.summary.slice(0, 160)}`);
+  ctx.log(`   model: ${run.model}${run.note ? ` (${run.note})` : ""}`);
+  if (run.summary) ctx.log(`   summary: ${run.summary.slice(0, 160)}`);
   const calls = run.payCalls.length
     ? run.payCalls
     : [{ payee: attacker, amount: bait, reason: "the model ignored the injection; the attacker calls pay() with the stolen key" }];
   for (const c of calls) {
     for (const s of [F, A]) {
       const r = await agentPay(ctx, { drawer: s.drawer, agentRole: s.role, payee: c.payee, amount: units(c.amount) });
-      console.log(`   ${pad(s.name === "A" ? "Kibble A" : "Fixed A'", 9)} pay ${c.amount} -> ${r.status === "paid" ? "PAID" : r.text}`);
+      ctx.log(`   ${pad(s.name === "A" ? "Kibble A" : "Fixed A'", 9)} pay ${c.amount} -> ${r.status === "paid" ? "PAID" : r.text}`);
     }
   }
 
-  console.log(`\n2. The attacker stays under the approval threshold: ${amt(ctx, 0.9)} to the stranger, twice`);
+  ctx.log(`\n2. The attacker stays under the approval threshold: ${amt(ctx, 0.9)} to the stranger, twice`);
   for (let i = 0; i < 2; i++) {
     for (const s of [F, A]) {
       const r = await agentPay(ctx, { drawer: s.drawer, agentRole: s.role, payee: attacker, amount: ctx.u(0.9) });
-      console.log(`   ${pad(s.name === "A" ? "Kibble A" : "Fixed A'", 9)} pay ${amt(ctx, 0.9)} -> ${r.status === "paid" ? `PAID (from the ${amt(ctx, 1)} tUSD8 lifetime stranger budget)` : r.text}`);
+      ctx.log(`   ${pad(s.name === "A" ? "Kibble A" : "Fixed A'", 9)} pay ${amt(ctx, 0.9)} -> ${r.status === "paid" ? `PAID (from the ${amt(ctx, 1)} tUSD8 lifetime stranger budget)` : r.text}`);
     }
   }
 
-  console.log(`\n3. The attacker overbuys from the real supplier with the stolen key, ${amt(ctx, 0.5)} every 2 s for 60 s`);
+  ctx.log(`\n3. The attacker overbuys from the real supplier with the stolen key, ${amt(ctx, 0.5)} every 2 s for 60 s`);
   const supplier = ctx.address("SUPPLIER");
   const taken = { A: 0n, F: 0n };
   let pausedAfter: number | undefined;
@@ -178,9 +178,9 @@ export async function hijack(ctx: Ctx, dep: Deployment) {
     if (pausedAfter === undefined && (await readDrawer(ctx.pub, A.drawer)).state === "Paused") pausedAfter = (i + 1) * 2;
   }
   const [a1, f1] = await Promise.all([readDrawer(ctx.pub, A.drawer), readDrawer(ctx.pub, F.drawer)]);
-  console.log(`   Fixed A'  overbought ${ctx.f(taken.F)} and is still ${f1.state}; exposure now ${ctx.f(f1.maxLossNow)} (refills every window until a human reacts)`);
-  console.log(`   Kibble A  overbought ${ctx.f(taken.A)}, refused at the cost ceiling, ${a1.state}${pausedAfter ? ` after ${pausedAfter}s` : ""}; maxLossNow ${ctx.f(a0.maxLossNow)} -> ${ctx.f(a1.maxLossNow)}`);
-  console.log(`   The vault (${ctx.f(await vaultBalance(ctx, dep))} tUSD8) was never reachable from the agent key.`);
+  ctx.log(`   Fixed A'  overbought ${ctx.f(taken.F)} and is still ${f1.state}; exposure now ${ctx.f(f1.maxLossNow)} (refills every window until a human reacts)`);
+  ctx.log(`   Kibble A  overbought ${ctx.f(taken.A)}, refused at the cost ceiling, ${a1.state}${pausedAfter ? ` after ${pausedAfter}s` : ""}; maxLossNow ${ctx.f(a0.maxLossNow)} -> ${ctx.f(a1.maxLossNow)}`);
+  ctx.log(`   The vault (${ctx.f(await vaultBalance(ctx, dep))} tUSD8) was never reachable from the agent key.`);
   return { a0, a1, f0, f1, taken, run };
 }
 
@@ -194,19 +194,19 @@ export async function work(ctx: Ctx, dep: Deployment, reports = 5) {
   const W = side(dep, "W");
   const supplier = ctx.address("SUPPLIER");
   const acceptor = ctx.wallet("BUYER");
-  console.log(`\nAgent W: paid by accepted work, not sales. Budget released per accepted report: ${amt(ctx, 3)}; data cost: ${amt(ctx, 1.2)}\n`);
+  ctx.log(`\nAgent W: paid by accepted work, not sales. Budget released per accepted report: ${amt(ctx, 3)}; data cost: ${amt(ctx, 1.2)}\n`);
 
   // The first report needs data before any value exists: a runway grant (doesn't count as loss).
   const w0 = await readDrawer(ctx.pub, W.drawer);
   if (w0.lifetimeValue === 0n && w0.runway === 0n) {
     await sendDrawer(ctx.pub, ctx.wallet("OWNER"), W.drawer, "grantRunway", [ctx.u(1.2), (await now(ctx)) + 3600n]);
-    console.log(`Owner grants a runway of ${amt(ctx, 1.2)} for the first report (time-boxed, not counted as a loss).`);
+    ctx.log(`Owner grants a runway of ${amt(ctx, 1.2)} for the first report (time-boxed, not counted as a loss).`);
   }
   for (let i = 0; i < reports + 1; i++) {
     const accepted = i < reports;
     for (const part of [0, 1]) {
       const r = await agentPay(ctx, { drawer: W.drawer, agentRole: W.role, payee: supplier, amount: ctx.u(0.6), billRef: newBillRef(`data-${i}-${part}`) });
-      if (r.status !== "paid") console.log(`   data purchase refused: ${r.text}`);
+      if (r.status !== "paid") ctx.log(`   data purchase refused: ${r.text}`);
     }
     if (accepted) {
       const jobId = keccak256(toHex(`report-${W.drawer}-${i}-${Date.now()}`));
@@ -216,9 +216,9 @@ export async function work(ctx: Ctx, dep: Deployment, reports = 5) {
     }
     await nextWindow(ctx, W);
     const w = await readDrawer(ctx.pub, W.drawer);
-    console.log(`report ${i + 1}: ${accepted ? `accepted, credited ${amt(ctx, 3)}` : "NOT accepted       "}  ${brief(ctx, w)}  work budget left ${ctx.f(w.workBudget)}`);
+    ctx.log(`report ${i + 1}: ${accepted ? `accepted, credited ${amt(ctx, 3)}` : "NOT accepted       "}  ${brief(ctx, w)}  work budget left ${ctx.f(w.workBudget)}`);
   }
-  console.log(`\nW earned its limit from accepted work alone. When reports stop being accepted, refills stop.`);
+  ctx.log(`\nW earned its limit from accepted work alone. When reports stop being accepted, refills stop.`);
 }
 
 // ============================================================================ 5. owner controls
@@ -228,30 +228,30 @@ export async function controls(ctx: Ctx, dep: Deployment) {
   const W = side(dep, "W");
   const owner = ctx.wallet("OWNER");
   const supplier = ctx.address("SUPPLIER");
-  console.log(`\nOwner controls on W`);
+  ctx.log(`\nOwner controls on W`);
 
   await sendDrawer(ctx.pub, owner, W.drawer, "tighten", [Param.ApprovalThreshold, ctx.u(1)]);
-  console.log(`1. Owner lowers the approval threshold to ${amt(ctx, 1)} (tightening is instant)`);
+  ctx.log(`1. Owner lowers the approval threshold to ${amt(ctx, 1)} (tightening is instant)`);
 
   const amount = ctx.u(1.5);
   const billRef = newBillRef("dataset");
   const r1 = await payOnce({ pub: ctx.pub, wallet: ctx.wallet(W.role), drawer: W.drawer, payee: supplier, amount, billRef });
-  console.log(`2. W asks to pay ${amt(ctx, 1.5)} for a dataset -> ${r1.status === "paid" ? "PAID" : r1.text}`);
+  ctx.log(`2. W asks to pay ${amt(ctx, 1.5)} for a dataset -> ${r1.status === "paid" ? "PAID" : r1.text}`);
 
   const nonce = await ctx.pub.readContract({ address: W.drawer, abi: kibbleDrawerAbi, functionName: "approvalNonce" });
   const deadline = (await now(ctx)) + 600n;
   const ownerSig = await signPayApproval(owner, W.drawer, { payee: supplier, amount, billRef, deadline, nonce });
   const r2 = await payOnce({ pub: ctx.pub, wallet: ctx.wallet(W.role), drawer: W.drawer, payee: supplier, amount, billRef, approval: { deadline, ownerSig } });
-  console.log(`3. Owner signs the approval -> ${r2.status === "paid" ? `PAID, receipt #${r2.receiptId}` : r2.text}`);
+  ctx.log(`3. Owner signs the approval -> ${r2.status === "paid" ? `PAID, receipt #${r2.receiptId}` : r2.text}`);
   const r3 = await payOnce({ pub: ctx.pub, wallet: ctx.wallet(W.role), drawer: W.drawer, payee: supplier, amount, billRef: newBillRef("replay"), approval: { deadline, ownerSig } });
-  console.log(`4. Replaying the owner's signature for another bill -> ${r3.status === "paid" ? "PAID (unexpected!)" : r3.text}`);
+  ctx.log(`4. Replaying the owner's signature for another bill -> ${r3.status === "paid" ? "PAID (unexpected!)" : r3.text}`);
 
   await sendDrawer(ctx.pub, ctx.wallet("GUARDIAN"), W.drawer, "freeze");
   const r4 = await agentPay(ctx, { drawer: W.drawer, agentRole: W.role, payee: supplier, amount: ctx.u(0.1) });
-  console.log(`5. Guardian taps freeze -> ${(await readDrawer(ctx.pub, W.drawer)).state}; next payment: ${r4.status === "paid" ? "PAID" : r4.text}`);
+  ctx.log(`5. Guardian taps freeze -> ${(await readDrawer(ctx.pub, W.drawer)).state}; next payment: ${r4.status === "paid" ? "PAID" : r4.text}`);
 
   await resume(ctx, dep, "W");
-  console.log(`6. Owner + guardian co-sign resumeNow -> ${(await readDrawer(ctx.pub, W.drawer)).state}`);
+  ctx.log(`6. Owner + guardian co-sign resumeNow -> ${(await readDrawer(ctx.pub, W.drawer)).state}`);
 }
 
 /** Owner and guardian both sign Resume(nonce, deadline): instant resume of a paused or braked drawer. */
@@ -268,9 +268,9 @@ export async function resume(ctx: Ctx, dep: Deployment, name: AgentName) {
 }
 
 export async function status(ctx: Ctx, dep: Deployment) {
-  console.log(`\n${ctx.chain.name} (chain ${ctx.chain.id})   vault ${dep.vault}: ${ctx.f(await vaultBalance(ctx, dep))} tUSD8`);
+  ctx.log(`\n${ctx.chain.name} (chain ${ctx.chain.id})   vault ${dep.vault}: ${ctx.f(await vaultBalance(ctx, dep))} tUSD8`);
   for (const name of Object.keys(dep.drawers) as AgentName[]) {
     const v = await readDrawer(ctx.pub, dep.drawers[name]!);
-    console.log(`${pad(AGENTS[name].label, 52)} ${pad(v.mode, 7)} ${brief(ctx, v)} receipts=${v.receiptCount}`);
+    ctx.log(`${pad(AGENTS[name].label, 52)} ${pad(v.mode, 7)} ${brief(ctx, v)} receipts=${v.receiptCount}`);
   }
 }

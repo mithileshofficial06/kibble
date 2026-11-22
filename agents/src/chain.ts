@@ -37,6 +37,8 @@ export type Ctx = {
   u: (amount: number | string) => bigint;
   /** Format a tUSD8 amount with enough digits for the current scale. */
   f: (value: bigint) => string;
+  /** Where scenario output goes (the console, or the web playground's log). */
+  log: (...args: unknown[]) => void;
 };
 
 /** Scale a bigint amount (e.g. a contract default) by the demo scale. */
@@ -58,7 +60,10 @@ function keyFor(role: Role, local: boolean): Hex {
  * RPC_URL picks the network: Aevum testnet (default), `make fork` (http://127.0.0.1:8555) or
  * `make anvil` (http://127.0.0.1:8545).
  */
-export async function connect(rpcUrl = process.env.RPC_URL?.trim() || "http://127.0.0.1:8555"): Promise<Ctx> {
+export async function connect(
+  rpcUrl = process.env.RPC_URL?.trim() || "http://127.0.0.1:8555",
+  log: (...args: unknown[]) => void = console.log,
+): Promise<Ctx> {
   const probe = createPublicClient({ transport: http(rpcUrl) });
   const id = await probe.getChainId();
   const local = id !== aevumTestnet.id;
@@ -83,7 +88,7 @@ export async function connect(rpcUrl = process.env.RPC_URL?.trim() || "http://12
   const u = (amount: number | string) => units((Math.round(Number(amount) * scale * 1e6) / 1e6).toFixed(6));
   const digits = scale >= 1 ? 2 : scale >= 0.1 ? 3 : 4;
   const f = (value: bigint) => fmt(value, digits);
-  return { chain, rpcUrl, pub, local, wallet, address: (role) => wallet(role).account.address, scale, u, f };
+  return { chain, rpcUrl, pub, local, wallet, address: (role) => wallet(role).account.address, scale, u, f, log };
 }
 
 export function testClient(ctx: Ctx) {

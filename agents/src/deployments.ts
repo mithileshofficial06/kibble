@@ -3,7 +3,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Address } from "viem";
 
-export const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+/** The repo root. KIBBLE_ROOT overrides it when this code is bundled (the web playground). */
+export const ROOT = process.env.KIBBLE_ROOT ?? join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 /** The demo agents. Each pair runs the same traffic: the left side FIXED, the right side EARNED. */
 export const AGENTS = {
