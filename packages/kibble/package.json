@@ -1,0 +1,22 @@
+{
+  "name": "@kibble/sdk",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "description": "Kibble ABIs, typed data and helpers: pay once under retries, sign approvals and work acceptances, read a drawer.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "viem": "^2.57.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "5.9.3",
+    "viem": "2.57.12"
+  }
+}

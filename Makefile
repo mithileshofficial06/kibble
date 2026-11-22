@@ -17,7 +17,8 @@ AMOUNT      ?= 100
 # `make fork` runs under its own chain ID so wallets and signatures never mix it up with the real testnet.
 FORK_CHAIN  := 440050
 
-.PHONY: help install build test test-fork check anvil fork deploy-local deploy-fork deploy-aevum mint deal dev
+.PHONY: help install build test test-fork check anvil fork deploy-local deploy-fork deploy-aevum mint deal dev \
+	deploy-kibble-local deploy-kibble-fork deploy-kibble-aevum abi
 
 help: ## Show this list
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  \033[36mmake %-14s\033[0m %s\n", $$1, $$2}'
@@ -78,6 +79,23 @@ deal: ## `make fork` only: give TO AMOUNT tUSD8 and 10 tQDAY for gas
 	@cast send $(TUSD8) "configureMinter(address,uint256)" $(TUSD8_MM) 1000000000000000 --from $(TUSD8_MM) --unlocked --rpc-url $(FORK_RPC) > /dev/null
 	@cast send $(TUSD8) "mint(address,uint256)" $(TO) $$(cast parse-units $(AMOUNT) 6) --from $(TUSD8_MM) --unlocked --rpc-url $(FORK_RPC) > /dev/null
 	@echo "tUSD8 balance of $(TO): $$(cast call $(TUSD8) 'balanceOf(address)(uint256)' $(TO) --rpc-url $(FORK_RPC))"
+
+deploy-kibble-local: ## Deploy MockUSD8 + Kibble (admin module, drawer impl, factory) to `make anvil`
+	cd contracts && forge script script/DeployKibble.s.sol --rpc-url $(LOCAL_RPC) --broadcast --unlocked --sender $(ANVIL_0)
+
+deploy-kibble-fork: ## Deploy Kibble (real tUSD8) to `make fork` from a throwaway address
+	@test "$$(cast chain-id --rpc-url $(FORK_RPC))" = "$(FORK_CHAIN)" || (echo "This only works on 'make fork'." && exit 1)
+	@DEPLOYER=$$(cast to-check-sum-address 0x$$(openssl rand -hex 20)); \
+	  cast rpc anvil_setBalance $$DEPLOYER 0x8ac7230489e80000 --rpc-url $(FORK_RPC) > /dev/null && \
+	  cast rpc anvil_impersonateAccount $$DEPLOYER --rpc-url $(FORK_RPC) > /dev/null && \
+	  cd contracts && forge script script/DeployKibble.s.sol --rpc-url $(FORK_RPC) --broadcast --unlocked --sender $$DEPLOYER
+
+deploy-kibble-aevum: ## Deploy Kibble to Aevum testnet. Needs ACCOUNT=<keystore name>
+	@test -n "$(ACCOUNT)" || (echo "Set ACCOUNT=<name>. Create one with: cast wallet import <name> --interactive" && exit 1)
+	cd contracts && forge script script/DeployKibble.s.sol --rpc-url $(AEVUM_RPC) --broadcast --legacy --account $(ACCOUNT)
+
+abi: ## Export Kibble ABIs to packages/kibble/src/abi.ts (after `make build`)
+	node tools/export-abi.mjs
 
 dev: ## Start the web app on http://localhost:3000
 	pnpm dev
