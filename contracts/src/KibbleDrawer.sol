@@ -7,20 +7,7 @@ import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {KibbleCore} from "./KibbleCore.sol";
-import {
-    Mode,
-    State,
-    Reason,
-    WindowKind,
-    Param,
-    Action,
-    Config,
-    SupplierInit,
-    AcceptorInit,
-    Init,
-    ReceiptData,
-    Snapshot
-} from "./KibbleTypes.sol";
+import {Mode, State, Reason, Config, SupplierInit, Init, ReceiptData, Snapshot} from "./KibbleTypes.sol";
 
 interface IERC3009Receive {
     function receiveWithAuthorization(
@@ -82,7 +69,9 @@ contract KibbleDrawer is KibbleCore, Initializable {
             address(init.token) == address(0) || init.owner == address(0) || init.guardian == address(0)
                 || init.agent == address(0) || init.vault == address(0)
         ) revert ZeroAddress();
-        if (c.maxWeeklyLoss == 0 || c.windowLength == 0 || c.growthBps > BPS || c.carryBps > BPS) revert BadConfig();
+        if (c.maxWeeklyLoss == 0 || c.windowLength == 0 || c.growthBps > BPS || c.carryBps > BPS) {
+            revert BadConfig();
+        }
         if (init.agent == init.owner || init.agent == init.guardian) revert BadConfig();
 
         token = init.token;
@@ -151,11 +140,13 @@ contract KibbleDrawer is KibbleCore, Initializable {
     /// @notice Pay above `approvalThreshold` with the owner's EIP-712 signature over
     ///         PayApproval(payee, amount, billRef, deadline, approvalNonce). Skips the ceiling and caps
     ///         (the owner chose this payment) but still needs the allowance or runway.
-    function payWithApproval(address payee, uint256 amount, bytes32 billRef, uint256 deadline, bytes calldata ownerSig)
-        external
-        onlyAgent
-        returns (bool ok)
-    {
+    function payWithApproval(
+        address payee,
+        uint256 amount,
+        bytes32 billRef,
+        uint256 deadline,
+        bytes calldata ownerSig
+    ) external onlyAgent returns (bool ok) {
         _sync();
         bytes32 fp = fingerprint(payee, amount, billRef);
         if (block.timestamp > deadline) {
@@ -218,9 +209,10 @@ contract KibbleDrawer is KibbleCore, Initializable {
     ) external {
         _sync();
         _checkSale(billRef, amount);
-        IERC3009Receive(address(token)).receiveWithAuthorization(
-            from, address(this), amount, validAfter, validBefore, saleNonce(billRef), v, r, s
-        );
+        IERC3009Receive(address(token))
+            .receiveWithAuthorization(
+                from, address(this), amount, validAfter, validBefore, saleNonce(billRef), v, r, s
+            );
         _addPending(from, billRef, amount);
         _finish();
     }
@@ -349,7 +341,9 @@ contract KibbleDrawer is KibbleCore, Initializable {
         bytes32 fp = fingerprint(payee, amount, billRef);
         if (state == State.Paused) return _refuse(fp, Reason.StatePaused, payee, amount, billRef);
         if (state == State.Revoked) return _refuse(fp, Reason.StateRevoked, payee, amount, billRef);
-        if (amount == 0 || payee == address(0)) return _refuse(fp, Reason.ZeroAmount, payee, amount, billRef);
+        if (amount == 0 || payee == address(0)) {
+            return _refuse(fp, Reason.ZeroAmount, payee, amount, billRef);
+        }
         if (usedFingerprint[fp]) return _refuse(fp, Reason.DuplicateBill, payee, amount, billRef);
         bool approved = approver != address(0);
         if (!approved && amount > approvalThreshold) {
@@ -363,7 +357,9 @@ contract KibbleDrawer is KibbleCore, Initializable {
                     s.windowIdx = uint64(windowIndex);
                     s.spent = 0;
                 }
-                if (amount > s.perPayment) return _refuse(fp, Reason.OverSupplierPayment, payee, amount, billRef);
+                if (amount > s.perPayment) {
+                    return _refuse(fp, Reason.OverSupplierPayment, payee, amount, billRef);
+                }
                 if (s.spent + amount > s.perWindow) {
                     return _refuse(fp, Reason.OverSupplierWindow, payee, amount, billRef);
                 }
@@ -373,7 +369,9 @@ contract KibbleDrawer is KibbleCore, Initializable {
         }
 
         bool fromRunway = runway >= amount && block.timestamp <= runwayUntil;
-        if (!fromRunway && amount > allowance) return _refuse(fp, Reason.OverAllowance, payee, amount, billRef);
+        if (!fromRunway && amount > allowance) {
+            return _refuse(fp, Reason.OverAllowance, payee, amount, billRef);
+        }
 
         if (mode == Mode.EARNED && !fromRunway && !approved && windowSpend + amount > _ceiling()) {
             _strike(amount);
@@ -412,7 +410,9 @@ contract KibbleDrawer is KibbleCore, Initializable {
         // interaction
         token.safeTransfer(payee, amount);
         emit Paid(fp, payee, amount, id);
-        emit ReceiptIssued(id, fp, payee, amount, billRef, state, limitT, windowValue, windowSpend, r.approvedBy);
+        emit ReceiptIssued(
+            id, fp, payee, amount, billRef, state, limitT, windowValue, windowSpend, r.approvedBy
+        );
         _checkDrawdown();
         return true;
     }

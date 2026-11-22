@@ -4,21 +4,7 @@ pragma solidity 0.8.24;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {
-    Mode,
-    State,
-    Reason,
-    WindowKind,
-    Param,
-    Action,
-    Config,
-    SupplierInit,
-    AcceptorInit,
-    Init,
-    ReceiptData,
-    Snapshot
-} from "./KibbleTypes.sol";
+import {Mode, State, Reason, WindowKind, Param, Action, ReceiptData} from "./KibbleTypes.sol";
 
 /// @title KibbleCore
 /// @notice Storage, events and the sync / window / ladder machinery shared by KibbleDrawer and KibbleAdmin.
@@ -47,7 +33,8 @@ abstract contract KibbleCore is EIP712 {
 
     bytes32 public constant PAY_APPROVAL_TYPEHASH =
         keccak256("PayApproval(address payee,uint256 amount,bytes32 billRef,uint256 deadline,uint256 nonce)");
-    bytes32 public constant WORK_TYPEHASH = keccak256("WorkAccepted(bytes32 jobId,uint256 value,uint256 deadline)");
+    bytes32 public constant WORK_TYPEHASH =
+        keccak256("WorkAccepted(bytes32 jobId,uint256 value,uint256 deadline)");
     bytes32 public constant RESUME_TYPEHASH = keccak256("Resume(uint256 nonce,uint256 deadline)");
 
     struct Supplier {
@@ -187,12 +174,20 @@ abstract contract KibbleCore is EIP712 {
         uint256 indexed index, uint256 value, uint256 spend, int256 profit, uint256 newT, WindowKind kind
     );
     event TrackRecord(
-        uint256 indexed index, uint256 value, uint256 spend, int256 profit, uint256 limitT, State state, uint256 strikes
+        uint256 indexed index,
+        uint256 value,
+        uint256 spend,
+        int256 profit,
+        uint256 limitT,
+        State state,
+        uint256 strikes
     );
     event LearningDone(uint256 costShareBps, uint256 costBps);
     event Alert(uint256 indexed windowIndex, uint256 loss); // FIXED mode: "a human should look at this"
     event Swept(uint256 amount);
-    event IncomePending(uint256 indexed id, bytes32 indexed billRef, address payer, uint256 amount, uint256 clearAt);
+    event IncomePending(
+        uint256 indexed id, bytes32 indexed billRef, address payer, uint256 amount, uint256 clearAt
+    );
     event IncomeCleared(uint256 indexed id, uint256 value, uint256 excessToVault);
     event Refunded(bytes32 indexed billRef, address payer, uint256 amount);
     event WorkCredited(bytes32 indexed jobId, address indexed acceptor, uint256 requested, uint256 credited);
@@ -442,7 +437,9 @@ abstract contract KibbleCore is EIP712 {
         uint256 s = windowSpend;
         int256 profit = int256(v) - int256(s);
         bool quiet = v < minActivity && s < minActivity;
-        WindowKind kind = quiet ? WindowKind.Quiet : profit > 0 ? WindowKind.Profit : profit < 0 ? WindowKind.Loss : WindowKind.Even;
+        WindowKind kind = quiet
+            ? WindowKind.Quiet
+            : profit > 0 ? WindowKind.Profit : profit < 0 ? WindowKind.Loss : WindowKind.Even;
 
         if (mode == Mode.FIXED) {
             if (kind == WindowKind.Loss) emit Alert(windowIndex, s - v);
@@ -475,7 +472,8 @@ abstract contract KibbleCore is EIP712 {
     }
 
     function _finishLearning() internal {
-        uint256 share = learnValue == 0 ? LEARNING_COST_BPS - LEARN_MARGIN_BPS : (learnSpend * BPS) / learnValue;
+        uint256 share =
+            learnValue == 0 ? LEARNING_COST_BPS - LEARN_MARGIN_BPS : (learnSpend * BPS) / learnValue;
         uint256 c = share + LEARN_MARGIN_BPS;
         if (c > MAX_COST_BPS) c = MAX_COST_BPS;
         learnedCostShareBps = share;
@@ -543,7 +541,9 @@ abstract contract KibbleCore is EIP712 {
     // ================================================================= internals: suppliers and acceptors
 
     function _setSupplier(address payee, uint128 perPayment, uint128 perWindow) internal {
-        if (payee == address(0) || payee == agent || payee == address(this) || payee == vault) revert BadConfig();
+        if (payee == address(0) || payee == agent || payee == address(this) || payee == vault) {
+            revert BadConfig();
+        }
         if (perWindow == 0) perWindow = uint128(tMax);
         Supplier storage s = suppliers[payee];
         s.ok = true;

@@ -6,20 +6,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {KibbleCore} from "./KibbleCore.sol";
-import {
-    Mode,
-    State,
-    Reason,
-    WindowKind,
-    Param,
-    Action,
-    Config,
-    SupplierInit,
-    AcceptorInit,
-    Init,
-    ReceiptData,
-    Snapshot
-} from "./KibbleTypes.sol";
+import {Mode, State, Reason, Param, Action} from "./KibbleTypes.sol";
 
 /// @title KibbleAdmin
 /// @notice Owner and guardian functions of a drawer. Never used directly: the drawer delegatecalls it, so it
@@ -28,6 +15,7 @@ contract KibbleAdmin is KibbleCore {
     using SafeERC20 for IERC20;
 
     constructor() EIP712("Kibble Drawer", "1") {}
+
     // ================================================================= owner: funding
 
     /// @notice Owner tops up the allowance (EARNED: up to the refill cap) or the reserve (FIXED).
@@ -120,7 +108,10 @@ contract KibbleAdmin is KibbleCore {
         _finish();
     }
 
-    function tightenSupplier(address payee, uint128 perPayment, uint128 perWindow) external onlyOwnerOrGuardian {
+    function tightenSupplier(address payee, uint128 perPayment, uint128 perWindow)
+        external
+        onlyOwnerOrGuardian
+    {
         Supplier storage s = suppliers[payee];
         if (!s.ok || perPayment > s.perPayment || perWindow > s.perWindow) revert NotTighter();
         s.perPayment = perPayment;
@@ -175,7 +166,10 @@ contract KibbleAdmin is KibbleCore {
         bytes32 digest = _hashTypedDataV4(keccak256(abi.encode(RESUME_TYPEHASH, resumeNonce, deadline)));
         (address a, ECDSA.RecoverError e1,) = ECDSA.tryRecover(digest, ownerSig);
         (address b, ECDSA.RecoverError e2,) = ECDSA.tryRecover(digest, guardianSig);
-        if (e1 != ECDSA.RecoverError.NoError || e2 != ECDSA.RecoverError.NoError || a != owner || b != guardian) {
+        if (
+            e1 != ECDSA.RecoverError.NoError || e2 != ECDSA.RecoverError.NoError || a != owner
+                || b != guardian
+        ) {
             revert BadSignature();
         }
         ++resumeNonce;
@@ -188,7 +182,8 @@ contract KibbleAdmin is KibbleCore {
 
     function _apply(Action a, bytes memory data) internal {
         if (a == Action.AddSupplier) {
-            (address payee, uint128 perPayment, uint128 perWindow) = abi.decode(data, (address, uint128, uint128));
+            (address payee, uint128 perPayment, uint128 perWindow) =
+                abi.decode(data, (address, uint128, uint128));
             _setSupplier(payee, perPayment, perWindow);
         } else if (a == Action.AddAcceptor) {
             (address acc, uint128 perWindow) = abi.decode(data, (address, uint128));
