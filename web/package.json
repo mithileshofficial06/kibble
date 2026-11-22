@@ -12,9 +12,11 @@
   },
   "dependencies": {
     "@aevum-kit/aevum": "workspace:*",
+    "@kibble/agents": "workspace:*",
+    "@kibble/sdk": "workspace:*",
     "@rainbow-me/rainbowkit": "2.2.11",
     "@tanstack/react-query": "5.90.2",
-    "next": "16.4.3",
+    "next": "16.4.5",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "viem": "2.57.12",
