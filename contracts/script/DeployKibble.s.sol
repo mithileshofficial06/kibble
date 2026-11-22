@@ -10,7 +10,7 @@ import {MockUSD8} from "../src/mocks/MockUSD8.sol";
 
 /// @notice Deploys the shared Kibble contracts: the admin module, the drawer implementation and the
 ///         factory. Owners then create their vault and drawers through the factory
-///         (`pnpm --filter @kibble/agents setup-demo` does that for the demo).
+///         (the agents package's `setup-demo` script does that for the demo).
 ///   - Aevum testnet and `make fork`: uses the real tUSD8.
 ///   - `make anvil` (31337) only: deploys MockUSD8 first.
 ///
