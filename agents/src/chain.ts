@@ -50,8 +50,13 @@ function keyFor(role: Role, local: boolean): Hex {
 export async function connect(rpcUrl = process.env.RPC_URL?.trim() || "http://127.0.0.1:8555"): Promise<Ctx> {
   const probe = createPublicClient({ transport: http(rpcUrl) });
   const id = await probe.getChainId();
-  const chain: Chain = id === aevumTestnet.id ? aevumTestnet : id === aevumFork.id ? aevumFork : { ...localAnvil, id };
   const local = id !== aevumTestnet.id;
+  const base: Chain = id === aevumTestnet.id ? aevumTestnet : id === aevumFork.id ? aevumFork : { ...localAnvil, id };
+  // anvil suggests a gas price from recent tips, so paying its suggestion on every tx feeds back and
+  // climbs without bound. On local chains pay a flat 1 gwei, roughly what Aevum charges.
+  const chain: Chain = local
+    ? { ...base, fees: { estimateFeesPerGas: async () => ({ gasPrice: 1_000_000_000n }) } }
+    : base;
   const pub = createPublicClient({ chain, transport: http(rpcUrl), pollingInterval: local ? 50 : 1_000 }) as PublicClient;
   const cache = new Map<Role, Wallet>();
   const wallet = (role: Role) => {
