@@ -22,7 +22,16 @@ function findBad(hex) {
   const metaLen = code.length >= 2 ? code.readUInt16BE(code.length - 2) + 2 : 0;
   const end = metaLen < code.length ? code.length - metaLen : code.length;
   const bad = [];
+  // A contract that deploys another (e.g. a factory with `new X()`) embeds X's creation code, which
+  // ends in X's own CBOR metadata: a 32-byte IPFS hash whose bytes can look like any opcode. Skip
+  // each embedded block: a2 64 "ipfs" 58 22 <34-byte multihash> 64 "solc" 43 <3 bytes> 00 33.
+  const META_START = Buffer.from("a264697066735822", "hex");
+  const META_TOTAL = 53;
   for (let i = 0; i < end; i++) {
+    if (code[i] === 0xa2 && code.subarray(i, i + 8).equals(META_START)) {
+      i += META_TOTAL - 1;
+      continue;
+    }
     const op = code[i];
     if (CANCUN_ONLY[op]) bad.push(`${CANCUN_ONLY[op]} at byte ${i}`);
     if (op >= 0x60 && op <= 0x7f) i += op - 0x5f;
