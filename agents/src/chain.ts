@@ -84,12 +84,25 @@ export async function connect(
     }
     return w;
   };
-  const scale = Number(process.env.KIBBLE_SCALE ?? (local ? 1 : 0.1));
-  if (!(scale > 0 && scale <= 1)) throw new Error(`KIBBLE_SCALE must be in (0, 1], got ${process.env.KIBBLE_SCALE}`);
+  const ctx = { chain, rpcUrl, pub, local, wallet, address: (role: Role) => wallet(role).account.address, log };
+  return withScale(ctx, Number(process.env.KIBBLE_SCALE ?? (local ? 1 : 0.1)));
+}
+
+/** Set the demo amount scale (and the helpers that use it). */
+export function withScale<T extends Omit<Ctx, "scale" | "u" | "f">>(ctx: T, scale: number): Ctx {
+  if (!(scale > 0 && scale <= 1)) throw new Error(`The demo scale must be in (0, 1], got ${scale}`);
   const u = (amount: number | string) => units((Math.round(Number(amount) * scale * 1e6) / 1e6).toFixed(6));
   const digits = scale >= 1 ? 2 : scale >= 0.1 ? 3 : 4;
-  const f = (value: bigint) => fmt(value, digits);
-  return { chain, rpcUrl, pub, local, wallet, address: (role) => wallet(role).account.address, scale, u, f, log };
+  return { ...ctx, scale, u, f: (value: bigint) => fmt(value, digits) };
+}
+
+/**
+ * Scenarios run at the scale the drawers were created with (saved in the deployment), so amounts always
+ * match the drawers' settings. KIBBLE_SCALE still wins if it's set.
+ */
+export function atDeploymentScale(ctx: Ctx, deploymentScale: number | undefined): Ctx {
+  if (process.env.KIBBLE_SCALE || deploymentScale === undefined || deploymentScale === ctx.scale) return ctx;
+  return withScale(ctx, deploymentScale);
 }
 
 export function testClient(ctx: Ctx) {
@@ -110,4 +123,14 @@ export async function advance(ctx: Ctx, seconds: number) {
 
 export async function now(ctx: Ctx): Promise<bigint> {
   return (await ctx.pub.getBlock()).timestamp;
+}
+
+/**
+ * A deadline `seconds` from now. The next block's timestamp can be ahead of the latest block's (an idle
+ * chain) or ahead of the wall clock (a fork after `advance`), so count from whichever is later.
+ */
+export async function deadlineIn(ctx: Ctx, seconds: number): Promise<bigint> {
+  const chain = await now(ctx);
+  const wall = BigInt(Math.floor(Date.now() / 1000));
+  return (chain > wall ? chain : wall) + BigInt(seconds);
 }

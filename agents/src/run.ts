@@ -10,13 +10,14 @@
 //   all                   timelapse, bad-strategy, hijack, work, controls
 //
 // RPC_URL selects the network (default: `make fork` on 127.0.0.1:8555).
-import { connect } from "./chain";
+import { atDeploymentScale, connect } from "./chain";
 import { requireDeployment, type AgentName } from "./deployments";
 import { badStrategy, controls, hijack, resume, status, timelapse, work } from "./scenarios";
 
 const [name = "status", arg] = process.argv.slice(2);
-const ctx = await connect();
-const dep = requireDeployment(ctx.chain.id);
+const raw = await connect();
+const dep = requireDeployment(raw.chain.id);
+const ctx = atDeploymentScale(raw, dep.scale);
 const n = arg ? Number(arg) : undefined;
 // On testnet a window is 2 minutes of real time and faucet tUSD8 is scarce: 10 windows by default.
 const windows = n ?? (ctx.local ? 30 : 10);

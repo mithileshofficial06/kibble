@@ -11,7 +11,7 @@ import {
   signWorkAccepted,
   type DrawerView,
 } from "@kibble/sdk";
-import { advance, now, type Ctx, type Role } from "./chain";
+import { advance, deadlineIn, now, type Ctx, type Role } from "./chain";
 import { AGENTS, type AgentName, type Deployment } from "./deployments";
 import { units } from "@kibble/sdk";
 
@@ -199,7 +199,7 @@ export async function work(ctx: Ctx, dep: Deployment, reports = 5) {
   // The first report needs data before any value exists: a runway grant (doesn't count as loss).
   const w0 = await readDrawer(ctx.pub, W.drawer);
   if (w0.lifetimeValue === 0n && w0.runway === 0n) {
-    await sendDrawer(ctx.pub, ctx.wallet("OWNER"), W.drawer, "grantRunway", [ctx.u(1.2), (await now(ctx)) + 3600n]);
+    await sendDrawer(ctx.pub, ctx.wallet("OWNER"), W.drawer, "grantRunway", [ctx.u(1.2), await deadlineIn(ctx, 3600)]);
     ctx.log(`Owner grants a runway of ${amt(ctx, 1.2)} for the first report (time-boxed, not counted as a loss).`);
   }
   for (let i = 0; i < reports + 1; i++) {
@@ -210,7 +210,7 @@ export async function work(ctx: Ctx, dep: Deployment, reports = 5) {
     }
     if (accepted) {
       const jobId = keccak256(toHex(`report-${W.drawer}-${i}-${Date.now()}`));
-      const deadline = (await now(ctx)) + 3600n;
+      const deadline = await deadlineIn(ctx, 3600);
       const sig = await signWorkAccepted(acceptor, W.drawer, { jobId, value: ctx.u(3), deadline });
       await sendDrawer(ctx.pub, ctx.wallet("RELAYER"), W.drawer, "creditWork", [jobId, ctx.u(3), deadline, sig]);
     }
@@ -239,7 +239,7 @@ export async function controls(ctx: Ctx, dep: Deployment) {
   ctx.log(`2. W asks to pay ${amt(ctx, 1.5)} for a dataset -> ${r1.status === "paid" ? "PAID" : r1.text}`);
 
   const nonce = await ctx.pub.readContract({ address: W.drawer, abi: kibbleDrawerAbi, functionName: "approvalNonce" });
-  const deadline = (await now(ctx)) + 600n;
+  const deadline = await deadlineIn(ctx, 600);
   const ownerSig = await signPayApproval(owner, W.drawer, { payee: supplier, amount, billRef, deadline, nonce });
   const r2 = await payOnce({ pub: ctx.pub, wallet: ctx.wallet(W.role), drawer: W.drawer, payee: supplier, amount, billRef, approval: { deadline, ownerSig } });
   ctx.log(`3. Owner signs the approval -> ${r2.status === "paid" ? `PAID, receipt #${r2.receiptId}` : r2.text}`);
@@ -260,7 +260,7 @@ export async function resume(ctx: Ctx, dep: Deployment, name: AgentName) {
   const v = await readDrawer(ctx.pub, s.drawer);
   if (v.state !== "Paused" && v.state !== "Braked") return v;
   const nonce = await ctx.pub.readContract({ address: s.drawer, abi: kibbleDrawerAbi, functionName: "resumeNonce" });
-  const deadline = (await now(ctx)) + 600n;
+  const deadline = await deadlineIn(ctx, 600);
   const o = await signResume(ctx.wallet("OWNER"), s.drawer, { nonce, deadline });
   const g = await signResume(ctx.wallet("GUARDIAN"), s.drawer, { nonce, deadline });
   await sendDrawer(ctx.pub, ctx.wallet("RELAYER"), s.drawer, "resumeNow", [deadline, o, g]);

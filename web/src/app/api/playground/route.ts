@@ -98,7 +98,9 @@ export async function POST(req: NextRequest) {
     .then(() => (job.ok = true))
     .catch((e: unknown) => {
       job.ok = false;
-      log(`Stopped: ${e instanceof Error ? e.message : String(e)}`);
+      // viem errors carry the call and its arguments; the short message is enough for visitors.
+      const short = (e as { shortMessage?: string })?.shortMessage;
+      log(`Stopped: ${short ?? (e instanceof Error ? e.message : String(e))}`);
     })
     .finally(() => {
       job.finishedAt = Date.now();

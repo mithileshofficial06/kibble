@@ -2,7 +2,7 @@
 // The web app's /api/playground route calls runBeat() one at a time, behind a cooldown and daily limits.
 import { erc20Abi } from "viem";
 import { readDrawer } from "@kibble/sdk";
-import { connect, type Ctx } from "./chain";
+import { atDeploymentScale, connect, type Ctx } from "./chain";
 import { requireDeployment, type AgentName, type Deployment } from "./deployments";
 import { badStrategy, hijack, resume, timelapse } from "./scenarios";
 
@@ -50,8 +50,9 @@ async function preflight(ctx: Ctx, dep: Deployment) {
  */
 export async function runBeat(beat: Beat, opts: { rpcUrl: string; log: (line: string) => void }) {
   const log = (...args: unknown[]) => opts.log(args.map(String).join(" "));
-  const ctx = await connect(opts.rpcUrl, log);
-  const dep = requireDeployment(ctx.chain.id);
+  const raw = await connect(opts.rpcUrl, log);
+  const dep = requireDeployment(raw.chain.id);
+  const ctx = atDeploymentScale(raw, dep.scale);
   await preflight(ctx, dep);
   for (const name of BEATS[beat].drawers) {
     const v = await readDrawer(ctx.pub, dep.drawers[name]!);

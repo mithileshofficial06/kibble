@@ -26,6 +26,8 @@ export type Deployment = {
   vault?: Address;
   drawers: Partial<Record<AgentName, Address>>;
   roles: Record<string, Address>;
+  /** The demo amount scale the drawers were created with (1 locally, 0.1 on testnet). */
+  scale?: number;
 };
 
 export function deploymentPath(chainId: number) {

@@ -120,6 +120,7 @@ async function main() {
 
   if (needDrawersFor(dep, fresh)) {
     dep.drawers = await createDrawers(ctx, dep);
+    dep.scale = ctx.scale;
   }
   saveDeployment(dep);
   console.log(`\nSaved deployments/${ctx.chain.id}.json`);
