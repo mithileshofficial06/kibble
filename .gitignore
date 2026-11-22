@@ -21,3 +21,7 @@ contracts/broadcast/
 *.pem
 keystore/
 wallets/
+
+# local chain deployments (fork 440050, anvil 31337); the Aevum one (44005.json) is committed
+deployments/440050.json
+deployments/31337.json
