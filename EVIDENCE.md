@@ -4,7 +4,7 @@ Every feature, the test that proves it, and where it shows up in a run.
 
 - **Tests:** `make test` (unit, fuzz, invariants) and `make test-fork` (real tUSD8 on a fork of Aevum). Test files are in [`contracts/test`](contracts/test).
 - **Scenarios:** `pnpm --filter @kibble/agents scenario <name>` ([`agents/src/scenarios.ts`](agents/src/scenarios.ts)).
-- **Explorer links:** Aevum testnet transactions will be added here after the testnet deployment (the demo wallets need faucet funds first). Until then the run below is from a local fork of Aevum with the real tUSD8 contract.
+- **On Aevum testnet:** Kibble is deployed and every scenario has run on chain (see [Aevum testnet](#aevum-testnet)). Each drawer's receipts, track record and refusals can be checked on the explorer or in the web app's drawer pages.
 
 ## Feature → test
 
@@ -78,4 +78,20 @@ Kibble A spent its first 6 windows in Learning (window 1 was quiet), then grew T
 
 ## Aevum testnet
 
-Pending: the demo wallets need tQDAY and tUSD8 from the faucet. Then `RPC_URL=https://rpc-test.qday.info pnpm --filter @kibble/agents setup-demo` deploys everything, and this section gets the contract addresses and transaction links on https://explorer-test.qday.info.
+Deployed 22 Nov 2026 (block 3,847,745). Contracts: factory [`0xea5993b2…06d2`](https://explorer-test.qday.info/address/0xea5993b29f3ed9944fdd23dcf5b0b1114a9906d2), drawer implementation [`0x6d7ac2be…5fd3`](https://explorer-test.qday.info/address/0x6d7ac2befb19b6f5ccd846353324db5543845fd3), admin module [`0x38d0f87e…ff1b`](https://explorer-test.qday.info/address/0x38d0f87e9a4f5e64e5f5a481deb600b70219ff1b), owner vault [`0xe1e78CCC…E616`](https://explorer-test.qday.info/address/0xe1e78CCCF50112964429d29A0A66e91EAaf0E616).
+
+The whole testnet demo runs on **one faucet claim** (1 tQDAY + 5 tUSD8), so amounts are **a tenth** of the fork run's (max weekly loss 2, sale 0.010, model call 0.004). Every tUSD8 stays inside the demo's own wallets and contracts; `setup-demo --fresh` gets it back from old drawers for the next run.
+
+### Run 1: 20-second windows
+
+Log: [docs/runs/testnet-run1-20s-windows-2026-11-22.txt](docs/runs/testnet-run1-20s-windows-2026-11-22.txt). Drawers (now revoked): [docs/runs/testnet-run1-deployment.json](docs/runs/testnet-run1-deployment.json), e.g. Kibble A [`0x38f6626D…d87f`](https://explorer-test.qday.info/address/0x38f6626D05aaaB790bd78e8F74988f507da1d87f), fixed A′ [`0x2eb27Acc…Ab41`](https://explorer-test.qday.info/address/0x2eb27AccE2F884DbC2a10BAf1bd1B31D91BEab41).
+
+- **Hijack:** both sides refused the injected 0.5 payment and the stranger probes. Overbuying from the real supplier: **fixed A′ paid out 0.550 and stayed Healthy; Kibble A paid 0.000 and paused itself 4 s in**, with `maxLossNow` 0.200 → 0.000.
+- **Bad strategy:** fixed B′ stayed Healthy and lost 0.018 every window (0.108 over 6). Kibble B went Watch → Braked on its own, shrinking its exposure from 0.200 to 0.012.
+- **Work credits:** five accepted reports grew W's T from 0.200 to 0.302; the first report not accepted dropped it to Watch.
+- **Controls:** threshold lowered instantly, owner-signed payment paid (receipt #13), signature replay refused, guardian freeze, owner + guardian `resumeNow`.
+- **What it taught us:** on a real chain each sale is about four transactions, so a 20-second window held only 2–3 sales. Most windows fell below `minActivity`, so Kibble A never finished Learning and its T stayed at 0.200. On a fork, time only moves when the script moves it, which hid this. Run 2 uses 2-minute windows.
+
+### Run 2: 2-minute windows
+
+Pending (in progress).
