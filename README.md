@@ -8,6 +8,7 @@
 > - **The exact hijack bound**, live on chain as `maxLossNow()`: *the allowance (≤ T) plus any runway the owner granted.* Paying strangers comes out of that allowance and is capped at 1 tUSD8 for life. Overspending is refused and pauses the agent. The vault is never reachable.
 > - **Same contract, two modes**: `FIXED` is the comparison side of the split screen and `EARNED` is Kibble, so the comparison is fair.
 > - **Proof:** 97 Kibble tests in Foundry (unit, fuzz, attack and fork tests), including 10 invariants checked over 128,000 random calls and 3 tests against the real tUSD8 on a fork. There are also five scripted demo scenarios ([EVIDENCE.md](EVIDENCE.md)).
+> - **Live on Aevum testnet:** factory [`0xea5993b2…06d2`](https://explorer-test.qday.info/address/0xea5993b29f3ed9944fdd23dcf5b0b1114a9906d2), five demo drawers and an owner vault, with every scenario run on chain ([Deployments](#deployments), [EVIDENCE.md](EVIDENCE.md#aevum-testnet)). The web app shows the split screen, each drawer's receipts and track record, the owner controls, and a no-wallet playground.
 > - Also covered, as every rival does: approved suppliers with caps, owner approval for big payments, a receipt for every payment, pay-once per bill, and instant freeze.
 
 ---
@@ -20,6 +21,7 @@
 - [What a hijacker can take](#what-a-hijacker-can-take)
 - [Run it](#run-it)
 - [Demo scenarios](#demo-scenarios)
+- [The web app](#the-web-app)
 - [Contract API](#contract-api)
 - [Platform findings (Aevum)](#platform-findings-aevum)
 - [Known limits](#known-limits)
@@ -84,7 +86,8 @@ Plus the basics every rival has: approved suppliers with per-payment and per-win
 | [`KibbleVault`](contracts/src/KibbleVault.sol) | Owner's safe. Instant withdrawals only to `home`; any other address waits and can be cancelled |
 | [`KibbleFactory`](contracts/src/KibbleFactory.sol) | Creates vaults and drawers; `defaultConfig(L)` and `demoConfig(L)` |
 | [`@kibble/sdk`](packages/kibble/src) | Merged ABI, typed data (approvals, work, resume), `payOnce` (pay exactly once under retries), plain-words reasons |
-| [`agents/`](agents/src) | Setup, supplier, sale loop, injection page with a Claude summarizer, scenario runner |
+| [`agents/`](agents/src) (`@kibble/agents`) | Setup, supplier, sale loop, injection page with a Claude summarizer, scenario runner, playground beats |
+| [`web/`](web/src) | Next.js app: split-screen dashboard, drawer pages (receipts, track record, owner/guardian controls), playground |
 
 ### `_sync()`, which runs at the start of every call
 
@@ -138,14 +141,15 @@ pnpm --filter @kibble/agents scenario status
 
 On a local chain the scripts make throwaway keys. To use your own, put `OWNER_PRIVATE_KEY`, `GUARDIAN_PRIVATE_KEY`, `AGENT_A_PRIVATE_KEY`, `AGENT_B_PRIVATE_KEY`, `SUPPLIER_PRIVATE_KEY`, `BUYER_PRIVATE_KEY` and `RELAYER_PRIVATE_KEY` in a `.env` file **outside the repo** and point `KIBBLE_WALLETS` at it.
 
-**On Aevum testnet:** fund those wallets from the faucet (tQDAY for gas; about 60 tUSD8 for the owner and 20 for the buyer), then:
+**On Aevum testnet:** one Discord faucet claim (1 tQDAY + 5 tUSD8) to the owner is enough. On testnet the demo runs at **one tenth of the amounts** (`KIBBLE_SCALE`, default 0.1 there) with **2-minute windows**, and `setup-demo` shares the owner's gas and tUSD8 out to the other roles:
 
 ```bash
-RPC_URL=https://rpc-test.qday.info pnpm --filter @kibble/agents setup-demo
-RPC_URL=https://rpc-test.qday.info pnpm --filter @kibble/agents scenario hijack
+RPC_URL=https://rpc-test.qday.info pnpm --filter @kibble/agents setup-demo           # deploy, share out, 5 drawers
+RPC_URL=https://rpc-test.qday.info pnpm --filter @kibble/agents scenario all         # ~45 min of real time
+RPC_URL=https://rpc-test.qday.info pnpm --filter @kibble/agents setup-demo --fresh   # new drawers; reclaims the old ones' tUSD8
 ```
 
-Windows are 20 s in the demo config, so on the real testnet a scenario takes real minutes.
+`--fresh` on testnet revokes the old drawers, has the vault pay out to its home (the guardian), and returns the guardian's and supplier's tUSD8 to the owner, so one faucet claim covers many runs. The scale is saved in `deployments/<chainId>.json`, so later runs use the same amounts as the drawers.
 
 **The injection beat with a real model:** set `ANTHROPIC_API_KEY` and the hijack scenario asks `claude-opus-5-5` to summarize the poisoned page while it holds a `pay` tool. The server-side refusal fallback is on. Without a key, or with `KIBBLE_LLM=off`, a scripted naive model obeys the hidden instruction, and the output says which one ran. Either way the contract decides, not the prompt.
 
@@ -162,6 +166,18 @@ Windows are 20 s in the demo config, so on the real testnet a scenario takes rea
 | `controls` | Owner approval above the threshold, signature replay refused, guardian freeze, two-key instant resume |
 
 Results from a full run are in [EVIDENCE.md](EVIDENCE.md).
+
+## The web app
+
+```bash
+pnpm --filter web dev            # http://localhost:3000, reads Aevum testnet
+```
+
+- **Dashboard** (`/`): the scoreboard for all five drawers (state, T, value, spend, profit, hijack exposure, receipts), the fixed and Kibble agents side by side, and the window-by-window time-lapse from `TrackRecord` events.
+- **Drawer page** (`/drawer/<address>`): every number in `snapshot()`, the settings, the last receipts, the track record, and a feed of refusals, state changes and alerts. This is also the public "verify" page for an agent's record. With the owner's or guardian's wallet connected: sync, freeze, revoke, tighten, queue a raise and execute or cancel it, fund the allowance, grant a runway, and sign and submit a two-key `resumeNow`.
+- **Playground** (`/playground`): three no-wallet buttons (sales rush, bad strategy, hijack) that the server runs with the demo keys. Off unless `KIBBLE_PLAYGROUND=on`; one run at a time, with a cooldown, a per-IP daily limit and a global daily limit. Paused drawers are reset with an owner + guardian `resumeNow` before each run. Run state is kept in the server process, so host it with `next start`, not serverless functions. Settings are in [`web/.env.example`](web/.env.example).
+
+`NEXT_PUBLIC_NETWORKS=aevum,fork` adds a network switcher; on a local chain the app reads `deployments/<chainId>.json` from the repo. The design is still the starter kit's: styling comes next.
 
 ## Contract API
 
@@ -201,12 +217,17 @@ Events: `Paid`, `Refused(fp, reason, …)`, `ReceiptIssued`, `StateChanged(from,
 
 ### Deployments
 
-| Network | Factory | Notes |
-|---|---|---|
-| Aevum testnet (44005) | pending | The demo wallets need faucet funds first. Addresses land in `deployments/44005.json` and here |
-| Local fork (440050) | per run | `pnpm --filter @kibble/agents setup-demo` |
+Aevum testnet (chain 44005), deployed 22 Nov 2026 from commit `2a36161` (block 3,847,745):
 
-Explorer verification on Aevum doesn't work yet (see the starter kit). Addresses and the exact commit will be listed here instead.
+| Contract | Address |
+|---|---|
+| `KibbleFactory` | [`0xea5993b29f3ed9944fdd23dcf5b0b1114a9906d2`](https://explorer-test.qday.info/address/0xea5993b29f3ed9944fdd23dcf5b0b1114a9906d2) |
+| `KibbleDrawer` (clone implementation) | [`0x6d7ac2befb19b6f5ccd846353324db5543845fd3`](https://explorer-test.qday.info/address/0x6d7ac2befb19b6f5ccd846353324db5543845fd3) |
+| `KibbleAdmin` | [`0x38d0f87e9a4f5e64e5f5a481deb600b70219ff1b`](https://explorer-test.qday.info/address/0x38d0f87e9a4f5e64e5f5a481deb600b70219ff1b) |
+| Demo owner vault | [`0xe1e78CCCF50112964429d29A0A66e91EAaf0E616`](https://explorer-test.qday.info/address/0xe1e78CCCF50112964429d29A0A66e91EAaf0E616) |
+| tUSD8 | [`0x456569838f1d43009A91ebA4263147Afd7233483`](https://explorer-test.qday.info/address/0x456569838f1d43009A91ebA4263147Afd7233483) |
+
+The current demo drawers and roles are in [`deployments/44005.json`](deployments/44005.json); the first run's (now revoked) drawers are in [`docs/runs/testnet-run1-deployment.json`](docs/runs/testnet-run1-deployment.json). Explorer verification on Aevum doesn't work yet, so the source is this repository at the commit above. On a local fork, `pnpm --filter @kibble/agents setup-demo` deploys a fresh set each time.
 
 ## Platform findings (Aevum)
 
@@ -230,6 +251,8 @@ Checked on chain on 22 Nov 2026:
 - **The drawdown high-water mark resets once per period** (7 days by default) rather than rolling continuously.
 - **Revoke sends uncleared sales to the vault**; refunding those buyers is then up to the owner.
 - **Gas** is paid by the agent key (or a relayer) and isn't in the profit and loss.
+- **Testnet amounts are a tenth of the design's.** One faucet claim is 5 tUSD8, so on Aevum the demo uses 0.1-scale amounts (L = 2) and 2-minute windows. The logic and the ratios are the same.
+- **The playground keeps its limits in memory** and holds the demo keys on the server. Testnet keys only.
 - **Not audited.** Testnet only.
 
 ## Roadmap
@@ -238,7 +261,7 @@ Checked on chain on 22 Nov 2026:
 - Signed processor attestations for off-chain revenue.
 - Many agents per owner with one total loss budget.
 - ML-DSA guardian for the vault once QDay's precompile ships.
-- Hosted dashboards and alerts.
+- Alerts (Telegram, email) on state changes.
 
 ## Credits and license
 
