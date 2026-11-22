@@ -184,20 +184,25 @@ export function useDrawerHistory(address: Address | undefined, deployBlock: bigi
   return useQuery({
     queryKey: ["kibble-history", address, blocks.toString()],
     enabled: Boolean(pub && address),
-    refetchInterval: 20_000,
+    refetchInterval: 60_000,
     queryFn: async () => {
       const head = await pub!.getBlockNumber();
       let from = head > blocks ? head - blocks : 0n;
       if (deployBlock !== undefined && from < deployBlock) from = deployBlock;
       const ranges: [bigint, bigint][] = [];
       for (let b = from; b <= head; b += LOG_SPAN) ranges.push([b, b + LOG_SPAN - 1n > head ? head : b + LOG_SPAN - 1n]);
-      const logs = (
-        await Promise.all(
-          ranges.map(([fromBlock, toBlock]) =>
-            pub!.getLogs({ address: address!, events: [TRACK, REFUSED, STATE_CHANGED, ALERT, WORK], fromBlock, toBlock }),
-          ),
-        )
-      ).flat();
+      // 10 requests at a time, so a long range doesn't flood the RPC.
+      const logs = [];
+      for (let i = 0; i < ranges.length; i += 10) {
+        const batch = await Promise.all(
+          ranges
+            .slice(i, i + 10)
+            .map(([fromBlock, toBlock]) =>
+              pub!.getLogs({ address: address!, events: [TRACK, REFUSED, STATE_CHANGED, ALERT, WORK], fromBlock, toBlock }),
+            ),
+        );
+        logs.push(...batch.flat());
+      }
       const windows = [];
       const feed: { block: bigint; tx: `0x${string}`; text: string }[] = [];
       for (const l of logs) {

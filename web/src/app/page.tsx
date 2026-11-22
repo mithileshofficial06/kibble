@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import type { DrawerView } from "@kibble/sdk";
 import { AGENTS, PAIRS, amt, pct, short, useDeployment, useDrawerHistory, useDrawers, type AgentName, type Deployment } from "@/lib/kibble";
 import { useNetwork } from "@/lib/network";
@@ -181,8 +182,21 @@ function DrawerCard({ name, dep, v }: { name: AgentName; dep: Deployment; v?: Dr
   );
 }
 
+/** Collapsed by default; the log scan only starts when it's opened. */
+function TimeLapse(props: { left: AgentName; right: AgentName; dep: Deployment }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <details className="card" onToggle={(e) => setOpen((e.currentTarget as HTMLDetailsElement).open)}>
+      <summary>
+        Time-lapse: {AGENTS[props.left].label} vs {AGENTS[props.right].label}, window by window
+      </summary>
+      {open && <TimeLapseBody {...props} />}
+    </details>
+  );
+}
+
 /** The two sides' windows next to each other, from their TrackRecord events. */
-function TimeLapse({ left, right, dep }: { left: AgentName; right: AgentName; dep: Deployment }) {
+function TimeLapseBody({ left, right, dep }: { left: AgentName; right: AgentName; dep: Deployment }) {
   const from = BigInt(dep.deployBlock);
   const l = useDrawerHistory(dep.drawers[left], from);
   const r = useDrawerHistory(dep.drawers[right], from);
@@ -194,10 +208,8 @@ function TimeLapse({ left, right, dep }: { left: AgentName; right: AgentName; de
   }
   const maxT = [...lw, ...rw].reduce((m, w) => (w.limitT > m ? w.limitT : m), 1n);
   return (
-    <details className="card">
-      <summary>
-        Time-lapse: {rows} windows, {AGENTS[left].label} vs {AGENTS[right].label}
-      </summary>
+    <>
+      <p className="fine">{rows} closed windows in the last ~5 hours.</p>
       <svg viewBox={`0 0 ${Math.max(rows - 1, 1) * 10} 50`} width="100%" height="80" preserveAspectRatio="none" aria-label="Limit per window">
         {[lw, rw].map((ws, i) => (
           <polyline
@@ -242,6 +254,6 @@ function TimeLapse({ left, right, dep }: { left: AgentName; right: AgentName; de
           </tbody>
         </table>
       </div>
-    </details>
+    </>
   );
 }

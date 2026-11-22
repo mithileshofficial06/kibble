@@ -18,7 +18,9 @@ export default function DrawerPage() {
   const v = useDrawer(address);
   const cfg = useDrawerConfig(address);
   const receipts = useReceipts(address, v.data?.receiptCount);
-  const history = useDrawerHistory(address, dep.data ? BigInt(dep.data.deployBlock) : undefined);
+  // Aevum makes ~1 block a second and serves logs 1,000 blocks at a time, so the range is a choice.
+  const [range, setRange] = useState<bigint>(20_000n);
+  const history = useDrawerHistory(address, dep.data ? BigInt(dep.data.deployBlock) : undefined, range);
   const name = dep.data && (Object.entries(dep.data.drawers).find(([, a]) => a?.toLowerCase() === address?.toLowerCase())?.[0] as AgentName | undefined);
 
   if (!address) return <main className="shell"><p>That isn&apos;t a drawer address.</p></main>;
@@ -166,7 +168,15 @@ export default function DrawerPage() {
         <div className="card flush">
           <h2>Track record</h2>
           <p className="fine">
-            One row per closed window (TrackRecord events), blocks {history.data?.from.toString()}–{history.data?.head.toString()}.
+            One row per closed window (TrackRecord events), blocks {history.data?.from.toString()}–{history.data?.head.toString()}.{" "}
+            <label>
+              Read the last{" "}
+              <select value={range.toString()} onChange={(e) => setRange(BigInt(e.target.value))}>
+                <option value="20000">~6 hours</option>
+                <option value="90000">~1 day</option>
+                <option value="300000">~3 days</option>
+              </select>
+            </label>
           </p>
           {history.data?.windows.length ? (
             <div className="table-wrap">
