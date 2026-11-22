@@ -13,7 +13,7 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { aevumFork, aevumTestnet, localAnvil } from "@aevum-kit/aevum";
-import type { Wallet } from "@kibble/sdk";
+import { fmt, units, type Wallet } from "@kibble/sdk";
 
 /** Demo roles. Keys come from the wallets file (never from the repo). */
 export const ROLES = ["OWNER", "GUARDIAN", "AGENT_A", "AGENT_B", "SUPPLIER", "BUYER", "RELAYER"] as const;
@@ -31,7 +31,18 @@ export type Ctx = {
   local: boolean;
   wallet: (role: Role) => Wallet;
   address: (role: Role) => Address;
+  /** Demo amount multiplier: 1 on local chains, 0.1 on Aevum testnet (faucet tUSD8 is scarce). KIBBLE_SCALE overrides. */
+  scale: number;
+  /** A demo amount in tUSD8, scaled: u(0.5) is 0.5 locally and 0.05 on testnet. */
+  u: (amount: number | string) => bigint;
+  /** Format a tUSD8 amount with enough digits for the current scale. */
+  f: (value: bigint) => string;
 };
+
+/** Scale a bigint amount (e.g. a contract default) by the demo scale. */
+export function scaled(ctx: Ctx, value: bigint): bigint {
+  return (value * BigInt(Math.round(ctx.scale * 1_000_000))) / 1_000_000n;
+}
 
 function keyFor(role: Role, local: boolean): Hex {
   const v = process.env[`${role}_PRIVATE_KEY`]?.trim();
@@ -67,7 +78,12 @@ export async function connect(rpcUrl = process.env.RPC_URL?.trim() || "http://12
     }
     return w;
   };
-  return { chain, rpcUrl, pub, local, wallet, address: (role) => wallet(role).account.address };
+  const scale = Number(process.env.KIBBLE_SCALE ?? (local ? 1 : 0.1));
+  if (!(scale > 0 && scale <= 1)) throw new Error(`KIBBLE_SCALE must be in (0, 1], got ${process.env.KIBBLE_SCALE}`);
+  const u = (amount: number | string) => units((Math.round(Number(amount) * scale * 1e6) / 1e6).toFixed(6));
+  const digits = scale >= 1 ? 2 : scale >= 0.1 ? 3 : 4;
+  const f = (value: bigint) => fmt(value, digits);
+  return { chain, rpcUrl, pub, local, wallet, address: (role) => wallet(role).account.address, scale, u, f };
 }
 
 export function testClient(ctx: Ctx) {

@@ -8,12 +8,14 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { encodeFunctionData, erc20Abi, parseEventLogs, type Address, type Hex } from "viem";
 import { kibbleFactoryAbi, kibbleDrawerAbi, fmt, Mode, units, sendDrawer } from "@kibble/sdk";
-import { connect, ROLES, testClient, type Ctx } from "./chain";
+
+/** maxWeeklyLoss L, the owner's one setting: 20 tUSD8 at demo scale 1 (2 on testnet). */
+const maxWeeklyLoss = (ctx: Ctx) => ctx.u(20);
+import { connect, ROLES, scaled, testClient, type Ctx, type Role } from "./chain";
 import { AGENTS, ROOT, loadDeployment, saveDeployment, type AgentName, type Deployment } from "./deployments";
 
 const TUSD8: Address = "0x456569838f1d43009A91ebA4263147Afd7233483";
 const TUSD8_MASTER_MINTER: Address = "0x4d4b7031D35B74215bebe33F6AF6e682Ea99d0b1";
-const L = units(20); // maxWeeklyLoss: the owner's one setting
 
 function artifact(name: string): { abi: unknown[]; bytecode: Hex } {
   const j = JSON.parse(readFileSync(join(ROOT, "contracts", "out", `${name}.sol`, `${name}.json`), "utf8"));
@@ -96,6 +98,7 @@ async function main() {
   dep.roles = roles;
 
   if (ctx.local) await dealLocal(ctx, dep.token);
+  else if (needDrawersFor(dep, fresh)) await shareOut(ctx, dep.token);
 
   const ownerBal = await ctx.pub.readContract({ address: dep.token, abi: erc20Abi, functionName: "balanceOf", args: [ctx.address("OWNER")] });
   console.log(`Owner tUSD8: ${fmt(ownerBal)}`);
@@ -112,8 +115,7 @@ async function main() {
     console.log(`Vault: ${dep.vault}`);
   }
 
-  const needDrawers = fresh || !dep.drawers.A;
-  if (needDrawers) {
+  if (needDrawersFor(dep, fresh)) {
     dep.drawers = await createDrawers(ctx, dep);
   }
   saveDeployment(dep);
@@ -121,21 +123,86 @@ async function main() {
   for (const [k, v] of Object.entries(dep.drawers)) console.log(`  ${AGENTS[k as AgentName].label.padEnd(52)} ${v}`);
 }
 
+function needDrawersFor(dep: Deployment, fresh: boolean) {
+  return fresh || !dep.drawers.A;
+}
+
+/**
+ * How much the demo needs, before scaling. Locally there's plenty; on testnet the faucet gives 5 tUSD8
+ * per person, so the fixed sides start with a smaller reserve and W with a smaller work budget.
+ */
+const PLAN = {
+  fixedSeed: (ctx: Ctx) => (ctx.local ? 10 : 3),
+  workBudget: (ctx: Ctx) => (ctx.local ? 30 : 16),
+  /** tUSD8 the owner puts in: five drawer seeds, W's work budget, and W's 1.2 runway grant later. */
+  ownerNeeds: (ctx: Ctx) => ctx.u(2 + PLAN.fixedSeed(ctx) + 2 + PLAN.fixedSeed(ctx) + 2 + PLAN.workBudget(ctx) + 1.2),
+  /** tUSD8 the buyer spends: an 8-window time-lapse (~9.2 before scaling) plus bad-strategy (~4.2). */
+  buyerNeeds: (ctx: Ctx) => ctx.u(16),
+};
+
+/** tQDAY each role needs for gas on testnet (1 gwei; a payment is ~250k gas = 0.00025). */
+const GAS: Record<Exclude<Role, "OWNER">, bigint> = {
+  AGENT_A: 200n * 10n ** 15n,
+  BUYER: 200n * 10n ** 15n,
+  AGENT_B: 120n * 10n ** 15n,
+  RELAYER: 120n * 10n ** 15n,
+  GUARDIAN: 30n * 10n ** 15n,
+  SUPPLIER: 10n * 10n ** 15n,
+};
+
+/**
+ * Testnet: the faucet funds only the owner, so the owner tops up every other role with gas and gives the
+ * buyer its tUSD8. Only sends what's missing, so it's safe to run again.
+ */
+async function shareOut(ctx: Ctx, token: Address) {
+  const owner = ctx.wallet("OWNER");
+  for (const [role, want] of Object.entries(GAS) as [Role, bigint][]) {
+    const have = await ctx.pub.getBalance({ address: ctx.address(role) });
+    if (have >= want / 2n) continue;
+    const hash = await owner.sendTransaction({ to: ctx.address(role), value: want - have, type: "legacy" } as never);
+    await ctx.pub.waitForTransactionReceipt({ hash });
+    console.log(`  gas for ${role.padEnd(8)} ${fmt((want - have) / 10n ** 12n, 3)} tQDAY`);
+  }
+  const bal = (a: Address) => ctx.pub.readContract({ address: token, abi: erc20Abi, functionName: "balanceOf", args: [a] });
+  const buyerHas = await bal(ctx.address("BUYER"));
+  const buyerWants = PLAN.buyerNeeds(ctx);
+  if (buyerHas < buyerWants) {
+    await write(ctx, "OWNER", token, erc20Abi, "transfer", [ctx.address("BUYER"), buyerWants - buyerHas]);
+    console.log(`  tUSD8 for BUYER    ${ctx.f(buyerWants - buyerHas)}`);
+  }
+  const ownerHas = await bal(ctx.address("OWNER"));
+  if (ownerHas < PLAN.ownerNeeds(ctx)) {
+    throw new Error(
+      `The owner has ${ctx.f(ownerHas)} tUSD8 but the drawers need ${ctx.f(PLAN.ownerNeeds(ctx))}. ` +
+        `Claim more from the faucet, or lower KIBBLE_SCALE (now ${ctx.scale}).`,
+    );
+  }
+}
+
 async function createDrawers(ctx: Ctx, dep: Deployment) {
-  const base = await ctx.pub.readContract({ address: dep.factory, abi: kibbleFactoryAbi, functionName: "demoConfig", args: [L] });
+  const demo = await ctx.pub.readContract({ address: dep.factory, abi: kibbleFactoryAbi, functionName: "demoConfig", args: [maxWeeklyLoss(ctx)] });
+  // demoConfig is written for scale 1; scale its amounts with the demo (timings stay the same)
+  const base = {
+    ...demo,
+    tMin: scaled(ctx, demo.tMin),
+    maxStep: scaled(ctx, demo.maxStep),
+    minActivity: scaled(ctx, demo.minActivity),
+    slack: scaled(ctx, demo.slack),
+    unknownBudget: scaled(ctx, demo.unknownBudget),
+  };
   const supplier = ctx.address("SUPPLIER");
   const acceptor = ctx.address("BUYER"); // the client who accepts W's reports
-  const suppliers = [{ payee: supplier, perPayment: units(1), perWindow: 0n }];
-  const acceptors = [{ acceptor, perWindow: units(6) }];
+  const suppliers = [{ payee: supplier, perPayment: ctx.u(1), perWindow: 0n }];
+  const acceptors = [{ acceptor, perWindow: ctx.u(6) }];
 
   const plans: Record<AgentName, { cfg: typeof base; seed: bigint; work?: bigint }> = {
     // A learns its cost share over 5 windows; profit grows T at 50% (report section 10)
-    A: { cfg: { ...base, growthBps: 5_000 }, seed: units(2) },
-    A_FIXED: { cfg: { ...base, fixedLimit: units(0.5) }, seed: units(10) },
+    A: { cfg: { ...base, growthBps: 5_000 }, seed: ctx.u(2) },
+    A_FIXED: { cfg: { ...base, fixedLimit: ctx.u(0.5) }, seed: ctx.u(PLAN.fixedSeed(ctx)) },
     // B and W skip learning so the demo shows the ladder straight away
-    B: { cfg: { ...base, learningWindows: 0, minActivity: units(0.1) }, seed: units(2) },
-    B_FIXED: { cfg: { ...base, fixedLimit: units(3) }, seed: units(10) },
-    W: { cfg: { ...base, learningWindows: 0 }, seed: units(2), work: units(30) },
+    B: { cfg: { ...base, learningWindows: 0, minActivity: ctx.u(0.1) }, seed: ctx.u(2) },
+    B_FIXED: { cfg: { ...base, fixedLimit: ctx.u(3) }, seed: ctx.u(PLAN.fixedSeed(ctx)) },
+    W: { cfg: { ...base, learningWindows: 0 }, seed: ctx.u(2), work: ctx.u(PLAN.workBudget(ctx)) },
   };
 
   const out: Partial<Record<AgentName, Address>> = {};
@@ -157,7 +224,7 @@ async function createDrawers(ctx: Ctx, dep: Deployment) {
     await sendDrawer(ctx.pub, ctx.wallet("OWNER"), drawer, "fundAllowance", [p.seed]);
     if (p.work) await sendDrawer(ctx.pub, ctx.wallet("OWNER"), drawer, "fundWorkBudget", [p.work]);
     const t = await ctx.pub.readContract({ address: drawer, abi: kibbleDrawerAbi, functionName: "limitT" });
-    console.log(`Created ${name.padEnd(8)} ${drawer}  T=${fmt(t)}`);
+    console.log(`Created ${name.padEnd(8)} ${drawer}  T=${ctx.f(t)}`);
   }
   return out;
 }

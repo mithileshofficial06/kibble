@@ -18,9 +18,11 @@ const [name = "status", arg] = process.argv.slice(2);
 const ctx = await connect();
 const dep = requireDeployment(ctx.chain.id);
 const n = arg ? Number(arg) : undefined;
+// On testnet a window takes 20 s of real time and faucet tUSD8 is scarce: 8 windows by default.
+const windows = n ?? (ctx.local ? 30 : 8);
 
 const scenarios: Record<string, () => Promise<unknown>> = {
-  timelapse: () => timelapse(ctx, dep, n ?? 30),
+  timelapse: () => timelapse(ctx, dep, windows),
   "bad-strategy": () => badStrategy(ctx, dep, n ?? 6),
   hijack: () => hijack(ctx, dep),
   work: () => work(ctx, dep, n ?? 5),
@@ -28,7 +30,7 @@ const scenarios: Record<string, () => Promise<unknown>> = {
   resume: async () => console.log(await resume(ctx, dep, (arg ?? "A") as AgentName)),
   status: () => status(ctx, dep),
   all: async () => {
-    await timelapse(ctx, dep, n ?? 30);
+    await timelapse(ctx, dep, windows);
     await badStrategy(ctx, dep);
     await hijack(ctx, dep);
     await work(ctx, dep);
