@@ -617,7 +617,8 @@ export function Intro() {
       }
       ptr.x = e.clientX;
       ptr.y = e.clientY;
-      ptr.on = true;
+      // Over a link or button (the fixed nav sits above the canvas), the pointer is a visitor, not an attacker.
+      ptr.on = !(e.target instanceof Element && e.target.closest("a, button, .k-navbar"));
       ptr.touch = e.pointerType !== "mouse";
       ptr.t = performance.now();
     };

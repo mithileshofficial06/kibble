@@ -145,7 +145,8 @@ html[data-intro="load"] .k-navbar { opacity: 0; transform: translateY(-18px); }
   font-size: 14px;
   transition: background 0.25s, color 0.25s, border-color 0.25s;
 }
-.k-nav-cta:hover { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.k-nav-cta { --pour: var(--saffron); --pour-ink: #120c0a; }
+.k-nav-cta:hover { border-color: var(--saffron); }
 
 /* ------------------------------------------------------------------ stage */
 .k-stage {
@@ -261,7 +262,7 @@ html[data-intro="load"] .k-navbar { opacity: 0; transform: translateY(-18px); }
   stroke-linejoin: round;
   transition: transform 0.45s var(--ease), stroke 0.6s;
 }
-.k-btn:hover { color: #120c0a; }
+.k-btn { --pour: var(--fg); --pour-ink: #120c0a; }
 .k-btn:hover svg { transform: rotate(-45deg) scale(1.08); }
 .k-link { position: relative; color: var(--fg); text-decoration: none; font-size: 15px; }
 .k-link::after {
@@ -330,7 +331,8 @@ html[data-intro="load"] .k-navbar { opacity: 0; transform: translateY(-18px); }
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s;
 }
-.k-replay:hover:not(:disabled) { color: var(--fg); border-color: var(--fg); }
+.k-replay { --pour: var(--fg); --pour-ink: var(--bg); }
+.k-replay:hover:not(:disabled) { border-color: var(--fg); }
 
 /* Story steps: like stories, each bar fills while its step plays. Click to jump. */
 .k-story { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; list-style: none; margin: 18px 0 0; padding: 0; }
