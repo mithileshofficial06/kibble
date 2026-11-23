@@ -13,15 +13,30 @@ export const dynamic = "force-dynamic";
 
 const COOLDOWN_MS = Number(process.env.PLAYGROUND_COOLDOWN_S ?? 60) * 1000;
 const PER_IP_PER_DAY = Number(process.env.PLAYGROUND_PER_IP_PER_DAY ?? 3);
-const RUNS_PER_DAY = Number(process.env.PLAYGROUND_RUNS_PER_DAY ?? 20);
+// About 40 beats fit in the demo wallets' testnet gas (0.6 tQDAY at ~0.015 a beat), so 10 a day spreads it over judging.
+const RUNS_PER_DAY = Number(process.env.PLAYGROUND_RUNS_PER_DAY ?? 10);
+/** Below this many beats of gas left, the page says so. */
+const FUEL_LOW = 5;
 const MAX_LINES = 400;
 
-type Job = { id: number; beat: string; startedAt: number; finishedAt?: number; ok?: boolean; lines: string[] };
-type State = { job?: Job; nextId: number; lastEnd: number; day: string; runs: number; perIp: Map<string, number> };
+type Job = { id: number; beat: string; startedAt: number; expectedSeconds: number; finishedAt?: number; ok?: boolean; lines: string[] };
+type State = {
+  job?: Job;
+  nextId: number;
+  lastEnd: number;
+  day: string;
+  runs: number;
+  perIp: Map<string, number>;
+  /** How long each beat really took last time it finished OK, in seconds. */
+  took: Record<string, number>;
+  /** Beats the demo wallets' gas still pays for, and when that was read. */
+  fuel?: { beats: number; at: number };
+};
 
 // Survives hot reloads in `next dev`.
 const g = globalThis as unknown as { __kibblePlayground?: State };
-const state: State = (g.__kibblePlayground ??= { nextId: 1, lastEnd: 0, day: "", runs: 0, perIp: new Map() });
+const state: State = (g.__kibblePlayground ??= { nextId: 1, lastEnd: 0, day: "", runs: 0, perIp: new Map(), took: {} });
+state.took ??= {};
 
 function enabled() {
   return process.env.KIBBLE_PLAYGROUND === "on";
@@ -43,15 +58,48 @@ function rollDay() {
   }
 }
 
+type Beats = Awaited<ReturnType<typeof loadBeats>>["BEATS"];
+
+/** What the page needs about each beat (the gas table holds bigints, which JSON can't carry). */
+function publicBeats(BEATS: Beats) {
+  return Object.fromEntries(
+    Object.entries(BEATS).map(([key, b]) => [key, { title: b.title, about: b.about, drawers: b.drawers, estSeconds: estimate(BEATS, key) }]),
+  );
+}
+
+function estimate(BEATS: Beats, key: string) {
+  return state.took[key] ?? BEATS[key as keyof Beats].estSeconds;
+}
+
+function rpcUrl() {
+  return process.env.PLAYGROUND_RPC_URL?.trim() || "https://rpc-test.qday.info";
+}
+
+/** Re-read the gas left at most once a minute (and after every run). A read error leaves it unknown. */
+async function refreshFuel(force = false) {
+  if (!enabled() || (!force && state.fuel && Date.now() - state.fuel.at < 60_000)) return;
+  try {
+    const { fuel } = await loadBeats();
+    const beats = await fuel(rpcUrl());
+    state.fuel = { beats: Number.isFinite(beats) ? beats : 9999, at: Date.now() };
+  } catch {
+    state.fuel = undefined;
+  }
+}
+
 function view() {
   rollDay();
   const running = Boolean(state.job && state.job.finishedAt === undefined);
+  const fuel = state.fuel?.beats;
   return {
     enabled: enabled(),
     running,
     job: state.job,
     cooldownEndsAt: running || !state.lastEnd ? null : state.lastEnd + COOLDOWN_MS,
     runsLeftToday: Math.max(0, RUNS_PER_DAY - state.runs),
+    /** Roughly how many more runs the demo wallets' testnet gas pays for; null if unknown. */
+    fuelRuns: fuel ?? null,
+    fuelLow: fuel !== undefined && fuel < FUEL_LOW,
   };
 }
 
@@ -63,7 +111,8 @@ async function loadBeats() {
 
 export async function GET() {
   const { BEATS } = await loadBeats();
-  return NextResponse.json({ ...view(), beats: BEATS });
+  await refreshFuel();
+  return NextResponse.json({ ...view(), beats: publicBeats(BEATS) });
 }
 
 export async function POST(req: NextRequest) {
@@ -84,8 +133,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `You've used your ${PER_IP_PER_DAY} runs for today.` }, { status: 429 });
   }
 
-  const rpcUrl = process.env.PLAYGROUND_RPC_URL?.trim() || "https://rpc-test.qday.info";
-  const job: Job = { id: state.nextId++, beat: body.beat, startedAt: now, lines: [] };
+  if (state.fuel && state.fuel.beats < 1) {
+    return NextResponse.json({ error: "The demo wallets are out of testnet gas. The playground is paused until they're topped up." }, { status: 503 });
+  }
+
+  const beat = body.beat;
+  const job: Job = { id: state.nextId++, beat, startedAt: now, expectedSeconds: estimate(BEATS, beat), lines: [] };
   state.job = job;
   state.runs++;
   state.perIp.set(ip, (state.perIp.get(ip) ?? 0) + 1);
@@ -94,8 +147,11 @@ export async function POST(req: NextRequest) {
     if (job.lines.length > MAX_LINES) job.lines.splice(0, job.lines.length - MAX_LINES);
   };
   // Runs in the background; the page polls GET for the log.
-  void runBeat(body.beat, { rpcUrl, log })
-    .then(() => (job.ok = true))
+  void runBeat(beat, { rpcUrl: rpcUrl(), log })
+    .then(() => {
+      job.ok = true;
+      state.took[beat] = Math.round((Date.now() - job.startedAt) / 1000);
+    })
     .catch((e: unknown) => {
       job.ok = false;
       // viem errors carry the call and its arguments; the short message is enough for visitors.
@@ -105,6 +161,7 @@ export async function POST(req: NextRequest) {
     .finally(() => {
       job.finishedAt = Date.now();
       state.lastEnd = job.finishedAt;
+      void refreshFuel(true);
     });
-  return NextResponse.json(view(), { status: 202 });
+  return NextResponse.json({ ...view(), beats: publicBeats(BEATS) }, { status: 202 });
 }
