@@ -10,6 +10,8 @@ Done, committed and pushed:
 - **Web app** (new design: plum/saffron/coral, Geist + Instrument Serif, Motion): dashboard with scoreboard, split screen and time-lapse; drawer pages with receipts, track record, event feed and owner/guardian controls; playground with server-side limits; How it works page. Builds clean on Next.js 16.4.5.
 - **Docs:** README (judges box, deployments, web app, platform findings, limits), EVIDENCE.md (feature → test, fork run, testnet runs).
 
+- **End-to-end test (23 Nov, local fork, no testnet gas, scripted model):** 105/105 unit+fuzz+invariant, 6/6 fork tests, all 4 packages typecheck, `setup-demo --redeploy` + `scenario all` clean (time-lapse T 2.00 → 10.00; B paused 17 s after the price jump; hijack: 0.00 overbought, paused in 12 s; W earned via work; controls incl. replayed-signature refusal and two-key resume), web production build 40/40 browser checks (desktop + phone, no errors, no sideways scroll) and all three Playground demos run through the page. Fixed: `cooldownEndsAt` reported a 1970 time before the first run.
+
 Not done:
 - **Hosting** the web app (needs a long-running server for the playground) and the demo video.
 - The injection beat with a real model needs `ANTHROPIC_API_KEY` (uses the user's API credits). So far the scripted model ran.

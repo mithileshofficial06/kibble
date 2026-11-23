@@ -50,7 +50,7 @@ function view() {
     enabled: enabled(),
     running,
     job: state.job,
-    cooldownEndsAt: running ? null : state.lastEnd + COOLDOWN_MS,
+    cooldownEndsAt: running || !state.lastEnd ? null : state.lastEnd + COOLDOWN_MS,
     runsLeftToday: Math.max(0, RUNS_PER_DAY - state.runs),
   };
 }
