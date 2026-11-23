@@ -234,7 +234,6 @@ html[data-intro="load"] .k-navbar { opacity: 0; transform: translateY(-18px); }
 }
 
 .k-ctas { display: flex; align-items: center; flex-wrap: wrap; gap: 26px; margin-top: 30px; }
-.k-magnet { display: inline-block; }
 .k-btn {
   display: inline-flex;
   align-items: center;

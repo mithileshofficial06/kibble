@@ -222,7 +222,7 @@ dl.kv dd strong { color: var(--saffron); font-weight: 500; }
   box-shadow: 0 10px 34px -12px var(--saffron);
   transition: transform 0.35s var(--ease), box-shadow 0.35s, background 0.25s, color 0.25s, border-color 0.25s;
 }
-.btn:hover { color: #120c0a; transform: translateY(-2px); box-shadow: 0 16px 40px -12px var(--saffron); }
+.btn:hover { color: #120c0a; box-shadow: 0 16px 40px -12px var(--saffron); }
 .btn:active { transform: translateY(0); }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
 .btn.secondary, .btn.ghost { background: transparent; border-color: var(--line-2); color: var(--fg); box-shadow: none; }
@@ -390,7 +390,7 @@ table.data td.right, table.data th.right { text-align: right; }
 /* ================================================================ playground */
 .beats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 20px; }
 .beat { display: flex; flex-direction: column; gap: 16px; min-height: 300px; overflow: hidden; transition: border-color 0.4s, transform 0.5s var(--ease); }
-.beat:hover { border-color: var(--line-2); transform: translateY(-4px); }
+.beat:hover { border-color: var(--line-2); }
 .beat-n { font-weight: 200; font-size: 84px; line-height: 0.8; letter-spacing: -0.06em; color: transparent; -webkit-text-stroke: 1px var(--line-2); transition: -webkit-text-stroke-color 0.4s, color 0.4s; }
 .beat:hover .beat-n { -webkit-text-stroke-color: var(--saffron); }
 .beat h2 { font-size: 26px; }

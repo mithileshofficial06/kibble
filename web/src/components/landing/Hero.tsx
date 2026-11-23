@@ -217,14 +217,12 @@ export function Hero() {
           </motion.p>
 
           <motion.div className="k-ctas" initial={{ opacity: 0, y: 14 }} animate={on({ opacity: 1, y: 0 })} transition={{ duration: 0.8, delay: 0.95, ease: EASE }}>
-            <Magnetic>
-              <Link href="/live" className="k-btn">
-                <span>See it live</span>
-                <svg viewBox="0 0 16 16" aria-hidden="true">
-                  <path d="M3 8h10M9 4l4 4-4 4" />
-                </svg>
-              </Link>
-            </Magnetic>
+            <Link href="/live" className="k-btn">
+              <span>See it live</span>
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M3 8h10M9 4l4 4-4 4" />
+              </svg>
+            </Link>
             <Link href="/docs" className="k-link">
               How it works
             </Link>
@@ -520,31 +518,6 @@ function Fact({ to, label, run, suffix = "", decimals = 0 }: { to: number; label
       </dt>
       <dd>{label}</dd>
     </div>
-  );
-}
-
-/** A button that leans toward the pointer. */
-function Magnetic({ children }: { children: React.ReactNode }) {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const sx = useSpring(x, { stiffness: 200, damping: 14 });
-  const sy = useSpring(y, { stiffness: 200, damping: 14 });
-  return (
-    <motion.span
-      className="k-magnet"
-      style={{ x: sx, y: sy }}
-      onPointerMove={(e) => {
-        const r = e.currentTarget.getBoundingClientRect();
-        x.set((e.clientX - r.left - r.width / 2) * 0.3);
-        y.set((e.clientY - r.top - r.height / 2) * 0.4);
-      }}
-      onPointerLeave={() => {
-        x.set(0);
-        y.set(0);
-      }}
-    >
-      {children}
-    </motion.span>
   );
 }
 
