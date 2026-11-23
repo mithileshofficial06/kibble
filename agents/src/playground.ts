@@ -48,6 +48,11 @@ const PER_BEAT = Object.fromEntries(
   SENDERS.map((r) => [r, Object.values(BEATS).reduce((a, b) => ((b.gas as Partial<Record<Sender, bigint>>)[r] ?? 0n) > a ? (b.gas as Partial<Record<Sender, bigint>>)[r]! : a, 0n)]),
 ) as Record<Sender, bigint>;
 
+/** Average total gas of one beat (visitors pick beats about evenly). */
+const AVG_BEAT =
+  Object.values(BEATS).reduce((a, b) => a + Object.values(b.gas as Partial<Record<Sender, bigint>>).reduce((x, y) => x + (y ?? 0n), 0n), 0n) /
+  BigInt(Object.keys(BEATS).length);
+
 /**
  * Before a beat: move tUSD8 the beats sent to the supplier back to the buyer and the vault, and have
  * the owner send gas to any sender running low. Then check this beat can finish.
@@ -68,7 +73,7 @@ async function upkeep(ctx: Ctx, dep: Deployment, beat: Beat, log: (line: string)
 /** How many more beats the demo wallets' gas pays for (read-only). */
 export async function fuel(rpcUrl: string) {
   const ctx = await connect(rpcUrl, () => undefined);
-  return beatsAffordable(await gasBalances(ctx), PER_BEAT);
+  return beatsAffordable(await gasBalances(ctx), AVG_BEAT);
 }
 
 /**

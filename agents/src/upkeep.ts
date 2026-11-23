@@ -142,11 +142,10 @@ export async function rebalanceGas(ctx: Ctx, perBeat: Record<Sender, bigint>, lo
 }
 
 /**
- * How many more beats the demo wallets' gas can pay for: the owner's spare gas is shared out to
- * whichever sender needs it, so the total matters, with each sender's own share counted once.
+ * How many more beats the demo wallets' gas pays for: the owner's spare gas is shared out to whichever
+ * sender needs it, so the total matters. `avgBeat` is the average total gas of one beat.
  */
-export function beatsAffordable(bal: Record<Sender | "OWNER", bigint>, perBeat: Record<Sender, bigint>) {
-  const need = SENDERS.reduce((a, r) => a + perBeat[r], 0n);
+export function beatsAffordable(bal: Record<Sender | "OWNER", bigint>, avgBeat: bigint) {
   const have = SENDERS.reduce((a, r) => a + bal[r], 0n) + (bal.OWNER > OWNER_RESERVE ? bal.OWNER - OWNER_RESERVE : 0n);
-  return need > 0n ? Number(have / need) : Infinity;
+  return avgBeat > 0n ? Number(have / avgBeat) : Infinity;
 }
