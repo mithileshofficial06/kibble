@@ -40,7 +40,7 @@ export default function PlaygroundPage() {
         <p className="eyebrow">Playground</p>
         <h1>Try it without a wallet</h1>
         <p className="lede">
-          Each button runs a short demo on Aevum testnet with the demo agents. Watch the result here and on the <Link href="/">dashboard</Link>
+          Each button runs a short demo on Aevum testnet with the demo agents. Watch the result here and on the <Link href="/live">live desk</Link>
           . One run at a time, with a cooldown and a daily limit.
         </p>
       </div>

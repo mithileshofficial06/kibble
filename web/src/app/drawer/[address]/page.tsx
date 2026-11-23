@@ -31,7 +31,7 @@ export default function DrawerPage() {
     <main className="shell stack">
       <div className="page-head">
         <p className="eyebrow">
-          <Link href="/">Dashboard</Link> / Drawer
+          <Link href="/live">Live desk</Link> / Drawer
         </p>
         <h1>{name ? AGENTS[name].label : short(address)}</h1>
         <p className="lede">

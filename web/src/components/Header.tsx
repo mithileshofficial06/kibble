@@ -9,7 +9,7 @@ import { GitHubIcon } from "./Icons";
 import { useNetwork } from "@/lib/network";
 
 const links = [
-  { href: "/", label: "Dashboard" },
+  { href: "/live", label: "Live desk" },
   { href: "/playground", label: "Playground" },
   { href: "/docs", label: "How it works" },
 ];
@@ -19,6 +19,8 @@ export function Header() {
   const { isConnected, chainId } = useAccount();
   const { net, select, switchingTo, switchError } = useNetwork();
   const wrongNetwork = isConnected && chainId !== net.chain.id && !switchingTo;
+  // The landing page draws its own desk-style nav.
+  if (pathname === "/") return null;
 
   return (
     <>
