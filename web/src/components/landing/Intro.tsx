@@ -47,7 +47,13 @@ const T_SETTLE = T_START + T_SPAWN + T_FALL + T_FALL_J + 120;
 const T_SHINE = 480;
 const T_OPEN = T_SETTLE + T_SHINE;
 const T_DOOR = 1100;
-const T_IDLE = T_OPEN + T_DOOR;
+// The word rides out with the doors, then flies back in and locks.
+const T_GAP = 140;
+const T_STAGGER = 300;
+const T_RET = 1000;
+const T_IDLE = T_OPEN + T_DOOR + T_GAP + T_STAGGER + T_RET + 60;
+const T_LOCK = T_OPEN + T_DOOR + T_GAP + T_STAGGER * 0.6 + T_RET * 0.42;
+const T_PULSE = 650;
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const smooth = (a: number, b: number, v: number) => {
@@ -126,6 +132,7 @@ export function Intro() {
     let stg: Stage = reduce ? "idle" : "load";
     let cleared = false;
     let pourEl: Element | null = null;
+    let shownGlow = 0;
     const ticks: { x: number; y: number; born: number; text: string }[] = [];
     let lastTick = 0;
     const sparks: { i: number; born: number }[] = [];
@@ -236,14 +243,24 @@ export function Intro() {
       go("open");
       root.style.overflow = "";
       if (ticker) clearInterval(ticker);
-      // The vault door: each half of the word swings out with its door, then pulls back together.
-      const cx = W / 2;
-      for (const g of grains) {
-        const dir = g.x < cx ? -1 : 1;
-        const near = 1 - Math.min(1, Math.abs(g.x - cx) / (W * 0.5));
-        g.vx += dir * (7 + near * 9 + Math.random() * 6);
-        g.vy += (Math.random() - 0.5) * 5;
+    }
+
+    /**
+     * The vault door. Each half of the word rides out with its door (same distance, same easing as the
+     * CSS doors), then the grains fly back in from both edges and lock into the word.
+     */
+    function openPos(g: Grain, tt: number, top: number) {
+      const dir = g.tx < W / 2 ? -1 : 1;
+      const off = W * 0.51 + 40;
+      const by = g.ty + top;
+      const j = g.d - 0.5;
+      if (tt < T_DOOR) {
+        const u = quart(clamp(tt / T_DOOR));
+        return [g.tx + dir * off * u, by + j * 26 * u] as const;
       }
+      const r = clamp((tt - T_DOOR - T_GAP - g.d * T_STAGGER) / T_RET);
+      const e = (1 - Math.pow(2, -9 * r)) / (1 - Math.pow(2, -9));
+      return [g.tx + dir * off * (1 - e), by + j * 26 * (1 - e) + Math.sin(Math.PI * r) * j * 70] as const;
     }
 
     skipRef.current = () => {
@@ -274,7 +291,30 @@ export function Intro() {
       if (stg === "load" && t >= T_OPEN) open();
       if (stg === "open" && t >= T_IDLE) go("idle");
 
-      if (stg !== "load" && scrollP > 1.15) {
+      // Pour target: the big number in the replay. `pour` runs 0 → 1 as the page scrolls until that
+      // number sits where the wordmark was, so the grains can stay on screen the whole way: they hang
+      // where they are, stream sideways, and the number rises into them.
+      let pr: DOMRect | null = null;
+      let pour = 0;
+      if (!reduce && stg === "idle" && scrollP > 0.002) {
+        if (!pourEl || !pourEl.isConnected) pourEl = document.querySelector("[data-pour-target]");
+        pr = pourEl?.getBoundingClientRect() ?? null;
+        if (pr) {
+          const numMid = pr.top + pr.height / 2 - top; // page y (the section starts at 0)
+          const wordMid = (wm.top + wm.bottom) / 2;
+          pour = -top / Math.max(200, numMid - wordMid);
+        }
+      }
+      // The number lights up as the grains land in it.
+      const glow = smooth(0.78, 0.98, pour) * (1 - smooth(1.02, 1.35, pour));
+      if (pourEl instanceof HTMLElement && Math.abs(glow - shownGlow) > 0.01) {
+        shownGlow = glow;
+        // A filter, not text-shadow: the odometer clips each digit, which would cut the glow into boxes.
+        pourEl.style.filter =
+          glow > 0.01 ? `drop-shadow(0 0 ${Math.round(6 * glow)}px rgba(255,214,120,${(0.9 * glow).toFixed(2)})) drop-shadow(0 0 ${Math.round(26 * glow)}px rgba(255,176,0,${(0.7 * glow).toFixed(2)}))` : "";
+      }
+
+      if (stg !== "load" && (pour >= 1 || (!pr && scrollP > 1.15))) {
         if (!cleared) {
           ctx!.setTransform(1, 0, 0, 1, 0, 0);
           ctx!.clearRect(0, 0, canvas!.width, canvas!.height);
@@ -286,13 +326,6 @@ export function Intro() {
 
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx!.clearRect(0, 0, W, H);
-
-      // Pour target: the big number in the replay.
-      let pr: DOMRect | null = null;
-      if (!reduce && scrollP > 0.002) {
-        if (!pourEl || !pourEl.isConnected) pourEl = document.querySelector("[data-pour-target]");
-        pr = pourEl?.getBoundingClientRect() ?? null;
-      }
 
       // The attacker: the real pointer, or a ghost pass when nobody has touched it for a while.
       const real = ptr.on && now - ptr.t < 2500;
@@ -328,6 +361,10 @@ export function Intro() {
       const holdDamp = Math.pow(0.8, k);
       const release = scrollP > 0.04;
       const half = sz / 2;
+      // A pulse of light runs out from the centre when the two halves lock back together.
+      const pulse = t >= T_LOCK && t < T_LOCK + T_PULSE ? (t - T_LOCK) / T_PULSE : -1;
+      const pulseR = pulse * (wm.right - wm.left) * 0.62;
+      const spring = pour > 0 ? 0.075 : 0.055;
       let disturbed = 0;
       let held = 0;
 
@@ -338,6 +375,7 @@ export function Intro() {
         let bx = g.tx;
         let by = g.ty + top;
         let a = 1;
+        let scale = 1;
 
         if (stg === "load" && !g.landed) {
           if (t < g.t0) continue;
@@ -366,15 +404,35 @@ export function Intro() {
               ctx!.drawImage(sp, gx - half, gy - half, sz, sz);
             }
           }
-        } else {
-          if (pr) {
-            const pp = clamp((scrollP - g.d * 0.4) / 0.6);
-            if (pp > 0) {
-              const e = pp * pp * (3 - 2 * pp);
-              bx += (pr.left + g.px * pr.width - bx) * e;
-              by += (pr.top + g.py * pr.height - by) * e;
-              a = 1 - smooth(0.72, 1, pp);
+        } else if (stg === "open") {
+          const tt = t - T_OPEN;
+          [g.x, g.y] = openPos(g, tt, top);
+          g.vx = 0;
+          g.vy = 0;
+          // Streak behind grains in flight.
+          if (tt > 40) {
+            const [gx, gy] = openPos(g, tt - 40, top);
+            if (Math.abs(gx - g.x) > 4) {
+              ctx!.globalAlpha = 0.28;
+              ctx!.drawImage(sprites[g.tint], gx - half, gy - half, sz, sz);
             }
+          }
+        } else {
+          if (pr && pour > 0) {
+            // Each grain's own progress: a little ahead or behind the scroll, equal at both ends.
+            const q = clamp(pour + (g.d - 0.5) * 0.32 * Math.sin(Math.PI * clamp(pour)));
+            const ex = q * q * (3 - 2 * q);
+            const px = pr.left + g.px * pr.width;
+            const py = pr.top + g.py * pr.height;
+            const ay0 = g.ty + top;
+            // Sideways: eased, with a gentle S-curve so the stream reads as a ribbon.
+            bx = g.tx + (px - g.tx) * ex + Math.sin(Math.PI * q) * (g.d - 0.5) * 140;
+            // Down the page: linear in q, which cancels the scroll and keeps the grain on screen,
+            // then a quick final drop into the digits.
+            const yq = q + (1 - q) * smooth(0.62, 0.94, q);
+            by = ay0 + (py - ay0) * yq;
+            a = (q > 0.03 && q < 0.9 ? 0.9 : 1) * (1 - smooth(0.9, 1, q));
+            scale = 1 - 0.55 * smooth(0.8, 1, q);
           }
           if (!reduce) {
             bx += Math.sin(now * 0.0011 + g.tw) * 0.5;
@@ -406,8 +464,8 @@ export function Intro() {
             g.vy *= holdDamp;
             held++;
           } else {
-            g.vx = (g.vx + (bx - g.x) * 0.055 * k) * damp;
-            g.vy = (g.vy + (by - g.y) * 0.055 * k) * damp;
+            g.vx = (g.vx + (bx - g.x) * spring * k) * damp;
+            g.vy = (g.vy + (by - g.y) * spring * k) * damp;
             if (g.heat > 0) g.heat = Math.max(0, g.heat - dt / 650);
           }
           g.x += g.vx * k;
@@ -418,11 +476,20 @@ export function Intro() {
         if (a <= 0.01) continue;
         if (g.heat < 1) {
           ctx!.globalAlpha = a * (1 - g.heat);
-          ctx!.drawImage(sprites[g.tint], g.x - half, g.y - half, sz, sz);
+          if (scale < 1) ctx!.drawImage(sprites[g.tint], g.x - half * scale, g.y - half * scale, sz * scale, sz * scale);
+          else ctx!.drawImage(sprites[g.tint], g.x - half, g.y - half, sz, sz);
         }
         if (g.heat > 0 && coral) {
           ctx!.globalAlpha = a * g.heat;
           ctx!.drawImage(coral, g.x - half, g.y - half, sz, sz);
+        }
+        if (pulse >= 0 && white) {
+          const q = (Math.abs(g.x - W / 2) - pulseR) / 45;
+          const w = Math.exp(-q * q) * (1 - pulse);
+          if (w > 0.02) {
+            ctx!.globalAlpha = w * 0.9;
+            ctx!.drawImage(white, g.x - half, g.y - half, sz, sz);
+          }
         }
         if (shine >= 0 && shine <= 1 && white) {
           const q = (g.x - sweepX) / 55;
@@ -621,6 +688,7 @@ export function Intro() {
     return () => {
       alive = false;
       cancelAnimationFrame(raf);
+      if (pourEl instanceof HTMLElement) pourEl.style.filter = "";
       if (ticker) clearInterval(ticker);
       clearTimeout(resizeT);
       root.style.overflow = "";
