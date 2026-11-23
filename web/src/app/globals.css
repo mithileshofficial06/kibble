@@ -433,7 +433,24 @@ table.data td.right, table.data th.right { text-align: right; }
 .beat h2 { font-size: 26px; }
 .beat p { flex: 1; }
 .beat .btn { align-self: flex-start; }
+.beat-time { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.beat-time::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 8px; border-radius: 50%; background: var(--saffron); vertical-align: 1px; }
 .terminal { padding: 0; overflow: hidden; }
+/* Run progress: elapsed against the expected length of the run. */
+.run-progress { display: flex; align-items: center; gap: 16px; padding: 12px 20px; border-bottom: 1px solid var(--line); }
+.run-progress-bar { position: relative; flex: 1; height: 3px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.run-progress-bar span {
+  position: absolute; inset: 0; transform-origin: left; border-radius: inherit;
+  background: linear-gradient(90deg, rgba(255, 176, 0, 0.35), var(--saffron));
+  transition: transform 1s linear;
+}
+.run-progress.done .run-progress-bar span { background: var(--mint, #6fdc9a); }
+.run-progress.bad .run-progress-bar span { background: var(--coral); }
+.run-progress-label { font-family: var(--mono); font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+@media (max-width: 720px) {
+  .run-progress { flex-direction: column; align-items: stretch; gap: 8px; }
+  .run-progress-label { white-space: normal; }
+}
 .terminal-top { display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 12px; color: var(--muted); }
 .terminal-top .dots { display: flex; gap: 6px; }
 .terminal-top .dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--line-2); }
@@ -512,6 +529,8 @@ table.data td.right, table.data th.right { text-align: right; }
   .foot-pitch { grid-column: 1 / -1; max-width: none; }
 }
 @media (max-width: 720px) {
+  /* On a phone the header wraps to ~250px: let it scroll away instead of covering a third of the screen. */
+  .topbar { position: relative; background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
   .topbar .shell { gap: 10px 18px; }
   .nav { order: 3; flex-basis: 100%; gap: 4px 20px; }
   .ph { grid-template-columns: minmax(0, 1fr); }
@@ -532,7 +551,7 @@ table.data td.right, table.data th.right { text-align: right; }
   .docs-body table.docs-table td, .docs-body table.docs-table th { padding-left: 8px; padding-right: 8px; font-size: 13.5px; }
   .docs-body ol.how li { padding-left: 40px; }
   .docs-body table.docs-table { display: block; overflow-x: auto; }
-  .docs-body section { scroll-margin-top: 140px; }
+  .docs-body section { scroll-margin-top: 24px; }
   dl.kv dd { text-align: left; border-top: 0; padding-top: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
