@@ -1,6 +1,6 @@
 # Progress
 
-## Current state (23 Nov 2026, day 8 of 26)
+## Current state (24 Nov 2026, day 9 of 26)
 
 Done, committed and pushed:
 - **Contracts** (all v5.1 must-ship and should-ship items): drawer in both modes, vault, factory, earned T, cost ceiling, strikes with cooldown, brake ladder, rolling drawdown, learning period + `maxWeeklyLoss`, work credits (V1), `maxLossNow` (V3), income on fulfilment + refunds (V4), runway grants (V5), `TrackRecord` events (V6), approval, receipts, pay-once, freeze/revoke, tighten/queue/cancel, two-key `resumeNow`, gasless EIP-3009 buying.
@@ -12,6 +12,8 @@ Done, committed and pushed:
 
 - **End-to-end test (23 Nov, local fork, no testnet gas, scripted model):** 105/105 unit+fuzz+invariant, 6/6 fork tests, all 4 packages typecheck, `setup-demo --redeploy` + `scenario all` clean (time-lapse T 2.00 → 10.00; B paused 17 s after the price jump; hijack: 0.00 overbought, paused in 12 s; W earned via work; controls incl. replayed-signature refusal and two-key resume), web production build 40/40 browser checks (desktop + phone, no errors, no sideways scroll) and all three Playground demos run through the page. Fixed: `cooldownEndsAt` reported a 1970 time before the first run.
 
+- **Playground made judge-ready (24 Nov):** before each run it moves tUSD8 back from the supplier to the buyer and vault (EIP-3009, relayer pays the gas; tested on the fork with the supplier at 0 gas) and the owner shares its idle gas with the senders. Per-beat gas checks from fork measurements (sales rush ~11, bad strategy ~15, hijack ~6.4 milli-tQDAY at 1 gwei). Gas-left estimate on the page (34 runs on testnet balances, 24 Nov), 10 runs/day default, expected time per demo + live progress bar (learned from the last real run). Hover: grain-pour colour fill on all buttons, nothing moves. Phone header no longer sticky.
+
 Not done:
 - **Hosting** the web app (needs a long-running server for the playground) and the demo video.
 - The injection beat with a real model needs `ANTHROPIC_API_KEY` (uses the user's API credits). So far the scripted model ran.
@@ -19,7 +21,7 @@ Not done:
 
 ## Next steps
 1. UI: landing (grain loader, living-wordmark hero, replay section) and all app pages restyled on 23 Nov; iterate on the user's feedback.
-2. Host the app (`next start` on a small server; `KIBBLE_PLAYGROUND=on` with the demo keys) and do a logged-out dry run.
+2. Host the app (`next start` on a small server, Railway suggested; `KIBBLE_PLAYGROUND=on` with the demo keys) and do a logged-out dry run: time each demo on testnet. A faucet claim (~1 tQDAY to the owner) adds ~50 runs.
 3. Optional: a run with `ANTHROPIC_API_KEY` for the real-model injection beat.
 4. Record the video; submit by 10 Dec.
 
