@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { links, TUSD8_ADDRESS } from "@aevum-kit/aevum";
+import { DocsToc } from "@/components/DocsToc";
 import { GitHubIcon } from "@/components/Icons";
+import { PageHead, Reveal, StatePill } from "@/components/ui";
 import { repoUrl } from "@/lib/env";
 import aevum from "../../../../deployments/44005.json";
 
@@ -34,34 +36,29 @@ function Addr({ a }: { a: string }) {
 export default function DocsPage() {
   return (
     <main className="shell">
-      <div className="page-head">
-        <div>
-          <p className="eyebrow">How it works</p>
-          <h1>An earned spending limit for AI agents</h1>
-          <p className="lede">
-            A fixed limit is a guess. Kibble&apos;s limit is earned from verified value, and the wallet itself brakes the agent when spending
-            stops paying for itself.
-          </p>
-        </div>
-        <a className="btn secondary" href={repoUrl} target="_blank" rel="noreferrer">
-          <GitHubIcon />
-          View the code on GitHub
-        </a>
-      </div>
+      <PageHead
+        n="K—05"
+        rail="How it works · contracts on Aevum"
+        eyebrow="How it works"
+        title="An *earned* spending limit for AI agents."
+        lede="A fixed limit is a guess. Kibble's limit is earned from verified value, and the wallet itself brakes the agent when spending stops paying for itself."
+        aside={
+          <a className="btn secondary" href={repoUrl} target="_blank" rel="noreferrer">
+            <GitHubIcon size={16} />
+            View the code on GitHub
+          </a>
+        }
+      />
 
       <div className="docs">
-        <nav className="docs-toc" aria-label="On this page">
-          <p className="docs-toc-title">On this page</p>
-          {sections.map((s) => (
-            <a key={s.id} href={`#${s.id}`}>
-              {s.label}
-            </a>
-          ))}
-        </nav>
+        <DocsToc sections={sections} />
 
         <article className="docs-body">
-          <section id="problem">
-            <h2>The problem</h2>
+          <Reveal as="section" id="problem" y={20}>
+            <h2>
+              <span className="n">01</span>
+              The problem
+            </h2>
             <p>Agents pay for model calls, data and other agents&apos; services on their own. A fixed limit fails three ways:</p>
             <table className="docs-table">
               <tbody>
@@ -79,11 +76,14 @@ export default function DocsPage() {
                 </tr>
               </tbody>
             </table>
-          </section>
+          </Reveal>
 
-          <section id="how">
-            <h2>How Kibble works</h2>
-            <ol>
+          <Reveal as="section" id="how" y={20}>
+            <h2>
+              <span className="n">02</span>
+              How Kibble works
+            </h2>
+            <ol className="how">
               <li>
                 <strong>The drawer</strong> (one contract per agent) holds the agent&apos;s money. The agent&apos;s key holds nothing: it can
                 only ask the drawer to pay.
@@ -117,10 +117,31 @@ export default function DocsPage() {
                 Owner and guardian together can resume at once.
               </li>
             </ol>
-          </section>
+            <div className="ladder" aria-label="The brake ladder">
+              <div>
+                <StatePill state="Healthy" />
+                <small>spending pays for itself</small>
+              </div>
+              <div>
+                <StatePill state="Watch" />
+                <small>1 strike</small>
+              </div>
+              <div>
+                <StatePill state="Braked" />
+                <small>2 strikes: limit cut</small>
+              </div>
+              <div>
+                <StatePill state="Paused" />
+                <small>3 strikes or the weekly loss: exposure 0</small>
+              </div>
+            </div>
+          </Reveal>
 
-          <section id="hijack">
-            <h2>What a hijacker can take</h2>
+          <Reveal as="section" id="hijack" y={20}>
+            <h2>
+              <span className="n">03</span>
+              What a hijacker can take
+            </h2>
             <table className="docs-table">
               <thead>
                 <tr>
@@ -150,12 +171,15 @@ export default function DocsPage() {
             <p>
               Every drawer shows its exact exposure live as <strong>maxLossNow</strong> = allowance + active runway, and 0 once paused.
             </p>
-          </section>
+          </Reveal>
 
-          <section id="screens">
-            <h2>Using this app</h2>
-            <dl>
-              <dt>Dashboard</dt>
+          <Reveal as="section" id="screens" y={20}>
+            <h2>
+              <span className="n">04</span>
+              Using this app
+            </h2>
+            <dl className="screens">
+              <dt>Live desk</dt>
               <dd>Fixed-limit agents on the left, Kibble agents on the right, with the scoreboard, live state and the window-by-window time-lapse.</dd>
               <dt>Drawer pages</dt>
               <dd>
@@ -165,10 +189,13 @@ export default function DocsPage() {
               <dt>Playground</dt>
               <dd>Three buttons that run a short demo on Aevum testnet without a wallet: a sales rush, a bad strategy and a hijack.</dd>
             </dl>
-          </section>
+          </Reveal>
 
-          <section id="contracts">
-            <h2>Contracts on Aevum testnet (chain 44005)</h2>
+          <Reveal as="section" id="contracts" y={20}>
+            <h2>
+              <span className="n">05</span>
+              Contracts on Aevum testnet (chain 44005)
+            </h2>
             <table className="docs-table">
               <tbody>
                 <tr>
@@ -203,10 +230,13 @@ export default function DocsPage() {
                 </tr>
               </tbody>
             </table>
-          </section>
+          </Reveal>
 
-          <section id="run">
-            <h2>Run it yourself</h2>
+          <Reveal as="section" id="run" y={20}>
+            <h2>
+              <span className="n">06</span>
+              Run it yourself
+            </h2>
             <Code>{`
 git clone ${repoUrl}
 cd kibble && pnpm install && make build
@@ -221,7 +251,7 @@ pnpm --filter web dev                       # this app on :3000`}</Code>
               </a>
               .
             </p>
-          </section>
+          </Reveal>
 
           <p className="fine">
             Source: <a href={repoUrl} target="_blank" rel="noreferrer">{repoUrl.replace("https://", "")}</a>. MIT licensed. Based on the Aevum

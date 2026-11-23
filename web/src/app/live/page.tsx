@@ -1,10 +1,17 @@
 "use client";
 
+import { motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { useState } from "react";
 import type { DrawerView } from "@kibble/sdk";
+import { Arrow, EASE, Num, PageHead, Reveal, SecHead, StatePill } from "@/components/ui";
 import { AGENTS, PAIRS, amt, pct, short, useDeployment, useDrawerHistory, useDrawers, type AgentName, type Deployment } from "@/lib/kibble";
 import { useNetwork } from "@/lib/network";
+
+const PAIR_COPY: Record<string, { title: string; note: string }> = {
+  A: { title: "Same sales, *different* limits.", note: "A′ gets a flat limit refilled every window. A earns its limit from cleared sales, and stops when its key is stolen." },
+  B: { title: "A losing strategy, *braked.*", note: "Both buy above their sale price. The fixed one keeps paying until a human reacts; Kibble walks Watch → Braked → Paused." },
+};
 
 /** Split screen: fixed limit on the left, Kibble on the right, the same contract code and traffic. */
 export default function DashboardPage() {
@@ -12,54 +19,100 @@ export default function DashboardPage() {
   const dep = useDeployment();
   const live = useDrawers(dep.data);
 
-  if (dep.isLoading) return <Shell><p className="fine">Loading the deployment…</p></Shell>;
+  const head = (
+    <PageHead
+      n="K—02"
+      rail={`Live desk · ${net.chain.name} · chain ${net.chain.id}`}
+      eyebrow={`Live on ${net.chain.name}`}
+      live
+      title="A fixed limit is a *guess.* Kibble's is earned."
+      lede="Each agent spends from its own drawer contract. Fixed on the left, Kibble on the right: the same code and the same traffic. Every number here is read from the chain every few seconds."
+      aside={
+        <Link href="/playground" className="btn">
+          Run a demo yourself <Arrow />
+        </Link>
+      }
+    />
+  );
+
+  if (dep.isLoading)
+    return (
+      <main className="shell">
+        {head}
+        <p className="fine">Loading the deployment…</p>
+      </main>
+    );
   if (!dep.data) {
     return (
-      <Shell>
+      <main className="shell">
+        {head}
         <div className="card">
           <p>
             No Kibble demo is deployed on <strong>{net.chain.name}</strong> yet. Run <code>pnpm --filter @kibble/agents setup-demo</code> with
             <code> RPC_URL</code> pointing at this network.
           </p>
         </div>
-      </Shell>
+      </main>
     );
   }
   const d = dep.data;
   const drawers = live.data?.drawers ?? {};
+  const receipts = Object.values(drawers).reduce((t, v) => t + Number(v?.receiptCount ?? 0n), 0);
 
   return (
-    <Shell>
-      <Scoreboard dep={d} drawers={drawers} vault={live.data?.vault} />
-      {PAIRS.map(([fixed, kibble]) => (
+    <main className="shell">
+      {head}
+
+      <Reveal className="livebar" y={10}>
+        <span className="livebar-tag">
+          <span className="pulse live" aria-hidden="true" /> Live
+        </span>
+        <span>
+          Owner vault <b>{amt(live.data?.vault)}</b> tUSD8 of swept profit
+        </span>
+        <span>
+          <b>{live.data ? receipts : "…"}</b> receipts on chain
+        </span>
+        <span>
+          <b>{Object.keys(d.drawers).length}</b> agents
+        </span>
+        <motion.span key={live.dataUpdatedAt} className="tick" initial={{ color: "#ffb000" }} animate={{ color: "#5f5768" }} transition={{ duration: 1.2 }}>
+          synced {live.dataUpdatedAt ? new Date(live.dataUpdatedAt).toLocaleTimeString() : "…"}
+        </motion.span>
+      </Reveal>
+
+      <section className="stack">
+        <SecHead n="00" title="The *scoreboard.*" note="Hijack exposure is the most a stolen agent key could take right now." />
+        <Scoreboard dep={d} drawers={drawers} vault={live.data?.vault} />
+      </section>
+
+      {PAIRS.map(([fixed, kibble], i) => (
         <section key={kibble} className="stack">
-          <div className="grid-2">
-            <DrawerCard name={fixed} dep={d} v={drawers[fixed]} />
-            <DrawerCard name={kibble} dep={d} v={drawers[kibble]} />
+          <SecHead n={`0${i + 1}`} title={PAIR_COPY[kibble]?.title ?? AGENTS[kibble].label} note={PAIR_COPY[kibble]?.note} />
+          <div className="vs">
+            <Reveal>
+              <AgentCard name={fixed} dep={d} v={drawers[fixed]} />
+            </Reveal>
+            <div className="vs-mid" aria-hidden="true">
+              <span>vs</span>
+            </div>
+            <Reveal delay={0.12}>
+              <AgentCard name={kibble} dep={d} v={drawers[kibble]} />
+            </Reveal>
           </div>
-          <TimeLapse left={fixed} right={kibble} dep={d} />
+          <Reveal>
+            <TimeLapse left={fixed} right={kibble} dep={d} />
+          </Reveal>
         </section>
       ))}
+
       <section className="stack">
-        <DrawerCard name="W" dep={d} v={drawers.W} />
+        <SecHead n="03" title="Work that's *accepted* earns budget." note="W sells nothing. A client signs that a report was accepted, and the drawer credits it." />
+        <Reveal>
+          <AgentCard name="W" dep={d} v={drawers.W} />
+        </Reveal>
       </section>
       {live.error && <p className="fine">Couldn&apos;t read the drawers: {String(live.error)}</p>}
-    </Shell>
-  );
-}
-
-function Shell({ children }: { children: React.ReactNode }) {
-  return (
-    <main className="shell stack">
-      <div className="page-head">
-        <p className="eyebrow">Kibble</p>
-        <h1>A fixed limit is a guess. Kibble&apos;s limit is earned.</h1>
-        <p className="lede">
-          Each agent spends from its own drawer contract. Fixed on the left, Kibble on the right: the same code and the same traffic. The
-          wallet brakes the agent when spending stops paying for itself.
-        </p>
-      </div>
-      {children}
     </main>
   );
 }
@@ -67,9 +120,9 @@ function Shell({ children }: { children: React.ReactNode }) {
 function Scoreboard({ dep, drawers, vault }: { dep: Deployment; drawers: Partial<Record<AgentName, DrawerView>>; vault?: bigint }) {
   const names = Object.keys(dep.drawers) as AgentName[];
   return (
-    <div className="card flush">
+    <Reveal className="card flush">
       <div className="table-wrap">
-        <table className="docs-table">
+        <table className="docs-table mono-cells">
           <thead>
             <tr>
               <th>Agent</th>
@@ -85,18 +138,19 @@ function Scoreboard({ dep, drawers, vault }: { dep: Deployment; drawers: Partial
           <tbody>
             {names.map((n) => {
               const v = drawers[n];
+              const profit = v ? v.lifetimeValue - v.lifetimeSpend : undefined;
               return (
                 <tr key={n}>
-                  <td>
+                  <td style={{ fontFamily: "var(--sans)", fontSize: 14 }}>
                     <Link href={`/drawer/${dep.drawers[n]}`}>{AGENTS[n].label}</Link>
                   </td>
                   <td>
-                    <span className="pill">{v?.state ?? "…"}</span>
+                    <StatePill state={v?.state} />
                   </td>
                   <td>{amt(v?.limitT)}</td>
                   <td>{amt(v?.lifetimeValue)}</td>
                   <td>{amt(v?.lifetimeSpend)}</td>
-                  <td>{v ? amt(v.lifetimeValue - v.lifetimeSpend) : "…"}</td>
+                  <td style={{ color: profit === undefined ? undefined : profit < 0n ? "var(--coral)" : "var(--mint)" }}>{amt(profit)}</td>
                   <td>{amt(v?.maxLossNow)}</td>
                   <td>{v?.receiptCount.toString() ?? "…"}</td>
                 </tr>
@@ -105,80 +159,109 @@ function Scoreboard({ dep, drawers, vault }: { dep: Deployment; drawers: Partial
           </tbody>
         </table>
       </div>
-      <p className="fine">
+      <p className="fine" style={{ padding: "14px clamp(18px, 2vw, 28px) 18px", borderTop: "1px solid var(--line)" }}>
         Owner vault {short(dep.vault)} holds <strong>{amt(vault)} tUSD8</strong> of swept profit. The agent keys can never reach it.
       </p>
-    </div>
+    </Reveal>
   );
 }
 
-function DrawerCard({ name, dep, v }: { name: AgentName; dep: Deployment; v?: DrawerView }) {
+function AgentCard({ name, dep, v }: { name: AgentName; dep: Deployment; v?: DrawerView }) {
   const meta = AGENTS[name];
   const addr = dep.drawers[name];
+  const earned = meta.mode === "EARNED";
+  const paused = v?.state === "Paused" || v?.state === "Revoked";
+  const share = v && v.tMax > 0n ? Math.min(100, Number((v.limitT * 10000n) / v.tMax) / 100) : 0;
   return (
-    <div className="card">
-      <p className="eyebrow">{meta.mode === "FIXED" ? "Fixed limit (with alerts)" : "Kibble"}</p>
-      <h2>
-        <Link href={`/drawer/${addr}`}>{meta.label}</Link>
-      </h2>
-      <p className="fine">{meta.about}</p>
-      {!v ? (
-        <p className="fine">Reading…</p>
-      ) : (
-        <dl className="kv">
-          <dt>State</dt>
-          <dd>
-            <span className="pill">{v.state}</span> {v.strikes > 0n && `${v.strikes} strike${v.strikes === 1n ? "" : "s"}`}
-          </dd>
-          <dt>{meta.mode === "FIXED" ? "Flat limit" : "Earned limit T"}</dt>
-          <dd>
-            {amt(v.limitT)} {meta.mode === "EARNED" && <span className="fine">(max {amt(v.tMax)})</span>}
-          </dd>
-          <dt>Allowance left</dt>
-          <dd>{amt(v.allowance)}</dd>
-          <dt>Hijack exposure (maxLossNow)</dt>
-          <dd>
-            <strong>{amt(v.maxLossNow)}</strong>
-          </dd>
-          {meta.mode === "EARNED" && (
-            <>
-              <dt>Cost ceiling</dt>
-              <dd>
-                {pct(v.costBps)} of value{v.learnedCostShareBps > 0n && <span className="fine"> (learned cost share {pct(v.learnedCostShareBps)})</span>}
-              </dd>
-            </>
-          )}
-          <dt>This window</dt>
-          <dd>
-            #{v.windowIndex.toString()}: value {amt(v.windowValue)}, spent {amt(v.windowSpend)}
-          </dd>
-          {v.pendingTotal > 0n && (
-            <>
-              <dt>Income not yet cleared</dt>
-              <dd>{amt(v.pendingTotal)}</dd>
-            </>
-          )}
-          {v.workBudget > 0n && (
-            <>
-              <dt>Work budget</dt>
-              <dd>{amt(v.workBudget)}</dd>
-            </>
-          )}
-          {v.runway > 0n && (
-            <>
-              <dt>Runway grant</dt>
-              <dd>{amt(v.runway)}</dd>
-            </>
-          )}
-          {meta.mode === "FIXED" && (
-            <>
-              <dt>Reserve</dt>
-              <dd>{amt(v.reserve)}</dd>
-            </>
-          )}
-        </dl>
+    <article className={`card agent ${earned ? "kibble" : ""} ${paused ? "danger" : ""}`}>
+      <div className="agent-top">
+        <div>
+          <p className="agent-mode">
+            <i aria-hidden="true" /> {earned ? "Kibble · earned limit" : "Fixed limit · with alerts"}
+          </p>
+          <h2>
+            <Link href={`/drawer/${addr}`}>{meta.label}</Link>
+          </h2>
+        </div>
+        <StatePill state={v?.state} />
+      </div>
+      <p className="agent-about">{meta.about}</p>
+
+      <div className="agent-nums">
+        <div>
+          <span className="stat-label">{earned ? "Earned limit T" : "Flat limit"}</span>
+          <Num className={`big ${paused ? "coral" : ""}`} value={v ? amt(v.limitT) : undefined} />
+        </div>
+        <div>
+          <span className="stat-label">Hijack exposure</span>
+          <Num className={`big mid ${v && v.maxLossNow === 0n ? "mint" : ""}`} value={v ? amt(v.maxLossNow) : undefined} />
+        </div>
+      </div>
+
+      {earned && v && (
+        <div className="stack" style={{ gap: 8 }}>
+          <div className={`meter ${paused ? "coral" : ""}`}>
+            <span style={{ width: `${share}%` }} />
+          </div>
+          <p className="fine">
+            T is {share.toFixed(0)}% of its ceiling {amt(v.tMax)}
+            {v.strikes > 0n && ` · ${v.strikes} strike${v.strikes === 1n ? "" : "s"}`}
+          </p>
+        </div>
       )}
-    </div>
+
+      <details>
+        <summary>All numbers</summary>
+        {!v ? (
+          <p className="fine">Reading…</p>
+        ) : (
+          <dl className="kv">
+            <dt>Allowance left</dt>
+            <dd>{amt(v.allowance)}</dd>
+            <dt>Hijack exposure (maxLossNow)</dt>
+            <dd>
+              <strong>{amt(v.maxLossNow)}</strong>
+            </dd>
+            {earned && (
+              <>
+                <dt>Cost ceiling</dt>
+                <dd>
+                  {pct(v.costBps)} of value{v.learnedCostShareBps > 0n && ` (learned ${pct(v.learnedCostShareBps)})`}
+                </dd>
+              </>
+            )}
+            <dt>This window</dt>
+            <dd>
+              #{v.windowIndex.toString()}: value {amt(v.windowValue)}, spent {amt(v.windowSpend)}
+            </dd>
+            {v.pendingTotal > 0n && (
+              <>
+                <dt>Income not yet cleared</dt>
+                <dd>{amt(v.pendingTotal)}</dd>
+              </>
+            )}
+            {v.workBudget > 0n && (
+              <>
+                <dt>Work budget</dt>
+                <dd>{amt(v.workBudget)}</dd>
+              </>
+            )}
+            {v.runway > 0n && (
+              <>
+                <dt>Runway grant</dt>
+                <dd>{amt(v.runway)}</dd>
+              </>
+            )}
+            {!earned && (
+              <>
+                <dt>Reserve</dt>
+                <dd>{amt(v.reserve)}</dd>
+              </>
+            )}
+          </dl>
+        )}
+      </details>
+    </article>
   );
 }
 
@@ -188,7 +271,12 @@ function TimeLapse(props: { left: AgentName; right: AgentName; dep: Deployment }
   return (
     <details className="card" onToggle={(e) => setOpen((e.currentTarget as HTMLDetailsElement).open)}>
       <summary>
-        Time-lapse: {AGENTS[props.left].label} vs {AGENTS[props.right].label}, window by window
+        <span>
+          <span className="card-label" style={{ display: "block", marginBottom: 6 }}>
+            Time-lapse
+          </span>
+          {AGENTS[props.left].label} vs {AGENTS[props.right].label}, window by window
+        </span>
       </summary>
       {open && <TimeLapseBody {...props} />}
     </details>
@@ -197,6 +285,7 @@ function TimeLapse(props: { left: AgentName; right: AgentName; dep: Deployment }
 
 /** The two sides' windows next to each other, from their TrackRecord events. */
 function TimeLapseBody({ left, right, dep }: { left: AgentName; right: AgentName; dep: Deployment }) {
+  const reduce = useReducedMotion();
   const from = BigInt(dep.deployBlock);
   const l = useDrawerHistory(dep.drawers[left], from);
   const r = useDrawerHistory(dep.drawers[right], from);
@@ -207,25 +296,39 @@ function TimeLapseBody({ left, right, dep }: { left: AgentName; right: AgentName
     return <p className="fine">{l.isLoading || r.isLoading ? "Reading the window history…" : "No closed windows in the last ~5 hours."}</p>;
   }
   const maxT = [...lw, ...rw].reduce((m, w) => (w.limitT > m ? w.limitT : m), 1n);
+  const W = Math.max(rows - 1, 1) * 10;
+  const pts = (ws: typeof lw) => ws.map((w, k) => `${k * 10},${48 - Number((w.limitT * 44n) / maxT)}`).join(" ");
   return (
     <>
-      <p className="fine">{rows} closed windows in the last ~5 hours.</p>
-      <svg viewBox={`0 0 ${Math.max(rows - 1, 1) * 10} 50`} width="100%" height="80" preserveAspectRatio="none" aria-label="Limit per window">
+      <svg className="chart" viewBox={`0 0 ${W} 50`} preserveAspectRatio="none" aria-label="Limit per window: dashed fixed, solid Kibble">
+        {[12, 24, 36, 48].map((y) => (
+          <line key={y} className="grid" x1={0} x2={W} y1={y} y2={y} vectorEffect="non-scaling-stroke" />
+        ))}
         {[lw, rw].map((ws, i) => (
-          <polyline
+          <motion.polyline
             key={i}
+            className={i === 0 ? "fixed" : "kibble"}
             fill="none"
-            stroke="currentColor"
-            strokeDasharray={i === 0 ? "2 2" : undefined}
-            strokeWidth={1}
+            strokeWidth={i === 0 ? 1.5 : 2}
             vectorEffect="non-scaling-stroke"
-            points={ws.map((w, k) => `${k * 10},${50 - Number((w.limitT * 48n) / maxT)}`).join(" ")}
+            points={pts(ws)}
+            initial={reduce ? false : { pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 1.6, delay: i * 0.25, ease: EASE }}
           />
         ))}
       </svg>
-      <p className="fine">Limit per window: dashed = fixed, solid = Kibble.</p>
-      <div className="table-wrap">
-        <table className="docs-table">
+      <div className="chart-legend">
+        <span>
+          <i className="dash" /> {AGENTS[left].label}
+        </span>
+        <span>
+          <i /> {AGENTS[right].label}
+        </span>
+        <span>{rows} closed windows, last ~5 hours</span>
+      </div>
+      <div className="table-wrap" style={{ marginTop: 18 }}>
+        <table className="docs-table mono-cells">
           <thead>
             <tr>
               <th>Window</th>
@@ -244,10 +347,10 @@ function TimeLapseBody({ left, right, dep }: { left: AgentName; right: AgentName
                 <tr key={k}>
                   <td>{k + 1}</td>
                   <td>{a ? `${amt(a.value)} / ${amt(a.spend)}` : ""}</td>
-                  <td>{a?.state}</td>
+                  <td>{a && <StatePill state={a.state} />}</td>
                   <td>{b ? `${amt(b.value)} / ${amt(b.spend)}` : ""}</td>
                   <td>{b ? amt(b.limitT) : ""}</td>
-                  <td>{b?.state}</td>
+                  <td>{b && <StatePill state={b.state} />}</td>
                 </tr>
               );
             })}

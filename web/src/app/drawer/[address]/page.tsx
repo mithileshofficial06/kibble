@@ -9,6 +9,7 @@ import { PARAMS, Param, decodeDrawerLogs, sendDrawer, signResume, units, type Wa
 import { explain } from "@/lib/errors";
 import { AGENTS, amt, pct, short, useDeployment, useDrawer, useDrawerConfig, useDrawerHistory, usePub, useReceipts, type AgentName } from "@/lib/kibble";
 import { useNetwork } from "@/lib/network";
+import { Num, PageHead, Reveal, SecHead, StatePill } from "@/components/ui";
 
 /** One drawer: its numbers, receipts, track record and the owner/guardian controls. Also the "verify" page. */
 export default function DrawerPage() {
@@ -26,21 +27,56 @@ export default function DrawerPage() {
   if (!address) return <main className="shell"><p>That isn&apos;t a drawer address.</p></main>;
   const d = v.data;
   const c = cfg.data;
+  const paused = d?.state === "Paused" || d?.state === "Revoked";
 
   return (
-    <main className="shell stack">
-      <div className="page-head">
-        <p className="eyebrow">
-          <Link href="/live">Live desk</Link> / Drawer
-        </p>
-        <h1>{name ? AGENTS[name].label : short(address)}</h1>
-        <p className="lede">
-          <Explorer address={address} />
-        </p>
-      </div>
+    <main className="shell">
+      <PageHead
+        n="K—03"
+        rail={`Drawer · ${short(address)}`}
+        eyebrow={
+          <>
+            <Link href="/live">Live desk</Link> / Drawer
+          </>
+        }
+        live
+        title={name ? AGENTS[name].label : short(address)}
+        lede={
+          <>
+            {name ? `${AGENTS[name].about} ` : ""}Contract <Explorer address={address} />. Every number, receipt and decision of this drawer is
+            public: this page is its track record.
+          </>
+        }
+        aside={d && <StatePill state={d.state} />}
+      />
 
-      <div className="grid-2">
-        <div className="card">
+      <Reveal className="stats">
+        <div className="stat">
+          <span className="stat-label">{d?.mode === "FIXED" ? "Flat limit" : "Earned limit T"}</span>
+          <Num className={`big ${paused ? "coral" : ""}`} value={d ? amt(d.limitT) : undefined} />
+          <span className="stat-sub">ceiling {amt(d?.tMax)}</span>
+        </div>
+        <div className="stat">
+          <span className="stat-label">Hijack exposure</span>
+          <Num className={`big mid ${d?.maxLossNow === 0n ? "mint" : ""}`} value={d ? amt(d.maxLossNow) : undefined} />
+          <span className="stat-sub">most a stolen key could take now</span>
+        </div>
+        <div className="stat">
+          <span className="stat-label">Allowance</span>
+          <Num className="big mid" value={d ? amt(d.allowance) : undefined} />
+          <span className="stat-sub">strikes {d?.strikes.toString() ?? "…"}</span>
+        </div>
+        <div className="stat">
+          <span className="stat-label">Balance</span>
+          <Num className="big mid" value={d ? amt(d.balance) : undefined} />
+          <span className="stat-sub">tUSD8 in the drawer</span>
+        </div>
+      </Reveal>
+
+      <section className="stack">
+        <SecHead n="01" title="Now, and its *settings.*" note="Refreshed every few seconds from the contract." />
+        <div className="grid-2">
+        <Reveal className="card">
           <h2>Now</h2>
           {!d ? (
             <p className="fine">{v.error ? explain(v.error) : "Reading…"}</p>
@@ -50,7 +86,7 @@ export default function DrawerPage() {
               <dd>{d.mode === "FIXED" ? "Fixed limit" : "Kibble (earned)"}</dd>
               <dt>State</dt>
               <dd>
-                <span className="pill">{d.state}</span> strikes {d.strikes.toString()}
+                <StatePill state={d.state} /> strikes {d.strikes.toString()}
               </dd>
               <dt>Limit T</dt>
               <dd>
@@ -86,8 +122,8 @@ export default function DrawerPage() {
               <dd>{amt(d.balance)} tUSD8</dd>
             </dl>
           )}
-        </div>
-        <div className="card">
+        </Reveal>
+        <Reveal className="card" delay={0.1}>
           <h2>Settings</h2>
           {!c ? (
             <p className="fine">Reading…</p>
@@ -119,16 +155,23 @@ export default function DrawerPage() {
               </dd>
             </dl>
           )}
+        </Reveal>
         </div>
-      </div>
+      </section>
 
-      {c && <Controls drawer={address} owner={c.owner} guardian={c.guardian} resumeNonce={c.resumeNonce} />}
+      {c && (
+        <section className="stack">
+          <SecHead n="02" title="Owner and guardian *controls.*" note="Anyone can see them. Only the contract decides who may act." />
+          <Controls drawer={address} owner={c.owner} guardian={c.guardian} resumeNonce={c.resumeNonce} />
+        </section>
+      )}
 
-      <div className="card flush">
-        <h2>Receipts</h2>
+      <section className="stack">
+        <SecHead n="03" title="Every *receipt.*" note="The latest 25 payments, read from the drawer's storage." />
+        <Reveal className="card flush">
         {receipts.data?.length ? (
           <div className="table-wrap">
-            <table className="docs-table">
+            <table className="docs-table mono-cells">
               <thead>
                 <tr>
                   <th>#</th>
@@ -148,7 +191,9 @@ export default function DrawerPage() {
                     <td>{new Date(Number(r.time) * 1000).toLocaleString()}</td>
                     <td>{short(r.payee)}</td>
                     <td>{amt(r.amount)}</td>
-                    <td>{r.state}</td>
+                    <td>
+                      <StatePill state={r.state} />
+                    </td>
                     <td>{amt(r.limitT)}</td>
                     <td>
                       {amt(r.windowValue)} / {amt(r.windowSpend)}
@@ -162,10 +207,13 @@ export default function DrawerPage() {
         ) : (
           <p className="fine">{receipts.isLoading ? "Reading…" : "No payments yet."}</p>
         )}
-      </div>
+        </Reveal>
+      </section>
 
-      <div className="grid-2">
-        <div className="card flush">
+      <section className="stack">
+        <SecHead n="04" title="What the wallet *decided.*" note="Closed windows, and every refusal, state change and alert from the contract's events." />
+        <div className="grid-2">
+        <Reveal className="card flush">
           <h2>Track record</h2>
           <p className="fine">
             One row per closed window (TrackRecord events), blocks {history.data?.from.toString()}–{history.data?.head.toString()}.{" "}
@@ -180,7 +228,7 @@ export default function DrawerPage() {
           </p>
           {history.data?.windows.length ? (
             <div className="table-wrap">
-              <table className="docs-table">
+              <table className="docs-table mono-cells">
                 <thead>
                   <tr>
                     <th>Window</th>
@@ -199,7 +247,9 @@ export default function DrawerPage() {
                       <td>{amt(w.spend)}</td>
                       <td>{amt(w.profit)}</td>
                       <td>{amt(w.limitT)}</td>
-                      <td>{w.state}</td>
+                      <td>
+                        <StatePill state={w.state} />
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -208,13 +258,13 @@ export default function DrawerPage() {
           ) : (
             <p className="fine">{history.isLoading ? "Reading…" : "No closed windows in this range."}</p>
           )}
-        </div>
-        <div className="card">
-          <h2>What the wallet decided</h2>
+        </Reveal>
+        <Reveal className="card" delay={0.1}>
+          <h2>Decisions</h2>
           {history.data?.feed.length ? (
-            <ul className="lines">
+            <ul className="feed">
               {history.data.feed.slice(0, 40).map((e, i) => (
-                <li key={i} className="line">
+                <li key={i} className={/Paused|Braked|Alert|refus|over|ceiling/i.test(e.text) ? "bad" : ""}>
                   <Explorer tx={e.tx} label={`#${e.block}`} /> {e.text}
                 </li>
               ))}
@@ -222,8 +272,9 @@ export default function DrawerPage() {
           ) : (
             <p className="fine">{history.isLoading ? "Reading…" : "No refusals, state changes or alerts in this range."}</p>
           )}
+        </Reveal>
         </div>
-      </div>
+      </section>
     </main>
   );
 }
@@ -295,8 +346,7 @@ function Controls({ drawer, owner, guardian, resumeNonce }: { drawer: Address; o
   }
 
   return (
-    <div className="card">
-      <h2>Controls</h2>
+    <Reveal className="card">
       <p className="fine">
         {!isConnected
           ? "Connect the owner's or guardian's wallet to use these. Anyone can see them; only the contract decides who may act."
@@ -304,7 +354,9 @@ function Controls({ drawer, owner, guardian, resumeNonce }: { drawer: Address; o
             ? `Connected as the ${role}.`
             : "The connected wallet is neither the owner nor the guardian: the contract will refuse owner actions."}
       </p>
-      <div className="stack">
+      <div className="stack" style={{ gap: 0, marginTop: 8 }}>
+        <div className="controls-group">
+        <span className="controls-title">Keep it current · stop it</span>
         <div className="row">
           <button className="btn small" disabled={!ready || !!busy} onClick={() => send("Sync", "sync")}>
             Sync (close finished windows)
@@ -320,7 +372,10 @@ function Controls({ drawer, owner, guardian, resumeNonce }: { drawer: Address; o
             Revoke (owner)
           </button>
         </div>
+        </div>
 
+        <div className="controls-group">
+        <span className="controls-title">Tighten now · raise slowly</span>
         <div className="row">
           <label>
             Tighten{" "}
@@ -368,7 +423,10 @@ function Controls({ drawer, owner, guardian, resumeNonce }: { drawer: Address; o
             Cancel (owner or guardian)
           </button>
         </div>
+        </div>
 
+        <div className="controls-group">
+        <span className="controls-title">Money in</span>
         <div className="row">
           <input placeholder="tUSD8" value={fund} onChange={(e) => setFund(e.target.value)} />
           <button
@@ -402,8 +460,10 @@ function Controls({ drawer, owner, guardian, resumeNonce }: { drawer: Address; o
             Grant runway (owner; the drawer pulls it from your wallet)
           </button>
         </div>
+        </div>
 
-        <div className="stack">
+        <div className="controls-group">
+        <span className="controls-title">Two-key resume</span>
           <p className="fine">
             Instant resume needs both keys: the owner and the guardian each sign (nonce {resumeNonce.toString()}), then anyone submits.
           </p>
@@ -426,6 +486,6 @@ function Controls({ drawer, owner, guardian, resumeNonce }: { drawer: Address; o
         {busy && <p className="fine">{busy}: confirm in your wallet…</p>}
         {msg && <p className="notice">{msg}</p>}
       </div>
-    </div>
+    </Reveal>
   );
 }

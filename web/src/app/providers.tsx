@@ -8,7 +8,7 @@ import { WagmiProvider } from "wagmi";
 import { NetworkProvider, useNetwork } from "@/lib/network";
 import { wagmiConfig } from "@/lib/wagmi";
 
-const theme = darkTheme({ accentColor: "#0257FF", borderRadius: "medium" });
+const theme = darkTheme({ accentColor: "#ffb000", accentColorForeground: "#120c0a", borderRadius: "large", fontStack: "system" });
 
 /** Connect the wallet straight to the network picked in the header, not always the first one. */
 function RainbowKit({ children }: { children: ReactNode }) {

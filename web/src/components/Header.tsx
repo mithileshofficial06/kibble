@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useAccount } from "wagmi";
 import { networks, repoUrl } from "@/lib/env";
 import { GitHubIcon } from "./Icons";
+import { Atmosphere } from "./ui";
 import { useNetwork } from "@/lib/network";
 
 const links = [
@@ -19,20 +20,20 @@ export function Header() {
   const { isConnected, chainId } = useAccount();
   const { net, select, switchingTo, switchError } = useNetwork();
   const wrongNetwork = isConnected && chainId !== net.chain.id && !switchingTo;
-  // The landing page draws its own desk-style nav.
+  // The landing page draws its own nav.
   if (pathname === "/") return null;
 
   return (
     <>
+      <Atmosphere />
       <header className="topbar">
         <div className="shell">
           <Link href="/" className="brand">
-            <span className="brand-mark" aria-hidden="true" />
-            <span className="brand-name">Kibble</span>
+            kibble<span aria-hidden="true">.</span>
           </Link>
           <nav className="nav" aria-label="Main">
             {links.map((l) => {
-              const active = l.href === "/" ? pathname === "/" : pathname.startsWith(l.href);
+              const active = pathname.startsWith(l.href) || (l.href === "/live" && pathname.startsWith("/drawer"));
               return (
                 <Link key={l.href} href={l.href} aria-current={active ? "page" : undefined}>
                   {l.label}
@@ -42,7 +43,7 @@ export function Header() {
           </nav>
           <div className="topbar-end">
             <a className="gh-link" href={repoUrl} target="_blank" rel="noreferrer" title="Source code on GitHub">
-              <GitHubIcon />
+              <GitHubIcon size={15} />
               <span>GitHub</span>
             </a>
             {networks.length > 1 && (
