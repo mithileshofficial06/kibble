@@ -2,8 +2,7 @@
 
 import { AnimatePresence, animate, motion, useInView, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
 import Link from "next/link";
-import { Fragment, useEffect, useReducer, useRef, useState } from "react";
-import { repoUrl } from "@/lib/env";
+import { Fragment, useEffect, useReducer, useRef } from "react";
 import { amt, useDeployment, useDrawers } from "@/lib/kibble";
 import { Odometer } from "./Odometer";
 
@@ -144,8 +143,13 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 
 export function Hero() {
   const reduce = useReducedMotion() ?? false;
+  const sectionRef = useRef<HTMLElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const inView = useInView(panelRef, { amount: 0.3 });
+  // Entrance plays when the section scrolls into view (the intro sits above it).
+  const seen = useInView(sectionRef, { once: true, amount: 0.2 });
+  const show = seen || reduce;
+  const on = <T,>(v: T) => (show ? v : undefined);
   const { state: live, jump } = useReplay(inView && !reduce);
   const s = reduce ? END : live;
   const step = STEPS.find((x) => x.key === s.phase)!;
@@ -168,7 +172,7 @@ export function Hero() {
   const sales = s.bars.filter((b) => b.kind === "sale").length;
 
   return (
-    <section className="k-hero" data-phase={s.phase} onPointerMove={onMove}>
+    <section ref={sectionRef} id="replay" className="k-hero" data-phase={s.phase} onPointerMove={onMove}>
       <div className="k-aurora" aria-hidden="true">
         <span />
         <span />
@@ -176,44 +180,43 @@ export function Hero() {
       </div>
       <div className="k-grain" aria-hidden="true" />
       <div className="k-vignette" aria-hidden="true" />
-      <Nav />
 
       <div className="k-stage">
-        <motion.aside className="k-rail" aria-hidden="true" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8, duration: 1 }}>
+        <motion.aside className="k-rail" aria-hidden="true" initial={{ opacity: 0 }} animate={on({ opacity: 1 })} transition={{ delay: 0.8, duration: 1 }}>
           <span className="k-rail-n">K—01</span>
           <span className="k-rail-text">Earned spending limits for AI agents · QDay Aevum · Chain 44005</span>
         </motion.aside>
 
         {/* ------------------------------------------------ left: the pitch */}
         <div className="k-left">
-          <motion.p className="k-eyebrow" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: EASE }}>
+          <motion.p className="k-eyebrow" initial={{ opacity: 0, y: 10 }} animate={on({ opacity: 1, y: 0 })} transition={{ duration: 0.7, ease: EASE }}>
             <span className="k-dot" aria-hidden="true" /> A wallet contract for AI agents
           </motion.p>
-          <h1 className="k-title">
-            <Words text="Don't give your agent a budget." delay={0.1} />
+          <h2 className="k-title">
+            <Words show={show} text="Don't give your agent a budget." delay={0.1} />
             <span className="k-title-2">
-              <Words text="Let it" delay={0.45} />{" "}
+              <Words show={show} text="Let it" delay={0.45} />{" "}
               <span className="k-earn">
-                <Words text="earn" delay={0.55} className="k-earn-word" />
+                <Words show={show} text="earn" delay={0.55} className="k-earn-word" />
                 <svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true">
                   <motion.path
                     d="M3 14 C 50 4, 110 18, 197 8"
                     initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
+                    animate={on({ pathLength: 1 })}
                     transition={{ duration: 0.8, delay: 1.2, ease: EASE }}
                   />
                 </svg>
               </span>{" "}
-              <Words text="one." delay={0.65} />
+              <Words show={show} text="one." delay={0.65} />
             </span>
-          </h1>
+          </h2>
 
-          <motion.p className="k-sub" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.8, ease: EASE }}>
+          <motion.p className="k-sub" initial={{ opacity: 0, y: 14 }} animate={on({ opacity: 1, y: 0 })} transition={{ duration: 0.8, delay: 0.8, ease: EASE }}>
             AI agents now pay for things by themselves. Kibble is the wallet that decides how much: an agent may only spend what its sales have
             earned. If it starts losing money, or its key gets stolen, the wallet stops it. No human has to be watching.
           </motion.p>
 
-          <motion.div className="k-ctas" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.95, ease: EASE }}>
+          <motion.div className="k-ctas" initial={{ opacity: 0, y: 14 }} animate={on({ opacity: 1, y: 0 })} transition={{ duration: 0.8, delay: 0.95, ease: EASE }}>
             <Magnetic>
               <Link href="/live" className="k-btn">
                 <span>See it live</span>
@@ -227,10 +230,10 @@ export function Hero() {
             </Link>
           </motion.div>
 
-          <motion.dl className="k-facts" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2, duration: 0.8 }}>
-            <Fact to={4} suffix=" s" label="to pause a hijacked agent" />
-            <Fact to={0} decimals={3} label="overbought by the attacker" />
-            <Fact to={105} label="tests, on a live testnet" />
+          <motion.dl className="k-facts" initial={{ opacity: 0 }} animate={on({ opacity: 1 })} transition={{ delay: 1.2, duration: 0.8 }}>
+            <Fact run={show} to={4} suffix=" s" label="to pause a hijacked agent" />
+            <Fact run={show} to={0} decimals={3} label="overbought by the attacker" />
+            <Fact run={show} to={105} label="tests, on a live testnet" />
           </motion.dl>
         </div>
 
@@ -239,7 +242,7 @@ export function Hero() {
           ref={panelRef}
           className="k-panel"
           initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={on({ opacity: 1, y: 0 })}
           transition={{ duration: 1, delay: 0.35, ease: EASE }}
         >
           <i className="k-crop tl" aria-hidden="true" />
@@ -303,7 +306,7 @@ export function Hero() {
               <span>Kibble agent</span> can spend up to <span className="k-unit">tUSD8</span>
             </p>
             <motion.div className="k-number" style={{ x: numX, y: numY }}>
-              <span className="k-number-in">
+              <span className="k-number-in" data-pour-target>
                 <Odometer value={s.limit} />
               </span>
               <AnimatePresence>
@@ -363,7 +366,7 @@ export function Hero() {
         </motion.div>
       </div>
 
-      <LiveLine />
+      <LiveLine show={show} />
     </section>
   );
 }
@@ -470,7 +473,7 @@ function Bars({ state }: { state: State }) {
   );
 }
 
-function Words({ text, delay, className }: { text: string; delay: number; className?: string }) {
+function Words({ text, delay, className, show }: { text: string; delay: number; className?: string; show: boolean }) {
   return (
     <>
       {text.split(" ").map((w, i, all) => (
@@ -479,7 +482,7 @@ function Words({ text, delay, className }: { text: string; delay: number; classN
             <motion.span
               className="k-word-in"
               initial={{ y: "115%", rotate: 6 }}
-              animate={{ y: "0%", rotate: 0 }}
+              animate={show ? { y: "0%", rotate: 0 } : undefined}
               transition={{ duration: 0.9, delay: delay + i * 0.06, ease: EASE }}
             >
               {w}
@@ -493,12 +496,12 @@ function Words({ text, delay, className }: { text: string; delay: number; classN
 }
 
 /** A count-up stat. */
-function Fact({ to, label, suffix = "", decimals = 0 }: { to: number; label: string; suffix?: string; decimals?: number }) {
+function Fact({ to, label, run, suffix = "", decimals = 0 }: { to: number; label: string; run: boolean; suffix?: string; decimals?: number }) {
   const ref = useRef<HTMLElement>(null);
   const from = to === 0 ? 0.25 : 0;
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || !run) return;
     const c = animate(from, to, {
       duration: 1.8,
       delay: 1.3,
@@ -506,7 +509,7 @@ function Fact({ to, label, suffix = "", decimals = 0 }: { to: number; label: str
       onUpdate: (v) => (el.textContent = v.toFixed(decimals) + suffix),
     });
     return () => c.stop();
-  }, [from, to, decimals, suffix]);
+  }, [from, to, decimals, suffix, run]);
   return (
     <div className="k-fact">
       <dt>
@@ -554,48 +557,14 @@ function Lock() {
   );
 }
 
-function Nav() {
-  const [scrolled, setScrolled] = useState(false);
-  useEffect(() => {
-    const on = () => setScrolled(window.scrollY > 8);
-    on();
-    window.addEventListener("scroll", on, { passive: true });
-    return () => window.removeEventListener("scroll", on);
-  }, []);
-  return (
-    <motion.nav
-      className={`k-nav ${scrolled ? "scrolled" : ""}`}
-      aria-label="Main"
-      initial={{ opacity: 0, y: -12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, ease: EASE }}
-    >
-      <Link href="/" className="k-brand">
-        kibble<span aria-hidden="true">.</span>
-      </Link>
-      <div className="k-nav-links">
-        <Link href="/live">Live</Link>
-        <Link href="/playground">Playground</Link>
-        <Link href="/docs">How it works</Link>
-        <a href={repoUrl} target="_blank" rel="noreferrer">
-          GitHub
-        </a>
-      </div>
-      <Link href="/live" className="k-nav-cta">
-        Open app
-      </Link>
-    </motion.nav>
-  );
-}
-
 /** The actual chain, right now, in one quiet line. */
-function LiveLine() {
+function LiveLine({ show }: { show: boolean }) {
   const dep = useDeployment();
   const live = useDrawers(dep.data);
   const d = live.data?.drawers;
   const receipts = d ? Object.values(d).reduce((t, v) => t + Number(v?.receiptCount ?? 0n), 0) : undefined;
   return (
-    <motion.div className="k-live" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4, duration: 0.8 }}>
+    <motion.div className="k-live" initial={{ opacity: 0 }} animate={show ? { opacity: 1 } : undefined} transition={{ delay: 1.4, duration: 0.8 }}>
       <span className="k-live-tag">
         <span className="k-dot" aria-hidden="true" /> Live on Aevum testnet now
       </span>
