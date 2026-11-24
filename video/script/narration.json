@@ -1,0 +1,85 @@
+{
+  "voice": "en-US-AvaMultilingualNeural",
+  "rate": "+0%",
+  "scenes": [
+    {
+      "id": "hook",
+      "text": "Your AI agent can spend money now. It buys data, model calls, and other agents' work. On its own."
+    },
+    {
+      "id": "guess",
+      "text": "So we give it a limit. Fifty dollars a day. But a fixed limit is a guess. And it treats three very different agents exactly the same."
+    },
+    {
+      "id": "three",
+      "text": "The winning agent hits the cap, and turns customers away. The losing agent burns the full limit, every single day. And a hijacked agent hands the attacker that limit, every day, until a human notices."
+    },
+    {
+      "id": "wallet",
+      "text": "A prompt that says, stay within budget, is not a guard. The limit has to live in the wallet. And it has to move with how the agent actually performs.",
+      "cap": "A prompt that says “stay within budget” is not a guard. The limit has to live in the wallet. And it has to move with how the agent actually performs."
+    },
+    {
+      "id": "reveal",
+      "text": "This is Kibble. The earned spending limit for AI agents."
+    },
+    {
+      "id": "drawer",
+      "text": "Every agent gets a drawer: a smart contract that holds its money. The agent's own key holds nothing. It can only ask the drawer to pay."
+    },
+    {
+      "id": "allowance",
+      "text": "The agent spends from a small allowance, capped at a limit called T. That allowance refills only from verified value: sales that have cleared, or work an approved client signed off."
+    },
+    {
+      "id": "vault",
+      "text": "Everything above the allowance is swept into the owner's vault. A safe the agent can never reach."
+    },
+    {
+      "id": "earned",
+      "text": "Make a profit, and T grows. Take a loss, and T shrinks. The limit is earned, window by window."
+    },
+    {
+      "id": "brakes",
+      "text": "And when an agent overspends, the wallet brakes it, on its own. Healthy. Watch. Braked. Paused. No human has to be watching."
+    },
+    {
+      "id": "onenumber",
+      "text": "The owner sets just one number: the most they're willing to lose in a week. Everything else is derived from it, or learned from the agent's first few windows."
+    },
+    {
+      "id": "live",
+      "text": "Now, let's see it run. Kibble is live on the Q Day, Ayvum testnet. The live desk reads every drawer straight from the chain. A fixed limit on one side, Kibble on the other. Same code. Same traffic.",
+      "cap": "Now, let's see it run. Kibble is live on the QDay _ Aevum testnet. The live desk reads every drawer straight from the chain. A fixed limit on one side, Kibble on the other. Same code. Same traffic."
+    },
+    {
+      "id": "playground",
+      "text": "And anyone can try it, in the playground. No wallet needed. Each button runs a real demo, on chain."
+    },
+    {
+      "id": "sales",
+      "text": "In the sales rush, a buyer pays both agents. Sales clear, Kibble's allowance refills, and the profit lands in the vault."
+    },
+    {
+      "id": "bad",
+      "text": "In the bad strategy, the supplier's price jumps above the sale price. The fixed agent keeps paying, and keeps losing, every window. Kibble's agent is refused at its cost ceiling, collects strikes, and pauses itself."
+    },
+    {
+      "id": "hijack",
+      "text": "Then, the hijack. An injected prompt tells the agent to pay an attacker. Then the attacker takes the agent's key, and overbuys from a real supplier. The fixed agent pays out, and stays healthy. Kibble pays nothing, and pauses within seconds. Its hijack exposure drops to zero."
+    },
+    {
+      "id": "receipts",
+      "text": "Every payment leaves a receipt. Every refusal leaves an event. All of it, on chain."
+    },
+    {
+      "id": "proof",
+      "text": "Under the hood: ninety-seven tests, including ten invariants, checked over a hundred and twenty-eight thousand random calls. And the worst case is never a guess. It's a number you can read on chain, at any moment.",
+      "cap": "Under the hood: 97 tests, including 10 invariants, checked over 128,000 _ _ _ _ random calls. And the worst case is never a guess. It's a number you can read on chain, at any moment."
+    },
+    {
+      "id": "close",
+      "text": "A fixed limit is a guess. Kibble's is earned. Don't give your agent a budget. Let it earn one."
+    }
+  ]
+}

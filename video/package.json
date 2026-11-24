@@ -1,0 +1,26 @@
+{
+  "name": "kibble-video",
+  "private": true,
+  "description": "Kibble demo video (Remotion).",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render Kibble out/kibble-demo.mp4 --gl=angle"
+  },
+  "dependencies": {
+    "@react-three/fiber": "^9.8.2",
+    "@remotion/cli": "^4.0.546",
+    "@remotion/google-fonts": "^4.0.546",
+    "@remotion/media-utils": "^4.0.546",
+    "@remotion/noise": "^4.0.546",
+    "@remotion/paths": "^4.0.546",
+    "@remotion/shapes": "^4.0.546",
+    "@remotion/three": "^4.0.546",
+    "@types/react": "^19.3.0",
+    "@types/three": "^0.187.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "remotion": "^4.0.546",
+    "three": "^0.187.0",
+    "typescript": "^7.0.2"
+  }
+}

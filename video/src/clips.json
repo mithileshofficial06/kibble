@@ -1,0 +1,115 @@
+{
+ "live": {
+  "dur": 13.467,
+  "segments": [
+   {
+    "src": "live2",
+    "at": 0.0,
+    "from": 1.5,
+    "to": 6.5,
+    "speed": 1.0
+   },
+   {
+    "src": "live2",
+    "at": 5.0,
+    "from": 6.5,
+    "to": 9.4,
+    "speed": 0.65
+   }
+  ],
+  "hold": 4.0
+ },
+ "pgintro": {
+  "dur": 8.0,
+  "segments": [
+   {
+    "src": "sales",
+    "at": 0.0,
+    "from": 1.8,
+    "to": 8.6,
+    "speed": 1.0
+   }
+  ],
+  "hold": 1.2
+ },
+ "sales": {
+  "dur": 9.966,
+  "segments": [
+   {
+    "src": "sales",
+    "at": 0.0,
+    "from": 8.6,
+    "to": 11.0,
+    "speed": 1.0
+   },
+   {
+    "src": "sales",
+    "at": 2.4,
+    "from": 11.0,
+    "to": 243.0,
+    "speed": 45.0
+   }
+  ],
+  "hold": 2.4
+ },
+ "bad": {
+  "dur": 15.167,
+  "segments": [
+   {
+    "src": "bad",
+    "at": 0.0,
+    "from": 9.0,
+    "to": 15.0,
+    "speed": 1.5
+   },
+   {
+    "src": "bad",
+    "at": 4.0,
+    "from": 15.0,
+    "to": 361.9,
+    "speed": 60.0
+   }
+  ],
+  "hold": 5.4
+ },
+ "hijack": {
+  "dur": 19.7,
+  "segments": [
+   {
+    "src": "hijack",
+    "at": 0.0,
+    "from": 9.0,
+    "to": 27.0,
+    "speed": 2.4
+   },
+   {
+    "src": "hijack",
+    "at": 7.5,
+    "from": 27.0,
+    "to": 207.6,
+    "speed": 45.0
+   }
+  ],
+  "hold": 8.2
+ },
+ "receipts": {
+  "dur": 7.7,
+  "segments": [
+   {
+    "src": "drawerA",
+    "at": 0.0,
+    "from": 17.5,
+    "to": 21.0,
+    "speed": 1.0
+   },
+   {
+    "src": "drawerA",
+    "at": 3.5,
+    "from": 21.0,
+    "to": 27.0,
+    "speed": 2.0
+   }
+  ],
+  "hold": 1.2
+ }
+}
