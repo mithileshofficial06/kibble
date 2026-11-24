@@ -63,8 +63,8 @@ export const LiveDesk: React.FC = () => {
   ];
   return (
     <AbsoluteFill>
-      <div style={{ position: "absolute", left: 960 - 760, top: 120, opacity: enter, transform: `translateY(${(1 - enter) * 120}px)` }}>
-        <Browser clip="live" startFrom={0} cam={cam} title="kibble · live desk" w={1520} rotX={interpolate(f, [40, 400], [10, 1.5], { extrapolateRight: "clamp" })} chip={<Chip>Live · Aevum testnet · chain 44005</Chip>}
+      <div style={{ position: "absolute", left: 960 - 680, top: 92, opacity: enter, transform: `translateY(${(1 - enter) * 120}px)` }}>
+        <Browser clip="live" startFrom={0} cam={cam} title="kibble · live desk" w={1360} rotX={interpolate(f, [40, 400], [10, 1.5], { extrapolateRight: "clamp" })} chip={<Chip>Live · Aevum testnet · chain 44005</Chip>}
           />
       </div>
     </AbsoluteFill>
@@ -75,7 +75,7 @@ export const LiveDesk: React.FC = () => {
 export const Playground: React.FC = () => {
   const f = useCurrentFrame();
   const enter = prog(f, 0, 30, EASE_IO);
-  const bw = 1520, bl = 200, bt = 120, sc = bw / 1600;
+  const bw = 1360, bl = 280, bt = 92, sc = bw / 1600;
   const toScreen = (x: number, y: number) => ({ x: bl + x * sc, y: bt + 44 + y * sc });
   const btn = toScreen(300, 546);
   const arrive = Math.round(4.0 * FPS), click = Math.round(5.15 * FPS);
@@ -95,9 +95,9 @@ const CursorOnButton: React.FC<{ f: number; arrive: number; click: number; btn: 
   // camera: s 1 → 1.35 around (640, 520) between 3.4 s and 4.6 s
   const k = interpolate(f, [Math.round(3.4 * FPS), Math.round(4.6 * FPS)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: EASE_IO });
   const s = 1 + 0.35 * k, cx = 800 + (640 - 800) * k, cy = 450 + (520 - 450) * k;
-  const bw = 1520, sc = bw / 1600;
+  const bw = 1360, sc = bw / 1600;
   const px = 800 + (300 - cx) * s, py = 450 + (546 - cy) * s;
-  const x = 200 + px * sc, y = 120 + 44 + py * sc;
+  const x = 280 + px * sc, y = 92 + 44 + py * sc;
   return <Cursor path={[{ f: arrive - 50, x: 1500, y: 980 }, { f: arrive, x: x - 4, y: y - 2 }, { f: click + 200, x: x - 4, y: y - 2 }]} click={click} />;
 };
 
@@ -136,7 +136,7 @@ export const Sales: React.FC = () => {
   const tl = fr(m.segments[1].at), hold = fr(m.dur - m.hold);
   return (
     <RunScene clip="sales" num="01" title="Sales rush" finished="Finished · 4:14 on chain"
-      cam={[{ f: 0, s: 1, x: 800, y: 450 }, { f: tl, s: 1.25, x: 790, y: 330 }, { f: hold - 10, s: 1.25, x: 790, y: 420 }, { f: hold + 30, s: 1.6, x: 640, y: 470 }]}>
+      cam={[{ f: 0, s: 1.25, x: 790, y: 330 }, { f: tl, s: 1.25, x: 790, y: 330 }, { f: hold - 10, s: 1.25, x: 790, y: 420 }, { f: hold + 30, s: 1.6, x: 640, y: 470 }]}>
       <Rise text={"Same demand,\n*different* limits."} at={6} size={58} />
       <div style={{ marginTop: 34 }}>
         <Compare at={wf(S, "pays")} label="Sales served · 2 windows" fixed="8" kibble="8" />
@@ -156,7 +156,7 @@ export const Bad: React.FC = () => {
   const jumps = wf(S, "jumps"), losing = wf(S, "losing"), refused = wf(S, "refused"), pauses = wf(S, "pauses");
   return (
     <RunScene clip="bad" num="02" title="Bad strategy" tone={C.coral} finished="Finished · 7:27 on chain"
-      cam={[{ f: 0, s: 1.2, x: 800, y: 420 }, { f: tl, s: 1.35, x: 760, y: 400 }, { f: hold + 10, s: 1.75, x: 640, y: 330 }]}>
+      cam={[{ f: 0, s: 1.75, x: 640, y: 330 }]}>
       <Appear at={jumps - 8}>
         <Card accent={C.coral} style={{ padding: "18px 24px" }}>
           <Label size={12} color={C.coral}>The price jump</Label>
@@ -256,8 +256,8 @@ export const Receipts: React.FC = () => {
   const segB = Math.round(clips.receipts.segments[1].at * FPS);
   return (
     <AbsoluteFill>
-      <div style={{ position: "absolute", left: 200, top: 120, opacity: enter, transform: `scale(${0.96 + 0.04 * enter})` }}>
-        <Browser clip="receipts" w={1520} title="kibble · drawer · A summarizer (Kibble) · 0xa924…902B"
+      <div style={{ position: "absolute", left: 280, top: 92, opacity: enter, transform: `scale(${0.96 + 0.04 * enter})` }}>
+        <Browser clip="receipts" w={1360} title="kibble · drawer · A summarizer (Kibble) · 0xa924…902B"
           cam={[{ f: 0, s: 1.3, x: 800, y: 420 }, { f: segB - 10, s: 1.3, x: 800, y: 420 }, { f: refusal + 20, s: 1.45, x: 1000, y: 560 }]}
           chip={<Chip>Read from the drawer · Aevum testnet</Chip>} />
       </div>
