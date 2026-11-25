@@ -191,14 +191,14 @@ export default function ConnectPage() {
         <div className="grid-2">
           <Reveal className="card">
             <h2>Four lines</h2>
-            <pre>{CLI}</pre>
+            <pre tabIndex={0}>{CLI}</pre>
             <p className="fine">
               The first run prints an address to fund from the faucet. <code>try</code> runs one sale, one purchase and one refused payment.
             </p>
           </Reveal>
           <Reveal className="card" delay={0.1}>
             <h2>In your agent</h2>
-            <pre>{CODE}</pre>
+            <pre tabIndex={0}>{CODE}</pre>
             <p className="fine">
               <a href={`${repoUrl}/blob/main/docs/connect-your-agent.md`} target="_blank" rel="noreferrer">
                 The full guide

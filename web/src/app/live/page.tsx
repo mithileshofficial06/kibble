@@ -76,7 +76,7 @@ export default function DashboardPage() {
         <span>
           <b>{Object.keys(d.drawers).length}</b> agents
         </span>
-        <motion.span key={live.dataUpdatedAt} className="tick" initial={{ color: "#ffb000" }} animate={{ color: "#5f5768" }} transition={{ duration: 1.2 }}>
+        <motion.span key={live.dataUpdatedAt} className="tick" initial={{ color: "#ffb000" }} animate={{ color: "#9a92a3" }} transition={{ duration: 1.2 }}>
           synced {live.dataUpdatedAt ? new Date(live.dataUpdatedAt).toLocaleTimeString() : "…"}
         </motion.span>
       </Reveal>
@@ -121,7 +121,7 @@ function Scoreboard({ dep, drawers, vault }: { dep: Deployment; drawers: Partial
   const names = Object.keys(dep.drawers) as AgentName[];
   return (
     <Reveal className="card flush">
-      <div className="table-wrap">
+      <div className="table-wrap" tabIndex={0} role="region" aria-label="Table, scrolls sideways">
         <table className="docs-table mono-cells">
           <thead>
             <tr>

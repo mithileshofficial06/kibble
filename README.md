@@ -7,7 +7,7 @@
 > - **The owner sets one number**, the most they'll lose in a week. Everything else is derived or learned in the first windows.
 > - **The exact hijack bound**, live on chain as `maxLossNow()`: *the allowance (≤ T) plus any runway the owner granted.* Paying strangers comes out of that allowance and is capped at 1 tUSD8 for life. Overspending is refused and pauses the agent. The vault is never reachable.
 > - **Same contract, two modes**: `FIXED` is the comparison side of the split screen and `EARNED` is Kibble, so the comparison is fair.
-> - **Proof:** 109 Kibble tests in Foundry (unit, fuzz, attack and fork tests), including 10 invariants checked over 128,000 random calls and 3 tests against the real tUSD8 on a fork. There are also five scripted demo scenarios ([EVIDENCE.md](EVIDENCE.md)).
+> - **Proof:** 131 Kibble tests in Foundry (unit, fuzz, attack and fork tests), including 10 invariants checked over 128,000 random calls and 3 tests against the real tUSD8 on a fork. There are also five scripted demo scenarios ([EVIDENCE.md](EVIDENCE.md)).
 > - **Live on Aevum testnet:** factory [`0x296a2e00…2afe`](https://explorer-test.qday.info/address/0x296a2e00c0b934dfea4384572972cd4e46322afe), five demo drawers and an owner vault, with every scenario run on chain ([Deployments](#deployments), [EVIDENCE.md](EVIDENCE.md#aevum-testnet)). The web app shows the split screen, each drawer's receipts and track record, the owner controls, and a no-wallet playground.
 > - Also covered, as every rival does: approved suppliers with caps, owner approval for big payments, a receipt for every payment, pay-once per bill, and instant freeze.
 
@@ -162,10 +162,12 @@ On 25 Nov 2026 both NVIDIA-hosted models we tried obeyed the hidden instruction 
 
 `pnpm --filter @kibble/agents paid-api serve` runs a summary API that answers `402 Payment Required` until it's paid, in the style of x402. The buyer signs one EIP-3009 authorization bound to that bill and **needs no gas**; the seller relays it into its drawer, buys the model call it needs, and delivers. If the drawer refuses the agent's own purchase, the buyer is refunded. Buyers use `paidFetch` from `@kibble/sdk`, with a price limit. It isn't interoperable with standard x402 clients, because the payment goes to the drawer contract. `pnpm --filter @kibble/agents paid-api` runs its 16 checks on a fork (replay, tampering, refunds, a buyer with no gas).
 
-## Attacks, simulation and alerts
+## Attacks, simulation, security and alerts
 
 - [What a capable attacker gets](docs/attacks.md) against Kibble and a well-run fixed limit, including where Kibble does worse (`make attacks`).
 - [120 simulated agents](docs/simulation.md) through the real contracts (`make sim`).
+- [Security notes and threat model](docs/security.md): Slither, coverage, and what we haven't fixed.
+- [A worked example](docs/customer-story.md): a small business in numbers (illustrative people, real runs).
 - [Alerts](docs/alerts.md) on Telegram or the console, for the quiet attacks a pause doesn't catch.
 
 ## The owner's assistant

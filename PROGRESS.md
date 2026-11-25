@@ -26,12 +26,16 @@ Done, committed and pushed:
   4. Outside agents: guide, issue form and `/agents` list are ready. **No outside agent has run yet.**
   5. Connect: SDK helpers, `pnpm kibble`, `/connect`, docs/connect-your-agent.md.
 
+- **Redeployed (25 Nov):** fixed contracts on testnet, factory `0x296a2e00…2afe`; old drawers revoked. Every scenario and the AI shift ran (docs/runs/testnet-v2-2026-11-26.txt). T stayed at 0.200 there: windows fell under the activity floor (setup now uses a third of it on testnet; the live drawers still have the old floor).
+- **Improvements 6-14 (26 Nov):** stronger fixed opponent and attack table (`make attacks`), 120-agent simulation (`make sim`), who-paid panel on drawer pages (`buyerStats`), pay-per-request API (`paid-api`), worked example, alerts (`alerts`; Telegram needs a bot token), security notes (Slither, coverage, threat model), error-path tests, accessibility pass.
+- **Tests:** 145 pass (139 local, 6 fork); 131 are Kibble's.
+
 Not done:
-- **Redeploy to testnet with the fixed contracts** (needs the user's OK for gas). Until then testnet drawers, including any made with `pnpm kibble` or `/connect`, have the old ceiling. The video's footage and addresses are from the old deployment.
-- Recruit outside testers (after the redeploy). Run `scenario ai` on testnet.
-- Video: the real-model scene is half done and uncommitted (narration, timing; no visuals). Don't render until it's finished or reverted.
-- **Hosting** the web app (needs a long-running server for the playground).
-- Outside test agents; DoraHacks submission.
+- **Lower the live drawers' activity floor and run a few sales windows** so T grows on testnet (needs the user's OK for gas).
+- Telegram with a real bot (token from the user). `/connect` with a real wallet (user).
+- Outside testers: none yet.
+- **Video (#15), last:** re-record on the new drawers, finish or revert the uncommitted real-model scene, update "97 tests" and every number and address. Don't render until then.
+- **Hosting**, YouTube upload, DoraHacks submission.
 
 ## Next steps
 1. UI: landing (grain loader, living-wordmark hero, replay section) and all app pages restyled on 23 Nov; iterate on the user's feedback.

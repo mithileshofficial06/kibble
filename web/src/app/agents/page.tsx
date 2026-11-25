@@ -75,7 +75,7 @@ export default function AgentsPage() {
         <SecHead n="01" title="All *drawers.*" note={list.data && list.data.total > MAX ? `The newest ${MAX}.` : "Newest first."} />
         <Reveal className="card flush">
           {rows.length ? (
-            <div className="table-wrap">
+            <div className="table-wrap" tabIndex={0} role="region" aria-label="Table, scrolls sideways">
               <table className="docs-table mono-cells">
                 <thead>
                   <tr>

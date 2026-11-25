@@ -19,7 +19,7 @@ const sections = [
 
 function Code({ children }: { children: string }) {
   return (
-    <pre className="code">
+    <pre className="code" tabIndex={0}>
       <code>{children.trim()}</code>
     </pre>
   );
@@ -60,7 +60,7 @@ export default function DocsPage() {
               The problem
             </h2>
             <p>Agents pay for model calls, data and other agents&apos; services on their own. A fixed limit fails three ways:</p>
-            <table className="docs-table">
+            <table className="docs-table" tabIndex={0}>
               <tbody>
                 <tr>
                   <th>Losing agent</th>
@@ -142,7 +142,7 @@ export default function DocsPage() {
               <span className="n">03</span>
               What a hijacker can take
             </h2>
-            <table className="docs-table">
+            <table className="docs-table" tabIndex={0}>
               <thead>
                 <tr>
                   <th></th>
@@ -196,7 +196,7 @@ export default function DocsPage() {
               <span className="n">05</span>
               Contracts on Aevum testnet (chain 44005)
             </h2>
-            <table className="docs-table">
+            <table className="docs-table" tabIndex={0}>
               <tbody>
                 <tr>
                   <th>KibbleFactory</th>

@@ -206,7 +206,7 @@ export default function DrawerPage() {
         <SecHead n="04" title="Every *receipt.*" note="The latest 25 payments, read from the drawer's storage." />
         <Reveal className="card flush">
         {receipts.data?.length ? (
-          <div className="table-wrap">
+          <div className="table-wrap" tabIndex={0} role="region" aria-label="Table, scrolls sideways">
             <table className="docs-table mono-cells">
               <thead>
                 <tr>
@@ -263,7 +263,7 @@ export default function DrawerPage() {
             </label>
           </p>
           {history.data?.windows.length ? (
-            <div className="table-wrap">
+            <div className="table-wrap" tabIndex={0} role="region" aria-label="Table, scrolls sideways">
               <table className="docs-table mono-cells">
                 <thead>
                   <tr>

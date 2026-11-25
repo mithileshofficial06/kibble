@@ -80,6 +80,8 @@ Kibble A spent its first 6 windows in Learning (window 1 was quiet), then grew T
 
 ## Aevum testnet
 
+**Version 1 (revoked).** The current deployment is [further down](#aevum-testnet-the-fixed-contracts-25-nov-2026).
+
 Deployed 22 Nov 2026 (block 3,847,745). Contracts: factory [`0xea5993b2…06d2`](https://explorer-test.qday.info/address/0xea5993b29f3ed9944fdd23dcf5b0b1114a9906d2), drawer implementation [`0x6d7ac2be…5fd3`](https://explorer-test.qday.info/address/0x6d7ac2befb19b6f5ccd846353324db5543845fd3), admin module [`0x38d0f87e…ff1b`](https://explorer-test.qday.info/address/0x38d0f87e9a4f5e64e5f5a481deb600b70219ff1b), owner vault [`0xe1e78CCC…E616`](https://explorer-test.qday.info/address/0xe1e78CCCF50112964429d29A0A66e91EAaf0E616).
 
 The whole testnet demo runs on **one faucet claim** (1 tQDAY + 5 tUSD8), so amounts are **a tenth** of the fork run's (max weekly loss 2, sale 0.010, model call 0.004). Every tUSD8 stays inside the demo's own wallets and contracts; `setup-demo --fresh` gets it back from old drawers for the next run.
@@ -94,9 +96,9 @@ Log: [docs/runs/testnet-run1-20s-windows-2026-11-22.txt](docs/runs/testnet-run1-
 - **Controls:** threshold lowered instantly, owner-signed payment paid (receipt #13), signature replay refused, guardian freeze, owner + guardian `resumeNow`.
 - **What it taught us:** on a real chain each sale is about four transactions, so a 20-second window held only 2–3 sales. Most windows fell below `minActivity`, so Kibble A never finished Learning and its T stayed at 0.200. On a fork, time only moves when the script moves it, which hid this. Run 2 uses 2-minute windows.
 
-### Run 2: 2-minute windows (the current drawers)
+### Run 2: 2-minute windows
 
-Log: [docs/runs/testnet-run2-2026-11-22.txt](docs/runs/testnet-run2-2026-11-22.txt). Drawers: [`deployments/44005.json`](deployments/44005.json): Kibble A [`0xa924b7f7…902B`](https://explorer-test.qday.info/address/0xa924b7f72f33c0A99dD81e3B2C7E3437D9FA902B), fixed A′ [`0xd2a188A5…7e56`](https://explorer-test.qday.info/address/0xd2a188A5C035529Dc17e739159B685511a1F7e56), Kibble B [`0x6A22c5b4…b9F2`](https://explorer-test.qday.info/address/0x6A22c5b44C3c3f428FDa104910B6cEab8325b9F2), fixed B′ [`0xA181dEeb…2aEa`](https://explorer-test.qday.info/address/0xA181dEebaC5D135Cf4f683cd2738C4d513b62aEa), W [`0x4Db4e932…5142`](https://explorer-test.qday.info/address/0x4Db4e932A84643f19CCa498AB3962efeF2a15142).
+Log: [docs/runs/testnet-run2-2026-11-22.txt](docs/runs/testnet-run2-2026-11-22.txt). Drawers (now revoked): [`docs/runs/testnet-v1-deployment-2026-11-22.json`](docs/runs/testnet-v1-deployment-2026-11-22.json): Kibble A [`0xa924b7f7…902B`](https://explorer-test.qday.info/address/0xa924b7f72f33c0A99dD81e3B2C7E3437D9FA902B), fixed A′ [`0xd2a188A5…7e56`](https://explorer-test.qday.info/address/0xd2a188A5C035529Dc17e739159B685511a1F7e56), Kibble B [`0x6A22c5b4…b9F2`](https://explorer-test.qday.info/address/0x6A22c5b44C3c3f428FDa104910B6cEab8325b9F2), fixed B′ [`0xA181dEeb…2aEa`](https://explorer-test.qday.info/address/0xA181dEebaC5D135Cf4f683cd2738C4d513b62aEa), W [`0x4Db4e932…5142`](https://explorer-test.qday.info/address/0x4Db4e932A84643f19CCa498AB3962efeF2a15142).
 
 **Time-lapse, 10 windows, the same demand on both sides** (sell at 0.010, buy the model call at 0.004):
 
@@ -144,7 +146,7 @@ What this does and doesn't show:
 
 ## A real AI agent at work (25 Nov 2026)
 
-`scenario ai`: Nemotron 3 Ultra runs Agent A, buying model calls from a supplier that runs Nemotron 3.5 Bolt E4B. Five jobs per shift, three shifts on a local fork with the fixed contracts ([log](docs/runs/ai-agent-fork-2026-11-25.txt)). Not run on testnet yet.
+`scenario ai`: Nemotron 3 Ultra runs Agent A, buying model calls from a supplier that runs Nemotron 3.5 Bolt E4B. Five jobs per shift, three shifts on a local fork with the fixed contracts ([log](docs/runs/ai-agent-fork-2026-11-25.txt)). Also run once on Aevum testnet on 26 Nov, with the same outcome: 4 delivered, 1 turned down and refunded, the hidden instruction ignored, 0.040 earned and 0.016 spent ([log](docs/runs/testnet-v2-2026-11-26.txt)).
 
 | | Run 1 | Run 2 | Run 3 |
 |---|---|---|---|
@@ -165,6 +167,27 @@ Reviewing our own contract on 25 Nov 2026, we found three ways for an attacker w
 | One uncleared sale backs spending in every window it stays pending | Spent 2.00 where one sale should back 0.90 | Spend resting on uncleared sales is carried until they clear |
 | A cleared sale's room is spent, then half of it is granted again next window | A 1.16 sale backed 1.69 of spending (fuzz counterexample) | Only room left unused carries over |
 
-**The drawers now on Aevum testnet were deployed on 22 Nov, before this fix.** The runs above are from those drawers.
+**The testnet runs above are from the 22 Nov drawers, before this fix.** They are revoked; the fixed contracts are below.
 
 The full scenario run on the fixed contracts is in [docs/runs/fork-run-2026-11-25.txt](docs/runs/fork-run-2026-11-25.txt): over 30 windows Kibble A served 369 sales and turned away none (fixed: 297 and 72); the bad strategy paused after 16 s; the hijack overbought 0.00 and paused after 12 s.
+
+## Aevum testnet: the fixed contracts (25 Nov 2026)
+
+Factory [`0x296a2e00…2afe`](https://explorer-test.qday.info/address/0x296a2e00c0b934dfea4384572972cd4e46322afe) (block 4,107,399); the deployed code matches this build. Drawers: [`deployments/44005.json`](deployments/44005.json). Log: [docs/runs/testnet-v2-2026-11-26.txt](docs/runs/testnet-v2-2026-11-26.txt).
+
+| | Fixed | Kibble |
+|---|---|---|
+| Sales served / turned away (10 windows) | 63 / 0 | 63 / 0 |
+| Limit after 10 windows | 0.050 | **0.200, not grown yet** |
+| Profit in the vault | 0.000 | 0.378 |
+| Bad strategy | lost 0.108, still Healthy | paused itself 93 s after the price jump |
+| Hijack: overbought | 0.150, still Healthy | 0.000, paused after 2 s (exposure 0.200 → 0.000) |
+
+- **The limit didn't grow in this run.** Batches of sales straddled the 2-minute windows, so most windows fell under the 0.050 activity floor and didn't count; learning ended in the last window. The floor is a demo setting and is now lower for new testnet drawers. Growth on these contracts is shown on the fork only (2.00 → 10.00 over 30 windows).
+- **Hijack:** Nemotron 3 Ultra asked to pay the attacker in this run too; both sides refused (approval threshold).
+- **Work credits:** T 0.200 → 0.302 over five accepted reports; the sixth, not accepted, dropped W to Watch at 0.182.
+- **Controls:** threshold lowered, owner-signed payment (receipt #13), replay refused, guardian freeze, two-key resume.
+
+## Tests now
+
+145 run in CI style: 139 local and 6 on a fork of Aevum (131 are Kibble's, 14 the starter kit's). `make attacks` and `make sim` add the [attack table](docs/attacks.md) and the [simulation](docs/simulation.md). See [docs/security.md](docs/security.md) for coverage and Slither.

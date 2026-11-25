@@ -23,6 +23,8 @@ export function Nav() {
           <a href="#replay">The replay</a>
           <Link href="/live">Live</Link>
           <Link href="/playground">Playground</Link>
+          <Link href="/assistant">Assistant</Link>
+          <Link href="/connect">Connect</Link>
           <Link href="/docs">How it works</Link>
           <a href={repoUrl} target="_blank" rel="noreferrer">
             GitHub

@@ -111,7 +111,7 @@ export default function PlaygroundPage() {
             Switched off on this server
           </p>
           <p style={{ marginBottom: 16, color: "var(--muted)" }}>The playground needs the demo keys on the server. Run the same demos yourself:</p>
-          <pre>pnpm --filter @kibble/agents scenario hijack</pre>
+          <pre tabIndex={0}>pnpm --filter @kibble/agents scenario hijack</pre>
         </Reveal>
       ) : (
         <section className="stack">

@@ -2,7 +2,7 @@
 
 import { AnimatePresence, animate, motion, useInView, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
 import Link from "next/link";
-import { Fragment, useEffect, useReducer, useRef } from "react";
+import { Fragment, useEffect, useReducer, useRef, useState } from "react";
 import { amt, useDeployment, useDrawers } from "@/lib/kibble";
 import { Odometer } from "./Odometer";
 
@@ -142,7 +142,11 @@ const STEPS: { key: Phase; n: string; title: string; caption: string }[] = [
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 export function Hero() {
-  const reduce = useReducedMotion() ?? false;
+  // Only the browser knows this: render like the server first, then switch (no hydration mismatch).
+  const prefersReduced = useReducedMotion() ?? false;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const reduce = mounted && prefersReduced;
   const sectionRef = useRef<HTMLElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const inView = useInView(panelRef, { amount: 0.3 });
