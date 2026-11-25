@@ -7,8 +7,8 @@
 > - **The owner sets one number**, the most they'll lose in a week. Everything else is derived or learned in the first windows.
 > - **The exact hijack bound**, live on chain as `maxLossNow()`: *the allowance (≤ T) plus any runway the owner granted.* Paying strangers comes out of that allowance and is capped at 1 tUSD8 for life. Overspending is refused and pauses the agent. The vault is never reachable.
 > - **Same contract, two modes**: `FIXED` is the comparison side of the split screen and `EARNED` is Kibble, so the comparison is fair.
-> - **Proof:** 97 Kibble tests in Foundry (unit, fuzz, attack and fork tests), including 10 invariants checked over 128,000 random calls and 3 tests against the real tUSD8 on a fork. There are also five scripted demo scenarios ([EVIDENCE.md](EVIDENCE.md)).
-> - **Live on Aevum testnet:** factory [`0xea5993b2…06d2`](https://explorer-test.qday.info/address/0xea5993b29f3ed9944fdd23dcf5b0b1114a9906d2), five demo drawers and an owner vault, with every scenario run on chain ([Deployments](#deployments), [EVIDENCE.md](EVIDENCE.md#aevum-testnet)). The web app shows the split screen, each drawer's receipts and track record, the owner controls, and a no-wallet playground.
+> - **Proof:** 109 Kibble tests in Foundry (unit, fuzz, attack and fork tests), including 10 invariants checked over 128,000 random calls and 3 tests against the real tUSD8 on a fork. There are also five scripted demo scenarios ([EVIDENCE.md](EVIDENCE.md)).
+> - **Live on Aevum testnet:** factory [`0x296a2e00…2afe`](https://explorer-test.qday.info/address/0x296a2e00c0b934dfea4384572972cd4e46322afe), five demo drawers and an owner vault, with every scenario run on chain ([Deployments](#deployments), [EVIDENCE.md](EVIDENCE.md#aevum-testnet)). The web app shows the split screen, each drawer's receipts and track record, the owner controls, and a no-wallet playground.
 > - Also covered, as every rival does: approved suppliers with caps, owner approval for big payments, a receipt for every payment, pay-once per bill, and instant freeze.
 
 ---
@@ -236,17 +236,17 @@ Events: `Paid`, `Refused(fp, reason, …)`, `ReceiptIssued`, `StateChanged(from,
 
 ### Deployments
 
-Aevum testnet (chain 44005), deployed 22 Nov 2026 from commit `2a36161` (block 3,847,745):
+Aevum testnet (chain 44005), deployed 25 Nov 2026, contracts as of commit `4ddaae6` (block 4,107,399). The deployed code matches this build byte for byte, apart from immutables:
 
 | Contract | Address |
 |---|---|
-| `KibbleFactory` | [`0xea5993b29f3ed9944fdd23dcf5b0b1114a9906d2`](https://explorer-test.qday.info/address/0xea5993b29f3ed9944fdd23dcf5b0b1114a9906d2) |
-| `KibbleDrawer` (clone implementation) | [`0x6d7ac2befb19b6f5ccd846353324db5543845fd3`](https://explorer-test.qday.info/address/0x6d7ac2befb19b6f5ccd846353324db5543845fd3) |
-| `KibbleAdmin` | [`0x38d0f87e9a4f5e64e5f5a481deb600b70219ff1b`](https://explorer-test.qday.info/address/0x38d0f87e9a4f5e64e5f5a481deb600b70219ff1b) |
-| Demo owner vault | [`0xe1e78CCCF50112964429d29A0A66e91EAaf0E616`](https://explorer-test.qday.info/address/0xe1e78CCCF50112964429d29A0A66e91EAaf0E616) |
+| `KibbleFactory` | [`0x296a2e00c0b934dfea4384572972cd4e46322afe`](https://explorer-test.qday.info/address/0x296a2e00c0b934dfea4384572972cd4e46322afe) |
+| `KibbleDrawer` (clone implementation) | [`0x6cfeb32ca3a3b76b303ba07ff003b9f0b8f978b4`](https://explorer-test.qday.info/address/0x6cfeb32ca3a3b76b303ba07ff003b9f0b8f978b4) |
+| `KibbleAdmin` | [`0xa3329c3f6f909609559c5494137edc0ffe9bed4f`](https://explorer-test.qday.info/address/0xa3329c3f6f909609559c5494137edc0ffe9bed4f) |
+| Demo owner vault | [`0x3a74A0D0847d3247B20f6782197c71B620ab0a72`](https://explorer-test.qday.info/address/0x3a74A0D0847d3247B20f6782197c71B620ab0a72) |
 | tUSD8 | [`0x456569838f1d43009A91ebA4263147Afd7233483`](https://explorer-test.qday.info/address/0x456569838f1d43009A91ebA4263147Afd7233483) |
 
-The current demo drawers and roles are in [`deployments/44005.json`](deployments/44005.json); the first run's (now revoked) drawers are in [`docs/runs/testnet-run1-deployment.json`](docs/runs/testnet-run1-deployment.json). Explorer verification on Aevum doesn't work yet, so the source is this repository at the commit above. On a local fork, `pnpm --filter @kibble/agents setup-demo` deploys a fresh set each time.
+The current demo drawers and roles are in [`deployments/44005.json`](deployments/44005.json); the first version (22 Nov, before the refund-loophole fix, now revoked) is in [`docs/runs/testnet-v1-deployment-2026-11-22.json`](docs/runs/testnet-v1-deployment-2026-11-22.json). Explorer verification on Aevum doesn't work yet, so the source is this repository at the commit above. On a local fork, `pnpm --filter @kibble/agents setup-demo` deploys a fresh set each time.
 
 ## Platform findings (Aevum)
 
