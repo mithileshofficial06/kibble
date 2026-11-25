@@ -22,7 +22,7 @@ const CODE = `import { KibbleAgent } from "@kibble/sdk";
 
 const kibble = new KibbleAgent(pub, agentWallet, drawer);
 const r = await kibble.pay(supplier, "0.004", "invoice-17");
-if (r.status === "refused") console.log(r.text); // plain words, not an exception`;
+if (r.status === "refused") console.log(r.text);`;
 
 /** Create a drawer for your own agent, from the browser or the command line. */
 export default function ConnectPage() {
@@ -187,7 +187,7 @@ export default function ConnectPage() {
       </section>
 
       <section className="stack">
-        <SecHead n="02" title="From the *command line.*" note="Makes test keys in your home folder, then the vault, drawer and first allowance." />
+        <SecHead n="02" title="From the command *line.*" note="Makes test keys in your home folder, then the vault, drawer and first allowance." />
         <div className="grid-2">
           <Reveal className="card">
             <h2>Four lines</h2>

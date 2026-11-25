@@ -158,6 +158,10 @@ On 25 Nov 2026 both NVIDIA-hosted models we tried obeyed the hidden instruction 
 
 **A real AI agent at work:** `scenario ai` has the model run Agent A as a business. It reads each customer job, checks its wallet on chain, buys a model call from the supplier through the drawer, and delivers or turns the job down. On the fork it delivered four jobs, turned down the one priced below cost and made a profit, in all three runs ([log](docs/runs/ai-agent-fork-2026-11-25.txt)). It needs a model key.
 
+## The owner's assistant
+
+The app's **Assistant** page answers questions about any drawer ("Why was it paused?", "What could a thief take?") from live chain data, and can **prepare** a protective change: freeze, sync, resume, or lower one setting. It holds no key. Every proposal is checked in code against the chain (it can never raise anything), the owner signs it in their own wallet, and the contract decides. `KIBBLE_ASSISTANT=nvidia|claude` switches the model on, with per-visitor and daily limits; unset, it gives built-in answers with no model. It's tested with Nemotron 3 Ultra; Claude hasn't been run.
+
 ## Connect your own agent
 
 ```bash

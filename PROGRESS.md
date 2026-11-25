@@ -19,7 +19,17 @@ Done, committed and pushed:
 - **Real-model hijack (25 Nov):** NVIDIA-hosted models supported in `agents/src/injection.ts`. Nemotron 3 Ultra and Bolt E4B obeyed the injection in 10/10 trials; fork runs with both and one testnet run with Ultra (Kibble A overbought 0.000, paused after 2 s; fixed A′ 0.200, still Healthy). See EVIDENCE.md. The Playground is now always scripted, in code.
 - **Gas topped up (25 Nov):** the owner holds 6.29 tQDAY, about 359 Playground runs.
 
+- **Five must-do upgrades (25 Nov), all local so far:**
+  1. Real AI agent (`scenario ai`): 3/3 fork shifts, 4 jobs delivered, the below-cost job refused, the poisoned page ignored.
+  2. Refund loophole and two related gaps found and fixed; 12 new tests (123 pass: 117 local, 6 fork).
+  3. Owner's assistant (`/assistant`), tested on live testnet data.
+  4. Outside agents: guide, issue form and `/agents` list are ready. **No outside agent has run yet.**
+  5. Connect: SDK helpers, `pnpm kibble`, `/connect`, docs/connect-your-agent.md.
+
 Not done:
+- **Redeploy to testnet with the fixed contracts** (needs the user's OK for gas). Until then testnet drawers, including any made with `pnpm kibble` or `/connect`, have the old ceiling. The video's footage and addresses are from the old deployment.
+- Recruit outside testers (after the redeploy). Run `scenario ai` on testnet.
+- Video: the real-model scene is half done and uncommitted (narration, timing; no visuals). Don't render until it's finished or reverted.
 - **Hosting** the web app (needs a long-running server for the playground).
 - Outside test agents; DoraHacks submission.
 

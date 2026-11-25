@@ -14,6 +14,7 @@ export function Footer() {
           <Link href="/#replay">The replay</Link>
           <Link href="/live">Live desk</Link>
           <Link href="/playground">Playground</Link>
+          <Link href="/assistant">Assistant</Link>
         </div>
         <div className="foot-col">
           <p>Learn</p>
