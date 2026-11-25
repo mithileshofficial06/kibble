@@ -148,10 +148,10 @@ export default function ConnectPage() {
                 </select>
               </label>
               <div className="row">
-                <button className="btn" type="submit" disabled={Boolean(problem) || busy || !wallet}>
-                  {busy ? "Working…" : "Create the drawer"}
+                <button className="btn" type="submit" disabled={Boolean(problem) || busy || !wallet || Boolean(drawer)}>
+                  {busy ? "Working…" : drawer ? "Created" : "Create the drawer"}
                 </button>
-                <span className="fine">{problem ?? "Ready."}</span>
+                <span className="fine">{drawer ? "Reload the page to make another." : (problem ?? "Ready.")}</span>
               </div>
             </form>
           </Reveal>

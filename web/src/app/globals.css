@@ -98,7 +98,7 @@ main.shell { padding-top: clamp(36px, 6vh, 64px); padding-bottom: 96px; display:
   position: sticky;
   top: 0;
   z-index: 40;
-  background: rgba(16, 12, 20, 0.72);
+  background: rgba(16, 12, 20, 0.96);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }

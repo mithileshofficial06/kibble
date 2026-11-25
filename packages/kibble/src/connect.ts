@@ -35,7 +35,8 @@ export async function configFor(pub: PublicClient, factory: Address, maxWeeklyLo
     incomeHold: 120n,
     tMin: scaled(demo.tMin),
     maxStep: scaled(demo.maxStep),
-    minActivity: scaled(demo.minActivity),
+    // a batch of sales can straddle two short windows, so a lower floor lets them count
+    minActivity: scaled(demo.minActivity) / 3n,
     slack: scaled(demo.slack),
     unknownBudget: scaled(demo.unknownBudget),
   };

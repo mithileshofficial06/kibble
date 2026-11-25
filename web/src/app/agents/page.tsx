@@ -61,9 +61,9 @@ export default function AgentsPage() {
           <span className="stat-sub">made by this factory</span>
         </div>
         <div className="stat">
-          <span className="stat-label">Not ours</span>
+          <span className="stat-label">Other wallets</span>
           <Num className="big mid" value={list.data ? String(outside.length) : undefined} />
-          <span className="stat-sub">owned by other wallets</span>
+          <span className="stat-sub">not Kibble&apos;s demo wallets; includes the author&apos;s own tests</span>
         </div>
         <div className="stat">
           <span className="stat-label">Owners</span>

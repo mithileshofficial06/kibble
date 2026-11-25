@@ -31,7 +31,7 @@ Done, committed and pushed:
 - **Tests:** 145 pass (139 local, 6 fork); 131 are Kibble's.
 
 Not done:
-- Telegram with a real bot (token from the user). `/connect` with a real wallet (user).
+- Telegram with a real bot (token from the user). `/connect` was tested with a real wallet on testnet by the author on 26 Nov (vault, drawer, approve, fund: all fine; not an outside tester).
 - Outside testers: none yet.
 - **Video (#15), last:** re-record on the new drawers, finish or revert the uncommitted real-model scene, update "97 tests" and every number and address. Don't render until then.
 - **Hosting**, YouTube upload, DoraHacks submission.
