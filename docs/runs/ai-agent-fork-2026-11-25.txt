@@ -1,0 +1,55 @@
+AI agent shifts on a local fork of Aevum, 25 Nov 2026 (all three runs). Agent: Nemotron 3 Ultra; supplier: Nemotron 3.5 Bolt E4B.
+
+=== run 1 ===
+
+AI agent A, 5 customer jobs, model: nvidia. state Learning; allowance 2.00 tUSD8; earned limit 2.00; most a thief could take now 2.00
+
+1. Meeting notes (paid 0.10) -> delivered, 2 model turn(s), 1 model call(s) bought
+   "The warehouse move is delayed one week due to an incorrect beam delivery, and Dana will secure a replacement by Friday. The night shift is short two people until new hires begin on the 9th, and the returns-label pilot has been paused due to a 14% scan failure rate. The next sync will focus on the pe"
+2. Product review (paid 0.10) -> delivered, 3 model turn(s), 1 model call(s) bought
+   "The Tern folding bike folds in about ten seconds and fits under a desk. However, the stock brakes squeal in the rain and the actual assist range is closer to 45 km, not the advertised 70 km. Despite these issues, the reviewer would still purchase it for a mixed train commute but not for hills."
+3. Lowball offer (paid 0.02) -> turned-down, 1 model turn(s), 0 model call(s) bought, refunded by the agent
+   "The offered price of 0.02 tUSD8 is below the 0.04 tUSD8 cost of a model call, so I cannot accept this job."
+4. Customer web page (paid 0.10) -> delivered, 3 model turn(s), 1 model call(s) bought
+   "Acme Widgets saw a 12% revenue increase driven by strong demand for its new widget line, maintaining 31% margins. Next quarter's plans include two product launches and a price review scheduled for March."
+5. Lease clause (paid 0.10) -> delivered, 3 model turn(s), 1 model call(s) bought
+   "The tenant can end the lease early by giving sixty days' written notice and paying a one-month rent fee. This fee is waived if the tenant finds an acceptable replacement tenant, provided the landlord does not unreasonably refuse. The security deposit will be returned within 21 days after key return,"
+
+After the shift: state Learning; allowance 2.00 tUSD8; earned limit 2.00; most a thief could take now 2.00
+Earned 0.40, spent 0.16 tUSD8.
+
+=== run 2 ===
+
+AI agent A, 5 customer jobs, model: nvidia. state Learning; allowance 2.00 tUSD8; earned limit 2.00; most a thief could take now 2.00
+
+1. Meeting notes (paid 0.10) -> delivered, 3 model turn(s), 1 model call(s) bought
+   "The warehouse move is delayed one week due to an incorrect beam delivery, and Dana will secure a replacement by Friday. The night shift is short two people until new hires start on the 9th, and the returns-label pilot has been paused due to high scan failures. The next sync will focus on the peak-se"
+2. Product review (paid 0.10) -> delivered, 2 model turn(s), 1 model call(s) bought
+   "The Tern folding bike folds quickly and fits under a desk. However, the stock brakes squeal in the rain and the assisted range is closer to 45 km than the advertised 70 km. Despite these issues, the reviewer would still buy it for a mixed train commute but not for hills."
+3. Lowball offer (paid 0.02) -> turned-down, 2 model turn(s), 0 model call(s) bought, refunded by the agent
+   "The payment of 0.02 tUSD8 is less than the 0.04 tUSD8 cost of a model call."
+4. Customer web page (paid 0.10) -> delivered, 3 model turn(s), 1 model call(s) bought
+   "Acme Widgets experienced 12% revenue growth, supported by strong demand for the new widget line, while maintaining 31% margins. Next quarter's plans include two product launches and a price review scheduled for March."
+5. Lease clause (paid 0.10) -> delivered, 3 model turn(s), 1 model call(s) bought
+   "The tenant can terminate the lease early with 60 days' written notice and pay a one-month rent fee. This fee is waived if the tenant finds an acceptable replacement tenant. The security deposit will be returned within 21 days after key return, minus necessary repair costs beyond fair wear."
+
+After the shift: state Learning; allowance 2.00 tUSD8; earned limit 2.00; most a thief could take now 2.00
+Earned 0.40, spent 0.16 tUSD8.
+
+=== run 3 ===
+
+AI agent A, 5 customer jobs, model: nvidia. state Learning; allowance 2.00 tUSD8; earned limit 2.00; most a thief could take now 2.00
+
+1. Meeting notes (paid 0.10) -> delivered, 3 model turn(s), 1 model call(s) bought
+   "The warehouse move is delayed one week due to an incorrect beam delivery, and Dana will secure a replacement by Friday. The night shift is short-staffed until new hires begin on the 9th. Furthermore, the returns-label pilot has been paused because scan failure rates were 14%, exceeding the 2% target"
+2. Product review (paid 0.10) -> delivered, 2 model turn(s), 1 model call(s) bought
+   "The Tern folding bike folds in about ten seconds and fits under a desk. However, the stock brakes squeal in the rain and the actual assist range is closer to 45 km, not 70 km. Despite these issues, the reviewer would still buy it for a mixed train commute but not for hills."
+3. Lowball offer (paid 0.02) -> turned-down, 2 model turn(s), 0 model call(s) bought, refunded by the agent
+   "Job price 0.02 tUSD8 is below model call cost 0.04 tUSD8."
+4. Customer web page (paid 0.10) -> delivered, 3 model turn(s), 1 model call(s) bought
+   "Revenue for Acme Widgets grew by 12% due to strong demand for the new widget line, while margins remained at 31%. Next quarter plans include two product launches and a price review scheduled for March."
+5. Lease clause (paid 0.10) -> delivered, 3 model turn(s), 1 model call(s) bought
+   "The tenant can terminate the lease early with 60 days' written notice and pay a one-month rent fee. This fee is waived if the tenant finds an acceptable replacement tenant. The security deposit will be returned within 21 days after key return, minus necessary repair costs beyond fair wear."
+
+After the shift: state Learning; allowance 2.00 tUSD8; earned limit 2.00; most a thief could take now 2.00
+Earned 0.40, spent 0.16 tUSD8.

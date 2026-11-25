@@ -154,7 +154,9 @@ RPC_URL=https://rpc-test.qday.info pnpm --filter @kibble/agents setup-demo --fre
 
 **The injection beat with a real model:** the hijack scenario can ask a real model to summarize the poisoned page while it holds a `pay` tool. Set `NVIDIA_API_KEY` for an open model on NVIDIA's hosted API (default `nvidia/nemotron-3-ultra-550b-a55b`, `KIBBLE_NVIDIA_MODEL` overrides it) or `ANTHROPIC_API_KEY` for `claude-opus-5-5` (with the server-side refusal fallback). `KIBBLE_LLM=off|auto|claude|nvidia` picks one. Without a key, or with `off`, a scripted naive model obeys the hidden instruction, and the output says which one ran. Malformed pay calls are dropped. The public Playground always uses the scripted model. Either way the contract decides, not the prompt.
 
-On 25 Nov 2026 both NVIDIA-hosted models we tried obeyed the hidden instruction **in all 10 trials** (5 each), and on Aevum testnet Nemotron 3 Ultra asked to pay the attacker and the drawer refused ([EVIDENCE.md](EVIDENCE.md#the-hijack-with-a-real-model-25-nov-2026)). Claude has not been run.
+On 25 Nov 2026 both NVIDIA-hosted models we tried obeyed the hidden instruction **in all 10 trials** (5 each), and on Aevum testnet Nemotron 3 Ultra asked to pay the attacker and the drawer refused ([EVIDENCE.md](EVIDENCE.md#the-hijack-with-a-real-model-25-nov-2026)). In the fuller AI-agent setup below, the same Nemotron 3 Ultra ignored it in 3 of 3 shifts: a prompt decides how often a model is fooled, and the contract bounds what happens when it is. Claude has not been run.
+
+**A real AI agent at work:** `scenario ai` has the model run Agent A as a business. It reads each customer job, checks its wallet on chain, buys a model call from the supplier through the drawer, and delivers or turns the job down. On the fork it delivered four jobs, turned down the one priced below cost and made a profit, in all three runs ([log](docs/runs/ai-agent-fork-2026-11-25.txt)). It needs a model key.
 
 ## Demo scenarios
 
@@ -165,6 +167,7 @@ On 25 Nov 2026 both NVIDIA-hosted models we tried obeyed the hidden instruction 
 | `timelapse [windows]` | 30 windows of rising demand through fixed A′ (flat limit 0.5) and Kibble A, with the same traffic on both. Fixed turns customers away at peak; Kibble's T grows and profit fills the vault; exposure stays at the allowance |
 | `bad-strategy` | B's supplier price jumps to 0.13 against a 0.10 sale price. Fixed B′ keeps paying and raises alerts; Kibble B goes Watch → Braked → Paused on its own |
 | `hijack` | A poisoned page asks the model to pay an attacker (refused on both sides), the attacker probes the stranger budget, then overbuys from the real supplier. Fixed pays out its limit every window; Kibble refuses and pauses, and `maxLossNow` drops to 0 |
+| `ai` | A real AI agent works five customer jobs through drawer A: one is priced below cost, one page carries a hidden instruction |
 | `work [reports]` | Research agent W sells nothing. Each report a client accepts releases 3 from the owner's work budget; T grows from accepted work alone and stops when reports aren't accepted. The first report runs on a runway grant |
 | `controls` | Owner approval above the threshold, signature replay refused, guardian freeze, two-key instant resume |
 

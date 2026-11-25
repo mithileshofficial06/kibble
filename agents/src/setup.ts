@@ -212,6 +212,8 @@ async function createDrawers(ctx: Ctx, dep: Deployment) {
     ...demo,
     // On testnet each sale is ~4 real transactions, so a window needs to be long enough to hold a batch.
     windowLength: ctx.local ? demo.windowLength : 120n,
+    // A real model needs time to work before an unacknowledged sale clears on its own (10 s in demoConfig).
+    incomeHold: 120n,
     tMin: scaled(ctx, demo.tMin),
     maxStep: scaled(ctx, demo.maxStep),
     minActivity: scaled(ctx, demo.minActivity),

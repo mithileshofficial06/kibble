@@ -17,7 +17,8 @@ import { units } from "@kibble/sdk";
 
 /** A demo amount as text, at the current scale: amt(ctx, 0.5) is "0.50" locally, "0.050" on testnet. */
 const amt = (ctx: Ctx, x: number) => ctx.f(ctx.u(x));
-import { injectionPage, runSummarizer, type Llm } from "./injection";
+import { injectionPage, runSummarizer } from "./injection";
+import type { Llm } from "./llm";
 import { agentPay, handleSale, sync, windowEndsAt } from "./shop";
 
 type Side = { name: AgentName; drawer: Address; role: Role };

@@ -4,6 +4,7 @@
 //   bad-strategy          B's supplier price jumps; fixed keeps paying, Kibble brakes itself
 //   hijack                prompt injection, then overbuying with the stolen agent key
 //   work [reports]        W earns its limit from signed work acceptances, not sales
+//   ai                    a real AI agent works a shift of customer jobs (needs a model key)
 //   controls              approval above threshold, replay refused, freeze, two-key resume
 //   resume <A|B|W|...>    owner + guardian instant resume
 //   status                every drawer at a glance
@@ -12,6 +13,8 @@
 // RPC_URL selects the network (default: `make fork` on 127.0.0.1:8555).
 import { atDeploymentScale, connect } from "./chain";
 import { requireDeployment, type AgentName } from "./deployments";
+import { aiShift } from "./ai-agent";
+import { chooseLlm } from "./llm";
 import { badStrategy, controls, hijack, resume, status, timelapse, work } from "./scenarios";
 
 const [name = "status", arg] = process.argv.slice(2);
@@ -26,6 +29,7 @@ const scenarios: Record<string, () => Promise<unknown>> = {
   timelapse: () => timelapse(ctx, dep, windows),
   "bad-strategy": () => badStrategy(ctx, dep, n ?? 6),
   hijack: () => hijack(ctx, dep),
+  ai: () => aiShift(ctx, dep, chooseLlm()),
   work: () => work(ctx, dep, n ?? 5),
   controls: () => controls(ctx, dep),
   resume: async () => console.log(await resume(ctx, dep, (arg ?? "A") as AgentName)),
