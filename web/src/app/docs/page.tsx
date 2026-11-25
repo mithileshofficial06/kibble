@@ -145,7 +145,9 @@ export default function DocsPage() {
             <table className="docs-table" tabIndex={0}>
               <thead>
                 <tr>
-                  <th></th>
+                  <th>
+                    <span className="sr-only">What happens</span>
+                  </th>
                   <th>Fixed limit, with alerts</th>
                   <th>Kibble</th>
                 </tr>

@@ -144,7 +144,7 @@ export default function DrawerPage() {
         <SecHead n="03" title="What it *paid.*" note="The latest 25 payments." />
         <Reveal className="card flush">
         {receipts.data?.length ? (
-          <div className="table-wrap" tabIndex={0} role="region" aria-label="Table, scrolls sideways">
+          <div className="table-wrap" tabIndex={0} role="region" aria-label="Payments, scrolls sideways">
             <table className="docs-table mono-cells">
               <thead>
                 <tr>
@@ -201,7 +201,7 @@ export default function DrawerPage() {
             </label>
           </p>
           {history.data?.windows.length ? (
-            <div className="table-wrap" tabIndex={0} role="region" aria-label="Table, scrolls sideways">
+            <div className="table-wrap" tabIndex={0} role="region" aria-label="Track record, scrolls sideways">
               <table className="docs-table mono-cells">
                 <thead>
                   <tr>
