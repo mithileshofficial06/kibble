@@ -7,12 +7,13 @@ pnpm --filter @kibble/agents alerts                  # the demo drawers
 pnpm --filter @kibble/agents alerts 0xYourDrawer     # yours
 ```
 
-Without a bot, alerts print to the console. For Telegram, create a bot with [@BotFather](https://t.me/BotFather), message it once, find your chat ID, and set these in your environment (never in the repo):
+Without a webhook, alerts print to the console. For Discord, open a channel in your own server, then **Settings → Integrations → Webhooks → New Webhook → Copy Webhook URL**, and set it in your environment (never in the repo: anyone with the link can post):
 
 ```
-TELEGRAM_BOT_TOKEN=…
-TELEGRAM_CHAT_ID=…
+DISCORD_WEBHOOK_URL=…
 ```
+
+Then check it with `pnpm --filter @kibble/agents alerts test`, which sends one test message.
 
 | You get | When |
 |---|---|

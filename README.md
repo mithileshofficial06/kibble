@@ -168,7 +168,7 @@ On 25 Nov 2026 both NVIDIA-hosted models we tried obeyed the hidden instruction 
 - [120 simulated agents](docs/simulation.md) through the real contracts (`make sim`).
 - [Security notes and threat model](docs/security.md): Slither, coverage, and what we haven't fixed.
 - [A worked example](docs/customer-story.md): a small business in numbers (illustrative people, real runs).
-- [Alerts](docs/alerts.md) on Telegram or the console, for the quiet attacks a pause doesn't catch.
+- [Alerts](docs/alerts.md) on Discord or the console, for the quiet attacks a pause doesn't catch.
 
 ## The app in two minutes
 
@@ -297,7 +297,7 @@ Checked on chain on 22 Nov 2026:
 - Signed processor attestations for off-chain revenue.
 - Many agents per owner with one total loss budget.
 - ML-DSA guardian for the vault once QDay's precompile ships.
-- Alerts (Telegram, email) on state changes.
+- Alerts by email and other channels (Discord works today).
 
 ## Credits and license
 

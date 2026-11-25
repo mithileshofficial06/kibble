@@ -1,9 +1,11 @@
-// Watch drawers and message the owner (Telegram, or the console when no bot is set up).
+// Watch drawers and message the owner (Discord, or the console when no webhook is set up).
 //
 //   pnpm --filter @kibble/agents alerts [0xDrawer …]      (default: the demo drawers)
+//   pnpm --filter @kibble/agents alerts test              send one test message
 //
-// TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID turn Telegram on. ALERT_POLL_S (default 20) sets how often to look.
+// DISCORD_WEBHOOK_URL turns Discord on (the link is a secret: anyone with it can post). ALERT_POLL_S (default 20) sets how often to look.
 // It only reads the chain: it holds no key and can't act.
+import { existsSync, readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { createPublicClient, http, isAddress, type Address, type PublicClient } from "viem";
 import { decodeDrawerLogsFrom, fmt, readDrawer, REASON_TEXT, REASONS, STATES, type DrawerView, type ReasonName } from "@kibble/sdk";
@@ -57,36 +59,63 @@ export function messagesFor(name: string, events: Event[], v: DrawerView): Messa
   return out;
 }
 
-export async function send(msgs: Message[], env: Record<string, string | undefined> = process.env): Promise<void> {
-  if (!msgs.length) return;
-  const icon = { info: "ℹ️", warn: "⚠️", stop: "🛑" } as const;
-  const text = msgs.map((x) => `${icon[x.level]} ${x.text}`).join("\n").slice(0, 3_900);
-  const token = env.TELEGRAM_BOT_TOKEN?.trim();
-  const chat = env.TELEGRAM_CHAT_ID?.trim();
-  if (!token || !chat) {
-    console.log(text);
-    return;
+/** Only a real Discord webhook is ever posted to (DISCORD_API replaces the host in tests). */
+function webhook(env: Record<string, string | undefined>): string | null {
+  const url = env.DISCORD_WEBHOOK_URL?.trim();
+  if (!url) return null;
+  const m = /^https:\/\/(?:www\.)?(?:ptb\.|canary\.)?discord(?:app)?\.com(\/api\/webhooks\/\d+\/[\w-]+)$/.exec(url);
+  if (!m) {
+    console.error("DISCORD_WEBHOOK_URL isn't a Discord webhook link. Alerts stay on this console.");
+    return null;
   }
-  const base = env.TELEGRAM_API?.trim() || "https://api.telegram.org";
-  for (let attempt = 0; attempt < 3; attempt++) {
+  return (env.DISCORD_API?.trim() || "https://discord.com") + m[1];
+}
+
+const ICON = { info: "ℹ️", warn: "⚠️", stop: "🛑" } as const;
+const COLOR = { info: 0x6ee7a8, warn: 0xffb000, stop: 0xff4d3d } as const;
+
+/** Post to Discord, or print when there's no webhook or Discord can't be reached. True if it was delivered. */
+export async function send(msgs: Message[], env: Record<string, string | undefined> = process.env): Promise<boolean> {
+  if (!msgs.length) return true;
+  const text = msgs.map((x) => `${ICON[x.level]} ${x.text}`).join("\n").slice(0, 3_900);
+  const url = webhook(env);
+  if (!url) {
+    console.log(text);
+    return false;
+  }
+  const worst = msgs.some((x) => x.level === "stop") ? "stop" : msgs.some((x) => x.level === "warn") ? "warn" : "info";
+  const body = JSON.stringify({
+    username: "Kibble",
+    embeds: [{ title: worst === "stop" ? "An agent was stopped" : worst === "warn" ? "Something needs a look" : "Update", description: text, color: COLOR[worst], timestamp: new Date().toISOString() }],
+    allowed_mentions: { parse: [] }, // nothing on chain can ping anyone
+  });
+  for (let attempt = 0; attempt < 4; attempt++) {
+    let wait = 1_000 * 2 ** attempt;
     try {
-      const r = await fetch(`${base}/bot${token}/sendMessage`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ chat_id: chat, text, disable_web_page_preview: true }),
-        signal: AbortSignal.timeout(15_000),
-      });
-      if (r.ok) return;
-      if (r.status === 401 || r.status === 400 || r.status === 403) {
-        console.error(`Telegram refused the message (${r.status}). Check the bot token and chat ID.`);
+      const r = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body, redirect: "error", signal: AbortSignal.timeout(15_000) });
+      if (r.ok) return true;
+      if (r.status === 429) {
+        const j = (await r.json().catch(() => ({}))) as { retry_after?: number };
+        wait = Math.min(30_000, Math.max(500, (j.retry_after ?? 1) * 1_000));
+      } else if (r.status >= 400 && r.status < 500) {
+        console.error(`Discord refused the message (${r.status}). Check the webhook link.`);
         break;
       }
     } catch {
-      // try again below; never print the error, its URL contains the token
+      // try again below; never print the error, the link in it is a secret
     }
-    await new Promise((res) => setTimeout(res, 1_000 * 2 ** attempt));
+    await new Promise((res) => setTimeout(res, wait));
   }
   console.log(text);
+  return false;
+}
+
+/** The webhook from the environment, or (locally) only that one line of the wallets file. */
+function loadWebhook() {
+  const file = process.env.KIBBLE_WALLETS?.trim() || "D:/Tools/kibble-wallets/.env";
+  if (process.env.DISCORD_WEBHOOK_URL || !existsSync(file)) return;
+  const m = /^DISCORD_WEBHOOK_URL=(.+)$/m.exec(readFileSync(file, "utf8"));
+  if (m) process.env.DISCORD_WEBHOOK_URL = m[1].trim();
 }
 
 const SPAN = 1_000n;
@@ -108,6 +137,12 @@ export async function look(pub: PublicClient, drawers: [string, Address][], from
 }
 
 async function main() {
+  loadWebhook();
+  if (process.argv[2] === "test") {
+    const ok = await send([{ level: "info", text: "Kibble alerts are connected. This is a test." }]);
+    console.log(ok ? "Delivered to Discord." : "Not delivered to Discord (see above).");
+    process.exit(ok ? 0 : 1);
+  }
   const rpc = process.env.RPC_URL?.trim() || "https://rpc-test.qday.info";
   const pub = createPublicClient({ transport: http(rpc) }) as PublicClient;
   const chainId = await pub.getChainId();
@@ -117,8 +152,8 @@ async function main() {
     ? args.map((a) => [`Agent ${a.slice(0, 6)}…${a.slice(-4)}`, a])
     : (Object.entries(dep?.drawers ?? {}) as [AgentName, Address][]).map(([n, a]) => [`Agent ${n.replace("_FIXED", "′")}`, a]);
   if (!drawers.length) throw new Error("Nothing to watch: pass drawer addresses.");
-  const on = Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID);
-  console.log(`Watching ${drawers.length} drawer(s) on chain ${chainId}; alerts go to ${on ? "Telegram" : "this console"}.`);
+  const on = Boolean(webhook(process.env));
+  console.log(`Watching ${drawers.length} drawer(s) on chain ${chainId}; alerts go to ${on ? "Discord" : "this console"}.`);
   let next = (await pub.getBlockNumber()) + 1n;
   const every = Math.max(5, Number(process.env.ALERT_POLL_S ?? 20)) * 1000;
   for (;;) {
