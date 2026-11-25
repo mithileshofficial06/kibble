@@ -1,0 +1,1520 @@
+{
+ "total": 136.09,
+ "scenes": [
+  {
+   "id": "spend",
+   "chapter": 1,
+   "from": 0.0,
+   "dur": 8.44,
+   "text": "AI agents have started to spend money, all by themselves. So who decides how much?",
+   "captions": [
+    {
+     "t": 1.69,
+     "text": "AI agents have started to spend money,"
+    },
+    {
+     "t": 3.94,
+     "text": "all by themselves."
+    },
+    {
+     "t": 5.39,
+     "text": "So who decides how much?"
+    }
+   ],
+   "words": [
+    {
+     "w": "AI",
+     "t": 1.69
+    },
+    {
+     "w": "agents",
+     "t": 2.08
+    },
+    {
+     "w": "have",
+     "t": 2.46
+    },
+    {
+     "w": "started",
+     "t": 2.6
+    },
+    {
+     "w": "to",
+     "t": 2.91
+    },
+    {
+     "w": "spend",
+     "t": 2.98
+    },
+    {
+     "w": "money",
+     "t": 3.29
+    },
+    {
+     "w": "all",
+     "t": 3.94
+    },
+    {
+     "w": "by",
+     "t": 4.18
+    },
+    {
+     "w": "themselves",
+     "t": 4.31
+    },
+    {
+     "w": "So",
+     "t": 5.39
+    },
+    {
+     "w": "who",
+     "t": 6.19
+    },
+    {
+     "w": "decides",
+     "t": 6.34
+    },
+    {
+     "w": "how",
+     "t": 6.82
+    },
+    {
+     "w": "much",
+     "t": 7.0
+    }
+   ]
+  },
+  {
+   "id": "guess",
+   "chapter": 1,
+   "from": 8.44,
+   "dur": 7.14,
+   "text": "Usually, we pick a number. Fifty a day, every day. But a fixed limit is only a guess.",
+   "captions": [
+    {
+     "t": 0.35,
+     "text": "Usually, we pick a number."
+    },
+    {
+     "t": 2.05,
+     "text": "Fifty a day, every day."
+    },
+    {
+     "t": 4.01,
+     "text": "But a fixed limit is only a guess."
+    }
+   ],
+   "words": [
+    {
+     "w": "Usually",
+     "t": 0.35
+    },
+    {
+     "w": "we",
+     "t": 0.79
+    },
+    {
+     "w": "pick",
+     "t": 0.93
+    },
+    {
+     "w": "a",
+     "t": 1.1
+    },
+    {
+     "w": "number",
+     "t": 1.15
+    },
+    {
+     "w": "Fifty",
+     "t": 2.05
+    },
+    {
+     "w": "a",
+     "t": 2.34
+    },
+    {
+     "w": "day",
+     "t": 2.41
+    },
+    {
+     "w": "every",
+     "t": 2.97
+    },
+    {
+     "w": "day",
+     "t": 3.26
+    },
+    {
+     "w": "But",
+     "t": 4.01
+    },
+    {
+     "w": "a",
+     "t": 4.12
+    },
+    {
+     "w": "fixed",
+     "t": 4.17
+    },
+    {
+     "w": "limit",
+     "t": 4.54
+    },
+    {
+     "w": "is",
+     "t": 4.92
+    },
+    {
+     "w": "only",
+     "t": 5.25
+    },
+    {
+     "w": "a",
+     "t": 5.6
+    },
+    {
+     "w": "guess",
+     "t": 5.67
+    }
+   ]
+  },
+  {
+   "id": "box",
+   "chapter": 2,
+   "from": 15.58,
+   "dur": 8.536,
+   "text": "Kibble works differently. The agent's money sits in a cash box. The agent can't open it. It can only ask.",
+   "captions": [
+    {
+     "t": 0.56,
+     "text": "Kibble works differently."
+    },
+    {
+     "t": 2.15,
+     "text": "The agent's money sits in a cash box."
+    },
+    {
+     "t": 4.86,
+     "text": "The agent can't open it."
+    },
+    {
+     "t": 6.64,
+     "text": "It can only ask."
+    }
+   ],
+   "words": [
+    {
+     "w": "Kibble",
+     "t": 0.56
+    },
+    {
+     "w": "works",
+     "t": 0.88
+    },
+    {
+     "w": "differently",
+     "t": 1.2
+    },
+    {
+     "w": "The",
+     "t": 2.15
+    },
+    {
+     "w": "agent's",
+     "t": 2.3
+    },
+    {
+     "w": "money",
+     "t": 2.75
+    },
+    {
+     "w": "sits",
+     "t": 3.2
+    },
+    {
+     "w": "in",
+     "t": 3.51
+    },
+    {
+     "w": "a",
+     "t": 3.61
+    },
+    {
+     "w": "cash",
+     "t": 3.67
+    },
+    {
+     "w": "box",
+     "t": 4.04
+    },
+    {
+     "w": "The",
+     "t": 4.86
+    },
+    {
+     "w": "agent",
+     "t": 5.08
+    },
+    {
+     "w": "can't",
+     "t": 5.54
+    },
+    {
+     "w": "open",
+     "t": 5.78
+    },
+    {
+     "w": "it",
+     "t": 6.03
+    },
+    {
+     "w": "It",
+     "t": 6.64
+    },
+    {
+     "w": "can",
+     "t": 6.74
+    },
+    {
+     "w": "only",
+     "t": 6.92
+    },
+    {
+     "w": "ask",
+     "t": 7.22
+    }
+   ]
+  },
+  {
+   "id": "sale",
+   "chapter": 2,
+   "from": 24.116,
+   "dur": 9.216,
+   "text": "A customer pays into the box. The agent asks to buy what the job needs. The box checks, and pays the supplier.",
+   "captions": [
+    {
+     "t": 0.49,
+     "text": "A customer pays into the box."
+    },
+    {
+     "t": 2.7,
+     "text": "The agent asks to buy what the job needs."
+    },
+    {
+     "t": 5.56,
+     "text": "The box checks, and pays the supplier."
+    }
+   ],
+   "words": [
+    {
+     "w": "A",
+     "t": 0.49
+    },
+    {
+     "w": "customer",
+     "t": 0.57
+    },
+    {
+     "w": "pays",
+     "t": 1.11
+    },
+    {
+     "w": "into",
+     "t": 1.51
+    },
+    {
+     "w": "the",
+     "t": 1.7
+    },
+    {
+     "w": "box",
+     "t": 1.79
+    },
+    {
+     "w": "The",
+     "t": 2.7
+    },
+    {
+     "w": "agent",
+     "t": 2.85
+    },
+    {
+     "w": "asks",
+     "t": 3.19
+    },
+    {
+     "w": "to",
+     "t": 3.6
+    },
+    {
+     "w": "buy",
+     "t": 3.74
+    },
+    {
+     "w": "what",
+     "t": 4.06
+    },
+    {
+     "w": "the",
+     "t": 4.25
+    },
+    {
+     "w": "job",
+     "t": 4.34
+    },
+    {
+     "w": "needs",
+     "t": 4.65
+    },
+    {
+     "w": "The",
+     "t": 5.56
+    },
+    {
+     "w": "box",
+     "t": 5.62
+    },
+    {
+     "w": "checks",
+     "t": 5.96
+    },
+    {
+     "w": "and",
+     "t": 6.65
+    },
+    {
+     "w": "pays",
+     "t": 7.05
+    },
+    {
+     "w": "the",
+     "t": 7.35
+    },
+    {
+     "w": "supplier",
+     "t": 7.45
+    }
+   ]
+  },
+  {
+   "id": "vault",
+   "chapter": 2,
+   "from": 33.332,
+   "dur": 6.976,
+   "text": "And when the customer is happy, the profit drops into your vault. A place the agent can never reach.",
+   "captions": [
+    {
+     "t": 0.39,
+     "text": "And when the customer is happy,"
+    },
+    {
+     "t": 2.16,
+     "text": "the profit drops into your vault."
+    },
+    {
+     "t": 4.03,
+     "text": "A place the agent can never reach."
+    }
+   ],
+   "words": [
+    {
+     "w": "And",
+     "t": 0.39
+    },
+    {
+     "w": "when",
+     "t": 0.65
+    },
+    {
+     "w": "the",
+     "t": 0.76
+    },
+    {
+     "w": "customer",
+     "t": 0.84
+    },
+    {
+     "w": "is",
+     "t": 1.3
+    },
+    {
+     "w": "happy",
+     "t": 1.41
+    },
+    {
+     "w": "the",
+     "t": 2.16
+    },
+    {
+     "w": "profit",
+     "t": 2.25
+    },
+    {
+     "w": "drops",
+     "t": 2.62
+    },
+    {
+     "w": "into",
+     "t": 2.96
+    },
+    {
+     "w": "your",
+     "t": 3.15
+    },
+    {
+     "w": "vault",
+     "t": 3.22
+    },
+    {
+     "w": "A",
+     "t": 4.03
+    },
+    {
+     "w": "place",
+     "t": 4.1
+    },
+    {
+     "w": "the",
+     "t": 4.45
+    },
+    {
+     "w": "agent",
+     "t": 4.54
+    },
+    {
+     "w": "can",
+     "t": 5.01
+    },
+    {
+     "w": "never",
+     "t": 5.17
+    },
+    {
+     "w": "reach",
+     "t": 5.46
+    }
+   ]
+  },
+  {
+   "id": "limit",
+   "chapter": 2,
+   "from": 40.308,
+   "dur": 7.588,
+   "text": "Nobody guesses the limit. It is earned. Every good round lifts it. Every loss lowers it.",
+   "captions": [
+    {
+     "t": 0.39,
+     "text": "Nobody guesses the limit."
+    },
+    {
+     "t": 2.2,
+     "text": "It is earned."
+    },
+    {
+     "t": 3.35,
+     "text": "Every good round lifts it."
+    },
+    {
+     "t": 5.06,
+     "text": "Every loss lowers it."
+    }
+   ],
+   "words": [
+    {
+     "w": "Nobody",
+     "t": 0.39
+    },
+    {
+     "w": "guesses",
+     "t": 0.86
+    },
+    {
+     "w": "the",
+     "t": 1.24
+    },
+    {
+     "w": "limit",
+     "t": 1.35
+    },
+    {
+     "w": "It",
+     "t": 2.2
+    },
+    {
+     "w": "is",
+     "t": 2.3
+    },
+    {
+     "w": "earned",
+     "t": 2.46
+    },
+    {
+     "w": "Every",
+     "t": 3.35
+    },
+    {
+     "w": "good",
+     "t": 3.61
+    },
+    {
+     "w": "round",
+     "t": 3.8
+    },
+    {
+     "w": "lifts",
+     "t": 4.14
+    },
+    {
+     "w": "it",
+     "t": 4.41
+    },
+    {
+     "w": "Every",
+     "t": 5.06
+    },
+    {
+     "w": "loss",
+     "t": 5.38
+    },
+    {
+     "w": "lowers",
+     "t": 5.71
+    },
+    {
+     "w": "it",
+     "t": 6.08
+    }
+   ]
+  },
+  {
+   "id": "busy",
+   "chapter": 3,
+   "from": 47.896,
+   "dur": 17.376,
+   "text": "Now let's put them side by side. The same customers, on the same busy day. On the left, the fixed limit runs out, and people are turned away. On the right, Kibble serves every one of them, and its limit keeps climbing.",
+   "captions": [
+    {
+     "t": 0.89,
+     "text": "Now let's put them side by side."
+    },
+    {
+     "t": 3.47,
+     "text": "The same customers, on the same busy day."
+    },
+    {
+     "t": 6.56,
+     "text": "On the left, the fixed limit runs out,"
+    },
+    {
+     "t": 9.04,
+     "text": "and people are turned away."
+    },
+    {
+     "t": 10.74,
+     "text": "On the right, Kibble serves every one of them,"
+    },
+    {
+     "t": 13.62,
+     "text": "and its limit keeps climbing."
+    }
+   ],
+   "words": [
+    {
+     "w": "Now",
+     "t": 0.89
+    },
+    {
+     "w": "let's",
+     "t": 1.59
+    },
+    {
+     "w": "put",
+     "t": 1.77
+    },
+    {
+     "w": "them",
+     "t": 1.94
+    },
+    {
+     "w": "side",
+     "t": 2.09
+    },
+    {
+     "w": "by",
+     "t": 2.44
+    },
+    {
+     "w": "side",
+     "t": 2.59
+    },
+    {
+     "w": "The",
+     "t": 3.47
+    },
+    {
+     "w": "same",
+     "t": 3.58
+    },
+    {
+     "w": "customers",
+     "t": 3.96
+    },
+    {
+     "w": "on",
+     "t": 4.88
+    },
+    {
+     "w": "the",
+     "t": 5.01
+    },
+    {
+     "w": "same",
+     "t": 5.1
+    },
+    {
+     "w": "busy",
+     "t": 5.56
+    },
+    {
+     "w": "day",
+     "t": 5.83
+    },
+    {
+     "w": "On",
+     "t": 6.56
+    },
+    {
+     "w": "the",
+     "t": 6.69
+    },
+    {
+     "w": "left",
+     "t": 6.75
+    },
+    {
+     "w": "the",
+     "t": 7.46
+    },
+    {
+     "w": "fixed",
+     "t": 7.59
+    },
+    {
+     "w": "limit",
+     "t": 8.06
+    },
+    {
+     "w": "runs",
+     "t": 8.43
+    },
+    {
+     "w": "out",
+     "t": 8.71
+    },
+    {
+     "w": "and",
+     "t": 9.04
+    },
+    {
+     "w": "people",
+     "t": 9.23
+    },
+    {
+     "w": "are",
+     "t": 9.54
+    },
+    {
+     "w": "turned",
+     "t": 9.66
+    },
+    {
+     "w": "away",
+     "t": 9.9
+    },
+    {
+     "w": "On",
+     "t": 10.74
+    },
+    {
+     "w": "the",
+     "t": 10.86
+    },
+    {
+     "w": "right",
+     "t": 10.94
+    },
+    {
+     "w": "Kibble",
+     "t": 11.62
+    },
+    {
+     "w": "serves",
+     "t": 11.94
+    },
+    {
+     "w": "every",
+     "t": 12.39
+    },
+    {
+     "w": "one",
+     "t": 12.7
+    },
+    {
+     "w": "of",
+     "t": 12.88
+    },
+    {
+     "w": "them",
+     "t": 12.95
+    },
+    {
+     "w": "and",
+     "t": 13.62
+    },
+    {
+     "w": "its",
+     "t": 13.96
+    },
+    {
+     "w": "limit",
+     "t": 14.11
+    },
+    {
+     "w": "keeps",
+     "t": 14.59
+    },
+    {
+     "w": "climbing",
+     "t": 14.89
+    }
+   ]
+  },
+  {
+   "id": "loss",
+   "chapter": 4,
+   "from": 65.272,
+   "dur": 20.568,
+   "text": "Next, a bad day. The supplier raises its price, and every sale now loses money. The fixed limit keeps on paying, until a person steps in. Kibble's wallet doesn't wait. Strike one. Strike two. Strike three. Then it stops the agent, by itself.",
+   "captions": [
+    {
+     "t": 0.88,
+     "text": "Next, a bad day."
+    },
+    {
+     "t": 2.64,
+     "text": "The supplier raises its price, and every sale now loses money."
+    },
+    {
+     "t": 7.06,
+     "text": "The fixed limit keeps on paying,"
+    },
+    {
+     "t": 8.99,
+     "text": "until a person steps in."
+    },
+    {
+     "t": 10.64,
+     "text": "Kibble's wallet doesn't wait."
+    },
+    {
+     "t": 12.56,
+     "text": "Strike one."
+    },
+    {
+     "t": 13.66,
+     "text": "Strike two."
+    },
+    {
+     "t": 14.88,
+     "text": "Strike three."
+    },
+    {
+     "t": 16.23,
+     "text": "Then it stops the agent, by itself."
+    }
+   ],
+   "words": [
+    {
+     "w": "Next",
+     "t": 0.88
+    },
+    {
+     "w": "a",
+     "t": 1.49
+    },
+    {
+     "w": "bad",
+     "t": 1.59
+    },
+    {
+     "w": "day",
+     "t": 1.9
+    },
+    {
+     "w": "The",
+     "t": 2.64
+    },
+    {
+     "w": "supplier",
+     "t": 2.7
+    },
+    {
+     "w": "raises",
+     "t": 3.24
+    },
+    {
+     "w": "its",
+     "t": 3.55
+    },
+    {
+     "w": "price",
+     "t": 3.69
+    },
+    {
+     "w": "and",
+     "t": 4.53
+    },
+    {
+     "w": "every",
+     "t": 4.88
+    },
+    {
+     "w": "sale",
+     "t": 5.16
+    },
+    {
+     "w": "now",
+     "t": 5.64
+    },
+    {
+     "w": "loses",
+     "t": 5.9
+    },
+    {
+     "w": "money",
+     "t": 6.26
+    },
+    {
+     "w": "The",
+     "t": 7.06
+    },
+    {
+     "w": "fixed",
+     "t": 7.15
+    },
+    {
+     "w": "limit",
+     "t": 7.6
+    },
+    {
+     "w": "keeps",
+     "t": 7.97
+    },
+    {
+     "w": "on",
+     "t": 8.26
+    },
+    {
+     "w": "paying",
+     "t": 8.43
+    },
+    {
+     "w": "until",
+     "t": 8.99
+    },
+    {
+     "w": "a",
+     "t": 9.23
+    },
+    {
+     "w": "person",
+     "t": 9.29
+    },
+    {
+     "w": "steps",
+     "t": 9.65
+    },
+    {
+     "w": "in",
+     "t": 10.0
+    },
+    {
+     "w": "Kibble's",
+     "t": 10.64
+    },
+    {
+     "w": "wallet",
+     "t": 11.06
+    },
+    {
+     "w": "doesn't",
+     "t": 11.55
+    },
+    {
+     "w": "wait",
+     "t": 11.81
+    },
+    {
+     "w": "Strike",
+     "t": 12.56
+    },
+    {
+     "w": "one",
+     "t": 12.96
+    },
+    {
+     "w": "Strike",
+     "t": 13.66
+    },
+    {
+     "w": "two",
+     "t": 14.1
+    },
+    {
+     "w": "Strike",
+     "t": 14.88
+    },
+    {
+     "w": "three",
+     "t": 15.36
+    },
+    {
+     "w": "Then",
+     "t": 16.23
+    },
+    {
+     "w": "it",
+     "t": 16.35
+    },
+    {
+     "w": "stops",
+     "t": 16.45
+    },
+    {
+     "w": "the",
+     "t": 16.84
+    },
+    {
+     "w": "agent",
+     "t": 16.94
+    },
+    {
+     "w": "by",
+     "t": 17.65
+    },
+    {
+     "w": "itself",
+     "t": 17.89
+    }
+   ]
+  },
+  {
+   "id": "thief",
+   "chapter": 5,
+   "from": 85.84,
+   "dur": 5.504,
+   "text": "And now, the worst day. A thief steals the agent's key.",
+   "captions": [
+    {
+     "t": 0.88,
+     "text": "And now, the worst day."
+    },
+    {
+     "t": 2.64,
+     "text": "A thief steals the agent's key."
+    }
+   ],
+   "words": [
+    {
+     "w": "And",
+     "t": 0.88
+    },
+    {
+     "w": "now",
+     "t": 1.01
+    },
+    {
+     "w": "the",
+     "t": 1.44
+    },
+    {
+     "w": "worst",
+     "t": 1.55
+    },
+    {
+     "w": "day",
+     "t": 1.88
+    },
+    {
+     "w": "A",
+     "t": 2.64
+    },
+    {
+     "w": "thief",
+     "t": 2.73
+    },
+    {
+     "w": "steals",
+     "t": 3.1
+    },
+    {
+     "w": "the",
+     "t": 3.59
+    },
+    {
+     "w": "agent's",
+     "t": 3.69
+    },
+    {
+     "w": "key",
+     "t": 4.16
+    }
+   ]
+  },
+  {
+   "id": "grab",
+   "chapter": 5,
+   "from": 91.344,
+   "dur": 15.792,
+   "text": "On the left, the thief simply spends the limit, round after round. On the right, every grab hits the wall. Refused. Refused. And then the box locks itself. The thief walks away with nothing.",
+   "captions": [
+    {
+     "t": 0.28,
+     "text": "On the left, the thief simply spends the limit,"
+    },
+    {
+     "t": 3.75,
+     "text": "round after round."
+    },
+    {
+     "t": 5.11,
+     "text": "On the right, every grab hits the wall."
+    },
+    {
+     "t": 7.64,
+     "text": "Refused."
+    },
+    {
+     "t": 8.76,
+     "text": "Refused."
+    },
+    {
+     "t": 9.89,
+     "text": "And then the box locks itself."
+    },
+    {
+     "t": 11.92,
+     "text": "The thief walks away with nothing."
+    }
+   ],
+   "words": [
+    {
+     "w": "On",
+     "t": 0.28
+    },
+    {
+     "w": "the",
+     "t": 0.4
+    },
+    {
+     "w": "left",
+     "t": 0.5
+    },
+    {
+     "w": "the",
+     "t": 1.36
+    },
+    {
+     "w": "thief",
+     "t": 1.49
+    },
+    {
+     "w": "simply",
+     "t": 1.88
+    },
+    {
+     "w": "spends",
+     "t": 2.44
+    },
+    {
+     "w": "the",
+     "t": 2.81
+    },
+    {
+     "w": "limit",
+     "t": 2.94
+    },
+    {
+     "w": "round",
+     "t": 3.75
+    },
+    {
+     "w": "after",
+     "t": 4.05
+    },
+    {
+     "w": "round",
+     "t": 4.34
+    },
+    {
+     "w": "On",
+     "t": 5.11
+    },
+    {
+     "w": "the",
+     "t": 5.26
+    },
+    {
+     "w": "right",
+     "t": 5.33
+    },
+    {
+     "w": "every",
+     "t": 5.85
+    },
+    {
+     "w": "grab",
+     "t": 6.12
+    },
+    {
+     "w": "hits",
+     "t": 6.51
+    },
+    {
+     "w": "the",
+     "t": 6.79
+    },
+    {
+     "w": "wall",
+     "t": 6.91
+    },
+    {
+     "w": "Refused",
+     "t": 7.64
+    },
+    {
+     "w": "Refused",
+     "t": 8.76
+    },
+    {
+     "w": "And",
+     "t": 9.89
+    },
+    {
+     "w": "then",
+     "t": 10.01
+    },
+    {
+     "w": "the",
+     "t": 10.2
+    },
+    {
+     "w": "box",
+     "t": 10.31
+    },
+    {
+     "w": "locks",
+     "t": 10.67
+    },
+    {
+     "w": "itself",
+     "t": 11.0
+    },
+    {
+     "w": "The",
+     "t": 11.92
+    },
+    {
+     "w": "thief",
+     "t": 12.01
+    },
+    {
+     "w": "walks",
+     "t": 12.47
+    },
+    {
+     "w": "away",
+     "t": 12.77
+    },
+    {
+     "w": "with",
+     "t": 13.11
+    },
+    {
+     "w": "nothing",
+     "t": 13.27
+    }
+   ]
+  },
+  {
+   "id": "honest",
+   "chapter": 6,
+   "from": 107.136,
+   "dur": 11.516,
+   "text": "Is it perfect? No. A patient thief, taking tiny amounts, isn't always stopped. So Kibble alerts you, and one button freezes everything.",
+   "captions": [
+    {
+     "t": 0.57,
+     "text": "Is it perfect?"
+    },
+    {
+     "t": 1.86,
+     "text": "No."
+    },
+    {
+     "t": 2.71,
+     "text": "A patient thief, taking tiny amounts,"
+    },
+    {
+     "t": 5.67,
+     "text": "isn't always stopped."
+    },
+    {
+     "t": 7.24,
+     "text": "So Kibble alerts you, and one button freezes everything."
+    }
+   ],
+   "words": [
+    {
+     "w": "Is",
+     "t": 0.57
+    },
+    {
+     "w": "it",
+     "t": 0.69
+    },
+    {
+     "w": "perfect",
+     "t": 0.82
+    },
+    {
+     "w": "No.",
+     "t": 1.86
+    },
+    {
+     "w": "A",
+     "t": 2.71
+    },
+    {
+     "w": "patient",
+     "t": 2.79
+    },
+    {
+     "w": "thief",
+     "t": 3.29
+    },
+    {
+     "w": "taking",
+     "t": 4.0
+    },
+    {
+     "w": "tiny",
+     "t": 4.35
+    },
+    {
+     "w": "amounts",
+     "t": 4.83
+    },
+    {
+     "w": "isn't",
+     "t": 5.67
+    },
+    {
+     "w": "always",
+     "t": 5.94
+    },
+    {
+     "w": "stopped",
+     "t": 6.31
+    },
+    {
+     "w": "So",
+     "t": 7.24
+    },
+    {
+     "w": "Kibble",
+     "t": 7.49
+    },
+    {
+     "w": "alerts",
+     "t": 7.8
+    },
+    {
+     "w": "you",
+     "t": 8.19
+    },
+    {
+     "w": "and",
+     "t": 8.7
+    },
+    {
+     "w": "one",
+     "t": 8.9
+    },
+    {
+     "w": "button",
+     "t": 9.18
+    },
+    {
+     "w": "freezes",
+     "t": 9.47
+    },
+    {
+     "w": "everything",
+     "t": 9.97
+    }
+   ]
+  },
+  {
+   "id": "keys",
+   "chapter": 6,
+   "from": 118.652,
+   "dur": 8.588,
+   "text": "To start again takes two keys. Yours, and your guardian's. One stolen key is never enough.",
+   "captions": [
+    {
+     "t": 0.39,
+     "text": "To start again takes two keys."
+    },
+    {
+     "t": 2.79,
+     "text": "Yours, and your guardian's."
+    },
+    {
+     "t": 4.83,
+     "text": "One stolen key is never enough."
+    }
+   ],
+   "words": [
+    {
+     "w": "To",
+     "t": 0.39
+    },
+    {
+     "w": "start",
+     "t": 0.46
+    },
+    {
+     "w": "again",
+     "t": 0.8
+    },
+    {
+     "w": "takes",
+     "t": 1.2
+    },
+    {
+     "w": "two",
+     "t": 1.57
+    },
+    {
+     "w": "keys",
+     "t": 1.78
+    },
+    {
+     "w": "Yours",
+     "t": 2.79
+    },
+    {
+     "w": "and",
+     "t": 3.45
+    },
+    {
+     "w": "your",
+     "t": 3.62
+    },
+    {
+     "w": "guardian's",
+     "t": 3.74
+    },
+    {
+     "w": "One",
+     "t": 4.83
+    },
+    {
+     "w": "stolen",
+     "t": 5.14
+    },
+    {
+     "w": "key",
+     "t": 5.67
+    },
+    {
+     "w": "is",
+     "t": 6.11
+    },
+    {
+     "w": "never",
+     "t": 6.5
+    },
+    {
+     "w": "enough",
+     "t": 6.95
+    }
+   ]
+  },
+  {
+   "id": "end",
+   "chapter": 7,
+   "from": 127.24,
+   "dur": 8.852,
+   "text": "So don't give your agent a budget. Let it earn one.",
+   "captions": [
+    {
+     "t": 0.9,
+     "text": "So don't give your agent a budget."
+    },
+    {
+     "t": 2.99,
+     "text": "Let it earn one."
+    }
+   ],
+   "words": [
+    {
+     "w": "So",
+     "t": 0.9
+    },
+    {
+     "w": "don't",
+     "t": 1.21
+    },
+    {
+     "w": "give",
+     "t": 1.43
+    },
+    {
+     "w": "your",
+     "t": 1.55
+    },
+    {
+     "w": "agent",
+     "t": 1.77
+    },
+    {
+     "w": "a",
+     "t": 2.09
+    },
+    {
+     "w": "budget",
+     "t": 2.12
+    },
+    {
+     "w": "Let",
+     "t": 2.99
+    },
+    {
+     "w": "it",
+     "t": 3.16
+    },
+    {
+     "w": "earn",
+     "t": 3.33
+    },
+    {
+     "w": "one",
+     "t": 3.59
+    }
+   ]
+  }
+ ]
+}

@@ -32,6 +32,8 @@ Done, committed and pushed:
 
 - **UI made understandable (26 Nov):** animated two-lane story (live runs, instant replays, guided `/tour`), a plain “why” for every agent, plain names and hints, three-card owner controls with a guided two-key restart (signatures survive account switches and reloads), corrected landing claims. Checked: nine wallet checks on the fork with a simulated wallet, a live Playground run on the fork, 0 axe violations on desktop and phone. Replays are recorded on the fork and say so.
 
+- **3D film (26 Nov):** `/tour` plays by itself in real-time 3D with narration, score, captions and chapters (2:16), and “Try it” plays the three stories in 3D one after another. Comparisons use the recorded fork runs and say so; the explaining parts are marked “How it works”. 31-68 fps on Intel integrated graphics. Browsers block sound until a visitor clicks, so a direct visit starts silent with captions and a “Turn on the voice” button.
+
 Not done:
 - Telegram with a real bot (token from the user). `/connect` was tested with a real wallet on testnet by the author on 26 Nov (vault, drawer, approve, fund: all fine; not an outside tester).
 - Outside testers: none yet.

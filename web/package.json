@@ -15,11 +15,15 @@
     "@kibble/agents": "workspace:*",
     "@kibble/sdk": "workspace:*",
     "@rainbow-me/rainbowkit": "2.2.11",
+    "@react-three/drei": "10.7.9",
+    "@react-three/fiber": "9.8.2",
+    "@react-three/postprocessing": "3.2.2",
     "@tanstack/react-query": "5.90.2",
     "motion": "12.43.0",
     "next": "16.4.5",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "three": "0.187.0",
     "viem": "2.57.12",
     "wagmi": "2.19.5"
   },
@@ -27,6 +31,7 @@
     "@types/node": "^22.10.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "@types/three": "0.187.0",
     "typescript": "5.9.3"
   }
 }

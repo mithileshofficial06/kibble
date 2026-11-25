@@ -1,11 +1,17 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { say, storyState, type StoryEvent, type StoryState } from "@kibble/sdk";
+import { SideCards } from "@/components/three/SideCards";
+import { act, Stage } from "@/components/three/stage";
+import { useCan3D } from "@/components/three/useCan3D";
 import { useNetwork } from "@/lib/network";
 import { Lane } from "./Lane";
 import { planStory, snapAt, type Focus } from "./plan";
+
+const World = dynamic(() => import("@/components/three/World"), { ssr: false, loading: () => <div className="film-load">Setting the stage…</div> });
 
 const COPY: Record<Focus, { fixed: [string, string]; kibble: [string, string] }> = {
   sales: {
@@ -71,6 +77,7 @@ export function StoryPlayer({
   onDone,
   controls = true,
   showVerdict = true,
+  run = 0,
 }: {
   events: StoryEvent[];
   focus: Focus;
@@ -80,6 +87,8 @@ export function StoryPlayer({
   onDone?: () => void;
   controls?: boolean;
   showVerdict?: boolean;
+  /** Changes when the story should start over (the 3D world stays up between stories). */
+  run?: number;
 }) {
   const { net } = useNetwork();
   const reduce = useReducedMotion();
@@ -88,25 +97,59 @@ export function StoryPlayer({
   const [speed, setSpeed] = useState(1);
   const done = useRef(onDone);
   done.current = onDone;
+  const can3d = useCan3D();
+  const stage = useMemo(() => new Stage(), []);
+  const [ready, setReady] = useState(false);
+  const shownTo = useRef(0);
   const plan = useMemo(() => planStory(events), [events]);
   const total = events.length;
   const finished = total > 0 && count >= total && (!live || events[total - 1].kind === "end");
 
   useEffect(() => {
-    if (!playing || count >= total) return;
+    if (!playing || count >= total || (can3d !== false && !ready)) return;
     const cur = count > 0 ? plan[count - 1] : { ms: 350, fast: false };
     // a live run that has fallen behind catches up
     const behind = live && total - count > 8 ? 0.35 : 1;
     const ms = Math.max(60, (cur.ms * behind * (reduce ? 1.4 : 1)) / speed);
     const t = setTimeout(() => setCount((c) => Math.min(total, c + 1)), ms);
     return () => clearTimeout(t);
-  }, [playing, count, total, plan, speed, live, reduce]);
+  }, [playing, count, total, plan, speed, live, reduce, can3d, ready]);
 
   useEffect(() => {
     if (!finished) return;
     const t = setTimeout(() => done.current?.(), 1200);
     return () => clearTimeout(t);
   }, [finished]);
+
+  useEffect(() => {
+    setCount(0);
+    setPlaying(autoPlay);
+    // a live run keeps its place: only a new run starts over
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [run]);
+
+  // act the new event out on the 3D stage, or rebuild the stage after a jump
+  useEffect(() => {
+    const from = shownTo.current;
+    shownTo.current = count;
+    stage.numbers = true;
+    stage.mood = focus === "sales" ? 0 : 0.55;
+    if (count === from + 1) {
+      const e = events[count - 1];
+      const b = plan[count - 1];
+      act(stage, e, Boolean(b?.fast));
+      stage.thief = e.kind === "flow" && e.by === "thief" ? 1 : e.kind === "end" ? 0 : stage.thief;
+      if (b?.change) {
+        stage.shot = b.change.side === "kibble" ? (b.change.to === "Paused" ? "locked" : "kibble") : "fixed";
+        const t = setTimeout(() => void (stage.shot = "both"), 2300);
+        return () => clearTimeout(t);
+      }
+      return;
+    }
+    for (const k of ["fixed", "kibble"] as const) stage.snap(k, snapAt(events, count, k));
+    stage.shot = "both";
+    stage.thief = focus === "theft" && events.slice(0, count).some((e) => e.kind === "flow" && e.by === "thief") ? 1 : 0;
+  }, [count, events, plan, stage, focus]);
 
   const event = count > 0 ? events[count - 1] : undefined;
   const beat = count > 0 ? plan[count - 1] : undefined;
@@ -164,6 +207,14 @@ export function StoryPlayer({
         </AnimatePresence>
       </div>
 
+      {can3d === null ? (
+        <div className="story-world" />
+      ) : can3d ? (
+        <div className="story-world">
+          <World stage={stage} onReady={() => setReady(true)} />
+          <SideCards focus={focus} s={state} />
+        </div>
+      ) : (
       <div className="story-lanes">
         {(["fixed", "kibble"] as const).map((side) => (
           <Lane
@@ -183,6 +234,7 @@ export function StoryPlayer({
           />
         ))}
       </div>
+      )}
 
       {controls && (
         <div className="story-controls">

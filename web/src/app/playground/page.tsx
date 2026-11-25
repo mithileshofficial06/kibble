@@ -125,10 +125,14 @@ export default function PlaygroundPage() {
     setTimeout(() => stage.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
   }
   function watch(id: keyof typeof STORIES) {
+    auto.current = false;
+    clearTimeout(next.current);
     setView({ mode: "replay", id, key: Date.now() });
     show();
   }
   async function start(beat: string) {
+    auto.current = false;
+    clearTimeout(next.current);
     setError(null);
     const r = await fetch("/api/playground", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ beat }) });
     if (!r.ok) {
@@ -140,10 +144,23 @@ export default function PlaygroundPage() {
     show();
   }
 
-  // a run already going on when you arrive
+  // a run already going on when you arrive; otherwise the first story starts by itself
   useEffect(() => {
-    if (running && !view) setView({ mode: "live" });
-  }, [running, view]);
+    if (view || !s) return;
+    setView(running ? { mode: "live" } : { mode: "replay", id: CARDS[0].id, key: 1 });
+  }, [running, view, s]);
+  const auto = useRef(true);
+  const next = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(next.current), []);
+  /** When a story ends, the next one begins (until you choose for yourself). */
+  function ended(id: keyof typeof STORIES) {
+    if (!auto.current) return;
+    clearTimeout(next.current);
+    next.current = setTimeout(() => {
+      const i = CARDS.findIndex((c) => c.id === id);
+      setView({ mode: "replay", id: CARDS[(i + 1) % CARDS.length].id, key: Date.now() });
+    }, 5200);
+  }
 
   const story: Story | undefined = view?.mode === "replay" ? STORIES[view.id] : undefined;
 
@@ -163,7 +180,7 @@ export default function PlaygroundPage() {
       />
 
       <section className="stack">
-        <SecHead n="01" title="Pick a *story.*" note="A replay takes about a minute and starts at once." />
+        <SecHead n="01" title="Pick a *story.*" note="They play by themselves below. Pick one to jump to it." />
         <div className="beats">
           {CARDS.map((c, i) => {
             const b = s?.beats[c.id];
@@ -219,9 +236,10 @@ export default function PlaygroundPage() {
           <section className="stack">
             <SecHead n="02" title={story.title.replace(/(\w+)$/, "*$1.*")} note="Same customers, same attack, two kinds of wallet." />
             <StoryPlayer
-              key={view.key}
+              run={view.key}
               events={story.events}
               focus={FOCUS[story.id] as Focus}
+              onDone={() => ended(view.id)}
               source={`${story.source}, ${story.recorded}. Run it for real above to see it happen on the testnet.`}
             />
           </section>

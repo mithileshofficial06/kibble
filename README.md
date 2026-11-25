@@ -172,7 +172,7 @@ On 25 Nov 2026 both NVIDIA-hosted models we tried obeyed the hidden instruction 
 
 ## The app in two minutes
 
-Start at **Start here** (`/tour`): three short animated stories show two agents going through the same day, one with a fixed limit and one with Kibble. **Try it** replays them or runs them for real on Aevum, with every payment and refusal in plain words. The replays are recordings of the real contracts on a local copy of the testnet, and say so.
+Start at **Start here** (`/tour`): a narrated 3D film that plays by itself and shows two agents going through the same days, one with a fixed limit and one with Kibble. **Try it** replays them or runs them for real on Aevum, with every payment and refusal in plain words. The replays are recordings of the real contracts on a local copy of the testnet, and say so.
 
 ## The owner's assistant
 
