@@ -28,7 +28,7 @@ Done, committed and pushed:
 
 - **Redeployed (25 Nov):** fixed contracts on testnet, factory `0x296a2e00…2afe`; old drawers revoked. Every scenario and the AI shift ran (docs/runs/testnet-v2-2026-11-26.txt). T stayed at 0.200 over 10 windows because windows fell under the activity floor; after lowering A's floor to 0.016, five more windows took T to **0.272** (setup now uses a lower floor on testnet; only A's live floor was changed).
 - **Improvements 6-14 (26 Nov):** stronger fixed opponent and attack table (`make attacks`), 120-agent simulation (`make sim`), who-paid panel on drawer pages (`buyerStats`), pay-per-request API (`paid-api`), worked example, alerts (`alerts`; Discord webhook, or the console), security notes (Slither, coverage, threat model), error-path tests, accessibility pass.
-- **Tests:** 145 pass (139 local, 6 fork); 131 are Kibble's.
+- **Tests:** 167 pass (161 local, 6 fork); 153 are Kibble's. KibbleAdmin: 100% lines and branches (was 46% of branches).
 
 - **UI made understandable (26 Nov):** animated two-lane story (live runs, instant replays, guided `/tour`), a plain “why” for every agent, plain names and hints, three-card owner controls with a guided two-key restart (signatures survive account switches and reloads), corrected landing claims. Checked: nine wallet checks on the fork with a simulated wallet, a live Playground run on the fork, 0 axe violations on desktop and phone. Replays are recorded on the fork and say so.
 

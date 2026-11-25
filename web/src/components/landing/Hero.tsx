@@ -235,7 +235,7 @@ export function Hero() {
           <motion.dl className="k-facts" initial={{ opacity: 0 }} animate={on({ opacity: 1 })} transition={{ delay: 1.2, duration: 0.8 }}>
             <Fact run={show} to={2} suffix=" s" label="to stop a grab with a stolen key" />
             <Fact run={show} to={0} decimals={3} label="taken in that grab" />
-            <Fact run={show} to={145} label="tests, on a live testnet" />
+            <Fact run={show} to={167} label="tests, on a live testnet" />
           </motion.dl>
         </div>
 
