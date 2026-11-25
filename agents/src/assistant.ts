@@ -3,7 +3,7 @@
 // the contract have the last word.
 import { existsSync, readFileSync } from "node:fs";
 import { createPublicClient, http, parseAbiItem, type Address, type PublicClient } from "viem";
-import { fmt, kibbleDrawerAbi, readDrawer, REASON_TEXT, REASONS, STATES, units, type DrawerView, type ReasonName } from "@kibble/sdk";
+import { buyerStats, fmt, kibbleDrawerAbi, type BuyerStats, readDrawer, REASON_TEXT, REASONS, STATES, units, type DrawerView, type ReasonName } from "@kibble/sdk";
 import { chat, LlmUnavailable, type Llm, type Msg, type Tool, type ToolCall } from "./llm";
 
 // ------------------------------------------------------------------------------------------- facts
@@ -33,6 +33,7 @@ export type Facts = {
   guardian: Address;
   current: Record<TightenParam, bigint>;
   loosenDelay: bigint;
+  buyers: BuyerStats;
   receipts: { id: number; payee: string; amount: string; state: string; time: string }[];
   events: { block: number; tx: string; text: string }[];
   scanned: { from: number; to: number };
@@ -57,6 +58,7 @@ export async function readFacts(rpcUrl: string, drawer: Address): Promise<Facts>
       return { id, payee: r.payee, amount: fmt(BigInt(r.amount), 4), state: STATES[r.state] ?? "?", time: new Date(Number(r.time) * 1000).toISOString() };
     }),
   );
+  const buyers = await buyerStats(pub, drawer, 60);
   const events: Facts["events"] = [];
   const from = head > SPAN * CALLS ? head - SPAN * CALLS + 1n : 0n;
   const ranges: bigint[] = [];
@@ -82,7 +84,7 @@ export async function readFacts(rpcUrl: string, drawer: Address): Promise<Facts>
   const isChange = (t: string) => STATES.some((x) => t.startsWith(`${x} to `));
   const recent = new Set([...events.filter((e) => isChange(e.text)).slice(0, 10), ...events.filter((e) => !isChange(e.text)).slice(0, 20)]);
   const keep = events.filter((e) => recent.has(e));
-  return { view, owner, guardian, current, loosenDelay, receipts, events: keep, scanned: { from: Number(from), to: Number(head) } };
+  return { view, owner, guardian, current, loosenDelay, buyers, receipts, events: keep, scanned: { from: Number(from), to: Number(head) } };
 }
 
 // ------------------------------------------------------------------------------------------- actions
@@ -171,6 +173,7 @@ function factsText(f: Facts) {
       approvalThreshold: m(f.current.ApprovalThreshold),
       strangerBudgetLeft: m(v.unknownRemaining),
       payments: Number(v.receiptCount),
+      buyers: f.buyers,
       latestPayments: f.receipts,
       recentEvents: f.events.map((e) => ({ block: e.block, what: e.text })),
       eventsScannedBlocks: f.scanned,

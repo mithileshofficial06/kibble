@@ -7,7 +7,7 @@ import { encodeAbiParameters, erc20Abi, isAddress, isHex, maxUint256, type Addre
 import { useAccount, useWalletClient } from "wagmi";
 import { PARAMS, Param, decodeDrawerLogs, sendDrawer, signResume, units, type Wallet } from "@kibble/sdk";
 import { explain } from "@/lib/errors";
-import { AGENTS, amt, pct, short, useDeployment, useDrawer, useDrawerConfig, useDrawerHistory, usePub, useReceipts, type AgentName } from "@/lib/kibble";
+import { AGENTS, amt, pct, short, useBuyers, useDeployment, useDrawer, useDrawerConfig, useDrawerHistory, usePub, useReceipts, type AgentName } from "@/lib/kibble";
 import { useNetwork } from "@/lib/network";
 import { Num, PageHead, Reveal, SecHead, StatePill } from "@/components/ui";
 
@@ -18,6 +18,7 @@ export default function DrawerPage() {
   const dep = useDeployment();
   const v = useDrawer(address);
   const cfg = useDrawerConfig(address);
+  const buyers = useBuyers(address);
   const receipts = useReceipts(address, v.data?.receiptCount);
   // Aevum makes ~1 block a second and serves logs 1,000 blocks at a time, so the range is a choice.
   const [range, setRange] = useState<bigint>(20_000n);
@@ -167,7 +168,42 @@ export default function DrawerPage() {
       )}
 
       <section className="stack">
-        <SecHead n="03" title="Every *receipt.*" note="The latest 25 payments, read from the drawer's storage." />
+        <SecHead n="03" title="Who actually *paid?*" note="From the drawer's latest sales. Earnings alone don't prove customers." />
+        <Reveal className="card">
+          {!buyers.data ? (
+            <p className="fine">{buyers.error ? explain(buyers.error) : "Reading…"}</p>
+          ) : buyers.data.sales === 0 ? (
+            <p className="fine">No sales yet.</p>
+          ) : (
+            <>
+              <dl className="kv">
+                <dt>Sales read</dt>
+                <dd>
+                  {buyers.data.sales} of {buyers.data.totalSales} (refunded {buyers.data.refunded})
+                </dd>
+                <dt>Different buyers</dt>
+                <dd>{buyers.data.buyers}</dd>
+                <dt>From the biggest buyer</dt>
+                <dd>
+                  {(buyers.data.topShare * 100).toFixed(1)}% {buyers.data.topBuyer && <Explorer address={buyers.data.topBuyer} />}
+                </dd>
+                <dt>From the owner, guardian or agent themselves</dt>
+                <dd>{(buyers.data.insiderShare * 100).toFixed(1)}%</dd>
+                <dt>From unknown senders (plain transfers)</dt>
+                <dd>{(buyers.data.unknownShare * 100).toFixed(1)}%</dd>
+              </dl>
+              <p className="fine">
+                {buyers.data.buyers <= 1 || buyers.data.topShare > 0.8 || buyers.data.insiderShare > 0.2
+                  ? "Concentrated: treat this track record as activity, not as proof of customers."
+                  : "Spread over several buyers. That's harder to fake, not impossible: one person can use many wallets."}
+              </p>
+            </>
+          )}
+        </Reveal>
+      </section>
+
+      <section className="stack">
+        <SecHead n="04" title="Every *receipt.*" note="The latest 25 payments, read from the drawer's storage." />
         <Reveal className="card flush">
         {receipts.data?.length ? (
           <div className="table-wrap">
@@ -211,7 +247,7 @@ export default function DrawerPage() {
       </section>
 
       <section className="stack">
-        <SecHead n="04" title="What the wallet *decided.*" note="Closed windows, and every refusal, state change and alert from the contract's events." />
+        <SecHead n="05" title="What the wallet *decided.*" note="Closed windows, and every refusal, state change and alert from the contract's events." />
         <div className="grid-2">
         <Reveal className="card flush">
           <h2>Track record</h2>

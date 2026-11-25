@@ -7,6 +7,8 @@
   "description": "Kibble demo agents, supplier, buyer bot, injection page and scenario runner.",
   "scripts": {
     "setup-demo": "tsx src/setup.ts",
+    "alerts": "tsx src/alerts.ts",
+    "paid-api": "tsx src/paid-api-demo.ts",
     "kibble": "tsx src/kibble.ts",
     "scenario": "tsx src/run.ts",
     "supplier": "tsx src/supplier-server.ts",

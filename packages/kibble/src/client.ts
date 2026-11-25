@@ -4,6 +4,7 @@ import {
   type Address,
   type Chain,
   type Hex,
+  type Log,
   type PublicClient,
   type TransactionReceipt,
   type Transport,
@@ -27,6 +28,11 @@ export function decodeDrawerLogs(receipt: TransactionReceipt, drawer: Address) {
     abi: kibbleDrawerAbi,
     logs: receipt.logs.filter((l) => l.address.toLowerCase() === drawer.toLowerCase()),
   });
+}
+
+/** Decode raw drawer logs (from getLogs). Unknown events are skipped. */
+export function decodeDrawerLogsFrom(logs: Log[]): { eventName: string; args: Record<string, unknown> }[] {
+  return parseEventLogs({ abi: kibbleDrawerAbi, logs }) as unknown as { eventName: string; args: Record<string, unknown> }[];
 }
 
 function outcome(receipt: TransactionReceipt, drawer: Address, fp: Hex): PayResult {

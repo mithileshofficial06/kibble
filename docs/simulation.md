@@ -17,7 +17,7 @@
 | Bad or hijacked agents on Watch or Braked | 16 | 0 | 0 |
 | Customers the agent key couldn't refund | 0 | 0 | 0 |
 
-\* 29 turn bad and 15 are hijacked; a few are both, so 44 counts some twice.
+\* 29 turn bad and 15 are hijacked. An agent can be both, so 44 is the most it could be.
 
 ## How to read it
 

@@ -158,6 +158,16 @@ On 25 Nov 2026 both NVIDIA-hosted models we tried obeyed the hidden instruction 
 
 **A real AI agent at work:** `scenario ai` has the model run Agent A as a business. It reads each customer job, checks its wallet on chain, buys a model call from the supplier through the drawer, and delivers or turns the job down. On the fork it delivered four jobs, turned down the one priced below cost and made a profit, in all three runs ([log](docs/runs/ai-agent-fork-2026-11-25.txt)). It needs a model key.
 
+## Sell by the request (HTTP 402)
+
+`pnpm --filter @kibble/agents paid-api serve` runs a summary API that answers `402 Payment Required` until it's paid, in the style of x402. The buyer signs one EIP-3009 authorization bound to that bill and **needs no gas**; the seller relays it into its drawer, buys the model call it needs, and delivers. If the drawer refuses the agent's own purchase, the buyer is refunded. Buyers use `paidFetch` from `@kibble/sdk`, with a price limit. It isn't interoperable with standard x402 clients, because the payment goes to the drawer contract. `pnpm --filter @kibble/agents paid-api` runs its 16 checks on a fork (replay, tampering, refunds, a buyer with no gas).
+
+## Attacks, simulation and alerts
+
+- [What a capable attacker gets](docs/attacks.md) against Kibble and a well-run fixed limit, including where Kibble does worse (`make attacks`).
+- [120 simulated agents](docs/simulation.md) through the real contracts (`make sim`).
+- [Alerts](docs/alerts.md) on Telegram or the console, for the quiet attacks a pause doesn't catch.
+
 ## The owner's assistant
 
 The app's **Assistant** page answers questions about any drawer ("Why was it paused?", "What could a thief take?") from live chain data, and can **prepare** a protective change: freeze, sync, resume, or lower one setting. It holds no key. Every proposal is checked in code against the chain (it can never raise anything), the owner signs it in their own wallet, and the contract decides. `KIBBLE_ASSISTANT=nvidia|claude` switches the model on, with per-visitor and daily limits; unset, it gives built-in answers with no model. It's tested with Nemotron 3 Ultra; Claude hasn't been run.

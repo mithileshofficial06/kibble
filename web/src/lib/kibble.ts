@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { erc20Abi, parseAbiItem, type Address, type PublicClient } from "viem";
 import { usePublicClient } from "wagmi";
-import { STATES, REASONS, REASON_TEXT, fmt, kibbleDrawerAbi, readDrawer, type DrawerView, type ReasonName } from "@kibble/sdk";
+import { buyerStats, STATES, REASONS, REASON_TEXT, fmt, kibbleDrawerAbi, readDrawer, type DrawerView, type ReasonName } from "@kibble/sdk";
 import aevumDeployment from "../../../deployments/44005.json";
 import { useNetwork } from "./network";
 
@@ -116,6 +116,17 @@ export function useDrawerConfig(address: Address | undefined) {
         ]);
       return { owner, guardian, agent, vault, maxWeeklyLoss, approvalThreshold, windowLength, incomeHold, delay, resumeNonce, approvalNonce };
     },
+  });
+}
+
+/** Who paid this drawer: distinct buyers, the biggest one's share, and the owner's own share. */
+export function useBuyers(address: Address | undefined) {
+  const pub = usePub();
+  return useQuery({
+    queryKey: ["kibble-buyers", address],
+    enabled: Boolean(pub && address),
+    refetchInterval: 60_000,
+    queryFn: () => buyerStats(pub!, address!),
   });
 }
 

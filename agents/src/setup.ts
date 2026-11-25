@@ -219,7 +219,8 @@ async function createDrawers(ctx: Ctx, dep: Deployment) {
     incomeHold: 120n,
     tMin: scaled(ctx, demo.tMin),
     maxStep: scaled(ctx, demo.maxStep),
-    minActivity: scaled(ctx, demo.minActivity),
+    // On testnet a batch of sales can straddle two windows, so a lower floor is needed for windows to count.
+    minActivity: scaled(ctx, demo.minActivity) / (ctx.local ? 1n : 3n),
     slack: scaled(ctx, demo.slack),
     unknownBudget: scaled(ctx, demo.unknownBudget),
   };

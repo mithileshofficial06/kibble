@@ -45,4 +45,4 @@ Two settings, both lowered instantly with `tighten`:
 | Skim while business goes on | 3.650 | 2.700 |
 | Overbuy flat out | 0.000 | 0.000 |
 
-Strict costs an agent with no sales yet its first purchase: it has to sell before it buys. For the skim and for vanishing with orders, the answer is a human: [alerts](alerts.md) on refunds, supplier concentration and undelivered orders, per-supplier caps, and approved suppliers you actually know.
+Strict costs an agent with no sales yet its first purchase: it has to sell before it buys. For the skim and for vanishing with orders, the answer is a human: [alerts](alerts.md) on spending above the normal share, refunds and unconfirmed orders, per-supplier caps, and approved suppliers you actually know.
