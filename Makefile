@@ -32,7 +32,13 @@ build: ## Compile contracts and check they are Shanghai-safe
 	node tools/check-shanghai.mjs contracts/out
 
 test: ## Unit tests (local, no network)
-	cd contracts && forge test --no-match-path 'test/fork/*' -vv
+	cd contracts && forge test --no-match-path 'test/{fork,bench}/*' -vv
+
+attacks: ## What a capable attacker gets, fixed vs Kibble (docs/attacks.md)
+	cd contracts && forge test --match-contract KibbleAttacks -vv | grep -E 'ROW|FAIL|passed'
+
+sim: ## 120 simulated agents through the real contracts (docs/simulation.md)
+	cd contracts && forge test --match-path 'test/bench/*' --gas-limit 18446744073709551615 -vv | grep -E 'ROW|FAIL|passed|agents|turn bad|hijacked'
 
 test-fork: ## Tests against the real tUSD8 on a local fork of Aevum (no funds needed)
 	cd contracts && forge test --match-path 'test/fork/*' --fork-url $(AEVUM_RPC) -vv
