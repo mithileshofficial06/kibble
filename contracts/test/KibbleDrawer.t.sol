@@ -280,16 +280,16 @@ contract KibbleDrawerTest is KibbleBase {
         adm(d).tighten(Param.Slack, 0); // isolate T maths
         sell(d, 1e6);
         clearHold(d);
-        // allowance 2, value 1: spend 0.9 is under the 90% ceiling
-        payS(d, 0.9e6);
-        nextWindow(d); // profit +0.1: T 2.01
-        assertEq(d.limitT(), 2.01e6);
-        // a loss window: value 0.5 (prev carry helps the ceiling), spend 0.9
+        payS(d, 0.3e6); // 0.6 of the 0.9 ceiling is left; half of 0.9 carries over
+        nextWindow(d); // profit +0.7: T 2.07
+        assertEq(d.limitT(), 2.07e6);
+        assertEq(d.carryRoom(), 0.45e6, "only unused room carries");
+        // a loss window: value 0.5 (the carried room helps the ceiling), spend 0.9
         sell(d, 0.5e6);
         clearHold(d);
         payS(d, 0.9e6);
         nextWindow(d);
-        assertEq(d.limitT(), 1.61e6, "T shrinks by the 0.4 loss");
+        assertEq(d.limitT(), 1.67e6, "T shrinks by the 0.4 loss");
         assertEq(uint8(d.state()), uint8(State.Watch));
         assertLe(d.allowance(), d.limitT());
     }

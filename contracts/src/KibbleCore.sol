@@ -114,6 +114,8 @@ abstract contract KibbleCore is EIP712 {
     uint256 public windowValue;
     uint256 public windowSpend;
     uint256 public prevValue;
+    uint256 public carryRoom; // last window's unused ceiling room (up to carryBps of it)
+    uint256 public carriedSpend; // earlier windows' spend that still rests on uncleared sales
 
     // ---------------------------------------------------------------- learning
     uint256 public learnValue;
@@ -223,6 +225,7 @@ abstract contract KibbleCore is EIP712 {
     error OverRoom();
     error NotReady();
     error NotQueued();
+    error RefundBacksSpend();
     error GuardianCannotCancel();
     error NothingToResume();
     error WrongMode();
@@ -423,6 +426,8 @@ abstract contract KibbleCore is EIP712 {
         uint64 len = windowLength;
         if (block.timestamp < windowStart + len) return;
         uint256 n = (block.timestamp - windowStart) / len;
+        if (mode == Mode.EARNED) (carriedSpend, carryRoom) = _carry();
+        if (n > 1) carryRoom = 0;
         _closeWindow();
         windowStart += uint64(n * len);
         prevValue = n == 1 ? windowValue : 0;
@@ -469,6 +474,24 @@ abstract contract KibbleCore is EIP712 {
         emit WindowClosed(windowIndex, v, s, profit, limitT, kind);
         emit TrackRecord(windowIndex, v, s, profit, limitT, state, strikes);
         _checkDrawdown();
+    }
+
+    /// @dev What the closing window hands to the next, so that one sale backs its spend once:
+    ///      spend that cleared value doesn't cover (it rests on sales still pending, until they clear), or
+    ///      ceiling room left unused (up to carryBps of the window's own).
+    function _carry() internal view returns (uint256 spend, uint256 room) {
+        uint256 own = (windowValue * costBps) / BPS;
+        uint256 used = windowSpend + carriedSpend;
+        uint256 cleared = own + carryRoom;
+        if (used > cleared + slack) {
+            spend = used - cleared - slack;
+            uint256 backed = (pendingTotal * costBps) / BPS;
+            if (spend > backed) spend = backed;
+        } else if (used < cleared) {
+            room = cleared - used;
+            uint256 most = (own * carryBps) / BPS;
+            if (room > most) room = most;
+        }
     }
 
     function _finishLearning() internal {

@@ -51,7 +51,7 @@ A shop with a cash drawer and a safe:
    - **accepted work** (for agents that sell nothing): an approved acceptor signs `WorkAccepted(jobId, value, deadline)`, which releases budget the owner set aside. Work credits can't create money; they only decide how fast the owner's budget is released.
 4. **Profit goes to the safe.** Everything above the allowance is swept to the owner's `KibbleVault`.
 5. **The limit is earned.** At each window close, profit grows T by min(`maxStep`, profit × `growthBps`), and a loss shrinks T by the loss.
-6. **Cost ceiling.** Window spend can't exceed `(value + pending sales + carried value) × costBps + slack`. A payment over it is refused and counts as a strike, at most one per cooldown.
+6. **Cost ceiling.** Window spend (plus earlier spend still resting on uncleared sales) can't exceed `(value + pending sales) × costBps + unused room from the last window + slack`. **One sale backs its spend once**, and the agent key can't refund a sale its spending rests on. A payment over it is refused and counts as a strike, at most one per cooldown.
 7. **The wallet brakes the agent.** Strikes or drawdown walk the ladder: 1 strike → **Watch** (refills to T/2), 2 → **Braked** (no refills), 3, or weekly drawdown ≥ L → **Paused**. Two clean windows bring it back to Healthy.
 8. **One owner setting**: `maxWeeklyLoss` = L. From it: Tmax = L/2, Tstart = min(2, L/10), approval threshold = L/10, Braked at drawdown L/2, Paused at L. A **learning period** (5 demo windows, 7 by default) measures the agent's real cost share and sets `costBps` to that share plus 10 points (at most 95%).
 9. **Tighten fast, loosen slow.** Lowering anything is instant. Raising anything, adding a supplier or acceptor, or resuming waits 24 h (2 min in the demo), and the guardian can cancel it. Owner and guardian together can `resumeNow` at once.
@@ -107,6 +107,7 @@ A stolen agent key, or a prompt injection that gets the model to call `pay`:
 | Overspend with approved suppliers | Up to the full limit, refilled every window, until a human reacts | Refused at the cost ceiling; 3 strikes → **Paused**, automatically |
 | Reach the savings | Everything sits in the drawer the limit refills from | Profit is already in the vault |
 | Fake its own earnings | n/a | Work credits need an approved acceptor that is never the agent key; self-sent income is the attacker's own money |
+| Raise the ceiling with a fake sale, then refund it | n/a | Refund refused while spending rests on that sale. Left to clear, the money goes to the owner ([how we found this](EVIDENCE.md#the-refund-loophole-found-and-fixed)) |
 | Pay a bill twice, raise limits, unpause, withdraw | Blocked | Blocked |
 
 **The exact bound** (the `maxLossNow()` view, shown live):
@@ -245,6 +246,7 @@ Checked on chain on 22 Nov 2026:
 
 ## Known limits
 
+- **Refunds after spending need the owner.** If an agent has bought the input for a sale and then can't deliver, its key may not be able to refund that sale; the owner always can, before it clears.
 - **The skim.** An attacker who spends at exactly the agent's normal cost share can take at most (costBps − real cost share) × value per window. The learned share and `skimBps()` make it visible; nothing stops it on chain.
 - **Approved suppliers and acceptors are trust decisions**, each bounded only by its own caps. An approved payee must be an end recipient: approving a forwarding contract breaks the stranger bound.
 - **Only on-chain tUSD8 income counts.** Off-chain revenue would need a signed processor attestation (roadmap).

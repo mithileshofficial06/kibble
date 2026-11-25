@@ -80,7 +80,7 @@ contract DrawerHandler is Test {
         (,uint8 status,,,) = d.pendings(d.saleOf(b) - 1);
         if (status != 1) return;
         vm.prank(agent);
-        d.refund(b);
+        try d.refund(b) {} catch {} // refused when spend already rests on this sale
     }
 
     function credit(uint256 value) external {

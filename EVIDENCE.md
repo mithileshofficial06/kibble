@@ -23,6 +23,7 @@ Every feature, the test that proves it, and where it shows up in a run.
 | Deferred-income trick closed (per-block clearing cap) | `test_income_clearingCappedPerBlock_excessToVault` |
 | Profit swept to the vault | `test_income_pendingThenClearedThenRefillAndSweep`, `test_maxLossNow_isAllowanceAndRunway` |
 | Cost ceiling, strikes, cooldown, ladder (7.7) | `test_ceiling_refusesAndStrikesWalkTheLadder`, `test_ceiling_noStrikeBelowMinActivity`, `testFuzz_ceilingNeverExceeded` |
+| One sale backs its spend once; fake-sale and refund attacks | `KibbleCeilingTest` (12 tests, one fuzz) |
 | Sellers can buy inputs before income clears | `test_ceiling_pendingSalesCountForCeiling` |
 | Earned limit T (7.4) | `test_T_growsOnProfit_cappedByStep`, `test_T_shrinksOnLoss_andLossMovesToWatch`, `test_T_neverAboveTmax`, `testFuzz_TGrowthBounded`, `invariant_allowanceWithinT` |
 | Watch → Healthy after 2 clean windows; Watch refills to T/2; Braked doesn't refill | `test_watch_twoCleanWindowsBackToHealthy`, `test_watch_refillsOnlyToHalfT`, `test_braked_noRefill` |
@@ -139,3 +140,15 @@ What this does and doesn't show:
 - Step 1 alone is stopped on both sides by the approval threshold. The difference between a fixed limit and Kibble is step 3.
 - It's one page, one system prompt with no anti-injection wording, and one model turn. It isn't a benchmark of these models.
 - Claude has not been run.
+
+## The refund loophole, found and fixed
+
+Reviewing our own contract on 25 Nov 2026, we found three ways for an attacker with the stolen agent key **and money of their own** to get past the cost ceiling. The attack tests failed on the old contract, and pass on the new one ([`KibbleCeiling.t.sol`](contracts/test/KibbleCeiling.t.sol)). The loss was always inside `maxLossNow`, but "Kibble pays 0" didn't hold against this attacker.
+
+| Attack | Old contract | Now |
+|---|---|---|
+| Fake sale raises the ceiling, overspend, refund the fake sale | Spent the whole 2.00 allowance; the attacker got all their money back | The agent key can't refund a sale its spending rests on |
+| One uncleared sale backs spending in every window it stays pending | Spent 2.00 where one sale should back 0.90 | Spend resting on uncleared sales is carried until they clear |
+| A cleared sale's room is spent, then half of it is granted again next window | A 1.16 sale backed 1.69 of spending (fuzz counterexample) | Only room left unused carries over |
+
+**The drawers now on Aevum testnet were deployed on 22 Nov, before this fix.** The runs above are from those drawers.

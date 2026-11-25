@@ -167,7 +167,10 @@ contract KibbleDrawer is KibbleCore, Initializable {
     }
 
     /// @notice Return a buyer's payment that hasn't cleared yet. Doesn't use U and isn't spend.
-    function refund(bytes32 billRef) external onlyAgent {
+    ///         The agent key can't take back a sale its spending already rests on (or a fake sale could
+    ///         raise the ceiling for free). The owner can always refund.
+    function refund(bytes32 billRef) external {
+        if (msg.sender != agent && msg.sender != owner) revert NotAgent();
         _sync();
         uint256 idPlus = saleOf[billRef];
         if (idPlus == 0) revert BadBillRef();
@@ -177,6 +180,10 @@ contract KibbleDrawer is KibbleCore, Initializable {
         uint256 amt = p.amount;
         p.status = P_REFUNDED;
         pendingTotal -= amt;
+        if (msg.sender != owner && mode == Mode.EARNED) {
+            uint256 used = windowSpend + carriedSpend;
+            if (used > 0 && used > _ceiling()) revert RefundBacksSpend();
+        }
         token.safeTransfer(p.payer, amt);
         emit Refunded(billRef, p.payer, amt);
         _finish();
@@ -298,7 +305,8 @@ contract KibbleDrawer is KibbleCore, Initializable {
     /// @notice Spend still allowed under the cost ceiling this window (EARNED).
     function ceilingRoom() public view returns (uint256) {
         uint256 lim = _ceiling();
-        return windowSpend >= lim ? 0 : lim - windowSpend;
+        uint256 used = windowSpend + carriedSpend;
+        return used >= lim ? 0 : lim - used;
     }
 
     function receipt(uint256 id) external view returns (ReceiptData memory) {
@@ -373,7 +381,7 @@ contract KibbleDrawer is KibbleCore, Initializable {
             return _refuse(fp, Reason.OverAllowance, payee, amount, billRef);
         }
 
-        if (mode == Mode.EARNED && !fromRunway && !approved && windowSpend + amount > _ceiling()) {
+        if (mode == Mode.EARNED && !fromRunway && !approved && windowSpend + carriedSpend + amount > _ceiling()) {
             _strike(amount);
             return _refuse(fp, Reason.OverCeiling, payee, amount, billRef);
         }
@@ -429,8 +437,7 @@ contract KibbleDrawer is KibbleCore, Initializable {
         if (mode == Mode.FIXED) return type(uint256).max;
         // Uncleared sales count toward the ceiling (an agent buys its inputs before the buyer
         // acknowledges delivery) but never toward T or refills.
-        uint256 base = windowValue + pendingTotal + (prevValue * carryBps) / BPS;
-        return (base * costBps) / BPS + slack;
+        return ((windowValue + pendingTotal) * costBps) / BPS + carryRoom + slack;
     }
 
     function _strike(uint256 attempted) internal {

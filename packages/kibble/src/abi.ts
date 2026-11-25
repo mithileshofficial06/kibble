@@ -221,7 +221,33 @@ export const kibbleDrawerAbi = [
   },
   {
     "type": "function",
+    "name": "carriedSpend",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "carryBps",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "carryRoom",
     "inputs": [],
     "outputs": [
       {
@@ -2523,6 +2549,11 @@ export const kibbleDrawerAbi = [
   {
     "type": "error",
     "name": "OverRoom",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "RefundBacksSpend",
     "inputs": []
   },
   {
