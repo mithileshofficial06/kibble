@@ -158,6 +158,15 @@ On 25 Nov 2026 both NVIDIA-hosted models we tried obeyed the hidden instruction 
 
 **A real AI agent at work:** `scenario ai` has the model run Agent A as a business. It reads each customer job, checks its wallet on chain, buys a model call from the supplier through the drawer, and delivers or turns the job down. On the fork it delivered four jobs, turned down the one priced below cost and made a profit, in all three runs ([log](docs/runs/ai-agent-fork-2026-11-25.txt)). It needs a model key.
 
+## Connect your own agent
+
+```bash
+pnpm kibble new --name "My agent" --loss 2   # test keys, vault, drawer, first allowance
+pnpm kibble try                              # one sale, one purchase, one refused payment
+```
+
+Keys go to `~/.kibble`, never into the repo. Guide: [docs/connect-your-agent.md](docs/connect-your-agent.md). The app's **Connect** page does the same from a wallet, and **Agents** lists every drawer the factory has made.
+
 ## Demo scenarios
 
 `pnpm --filter @kibble/agents scenario <name>`:

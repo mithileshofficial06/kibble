@@ -1,0 +1,53 @@
+name: Outside agent report
+description: You connected your own agent to Kibble on Aevum testnet
+title: "Outside agent: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. Please don't paste any private key. Reports (and the drawer address) are public and may be linked from the project's evidence page.
+  - type: input
+    id: drawer
+    attributes:
+      label: Drawer address
+      placeholder: 0x…
+    validations:
+      required: true
+  - type: textarea
+    id: agent
+    attributes:
+      label: What does your agent do?
+      description: One or two sentences. Is a model deciding what to buy? Which one?
+    validations:
+      required: true
+  - type: input
+    id: minutes
+    attributes:
+      label: Minutes from clone to first payment
+  - type: input
+    id: ran
+    attributes:
+      label: How long did it run, and roughly how many payments?
+  - type: textarea
+    id: refused
+    attributes:
+      label: Did the drawer refuse, brake or pause anything? Was it right to?
+  - type: textarea
+    id: attack
+    attributes:
+      label: Did you try to break it? What happened?
+  - type: textarea
+    id: confusing
+    attributes:
+      label: What was confusing, slow or wrong?
+  - type: dropdown
+    id: relation
+    attributes:
+      label: Your relation to the author
+      options:
+        - None
+        - Friend or classmate
+        - Fellow builder in the challenge
+        - Other
+    validations:
+      required: true

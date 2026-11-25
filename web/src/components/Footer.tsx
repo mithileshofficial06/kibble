@@ -26,6 +26,8 @@ export function Footer() {
           <a href={repoUrl} target="_blank" rel="noreferrer">
             GitHub
           </a>
+          <Link href="/connect">Connect your agent</Link>
+          <Link href="/agents">Every agent</Link>
           <Link href="/docs#run">Run it yourself</Link>
         </div>
       </div>

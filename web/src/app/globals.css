@@ -562,3 +562,12 @@ table.data td.right, table.data th.right { text-align: right; }
   .k-nav-cta::before, .k-nav-cta::after, .k-replay::before, .k-replay::after { transition: none !important; }
   .btn:hover, .gh-link:hover, .k-btn:hover, .k-nav-cta:hover, .k-replay:hover { transition-delay: 0s !important; }
 }
+
+/* ---- forms (connect) */
+.form { display: flex; flex-direction: column; gap: 16px; }
+.form label { display: flex; flex-direction: column; gap: 7px; }
+.form label > span { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.form input, .form select { width: 100%; }
+.form input.mono { font-family: var(--mono); font-size: 13px; }
+.form .row { margin-top: 6px; }
+.bad-text { color: #ff8a7d; }
