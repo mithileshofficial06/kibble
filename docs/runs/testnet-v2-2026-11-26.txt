@@ -105,3 +105,29 @@ AI agent A, 5 customer jobs, model: nvidia. state Watch; allowance 0.200 tUSD8; 
 
 After the shift: state Watch; allowance 0.184 tUSD8; earned limit 0.200; most a thief could take now 0.184
 Earned 0.040, spent 0.016 tUSD8.
+
+=== five more sales windows, after the owner lowered drawer A's activity floor from 0.050 to 0.016 (`tighten`, effective at once) and the buyer was topped up with 0.470 from the supplier ===
+
+2026-11-25T19:20:24.495Z activity floor 0.016
+activity floor now 0.016
+buyer has 0.600 tUSD8
+A before: Watch T 0.200
+
+Time-lapse: 5 windows, same demand on both sides (price 0.010, cost 0.004)
+
+win demand  Fixed A' served/away  Kibble A
+1   4       4/0                   4/0     Watch    T=0.212 allow=0.168 maxLossNow= 0.168
+2   4       4/0                   4/0     Healthy  T=0.224 allow=0.152 maxLossNow= 0.152
+3   5       5/0                   5/0     Healthy  T=0.239 allow=0.182 maxLossNow= 0.182
+4   5       5/0                   5/0     Healthy  T=0.254 allow=0.212 maxLossNow= 0.212
+5   6       6/0                   6/0     Healthy  T=0.272 allow=0.248 maxLossNow= 0.248
+
+Scoreboard after 5 windows
+                      Fixed A'      Kibble A
+  sales served        24            24
+  sales turned away   0             0
+  limit now           0.050         0.272 (earned; Tmax 1.000)
+  profit in the vault 0.000         0.080
+  hijack exposure now 0.572         0.248  (maxLossNow)
+  learned cost share  -             40% -> ceiling 50%
+2026-11-25T19:30:15.511Z A after: Healthy T 0.272 maxLossNow 0.248

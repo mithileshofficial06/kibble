@@ -26,12 +26,11 @@ Done, committed and pushed:
   4. Outside agents: guide, issue form and `/agents` list are ready. **No outside agent has run yet.**
   5. Connect: SDK helpers, `pnpm kibble`, `/connect`, docs/connect-your-agent.md.
 
-- **Redeployed (25 Nov):** fixed contracts on testnet, factory `0x296a2e00…2afe`; old drawers revoked. Every scenario and the AI shift ran (docs/runs/testnet-v2-2026-11-26.txt). T stayed at 0.200 there: windows fell under the activity floor (setup now uses a third of it on testnet; the live drawers still have the old floor).
+- **Redeployed (25 Nov):** fixed contracts on testnet, factory `0x296a2e00…2afe`; old drawers revoked. Every scenario and the AI shift ran (docs/runs/testnet-v2-2026-11-26.txt). T stayed at 0.200 over 10 windows because windows fell under the activity floor; after lowering A's floor to 0.016, five more windows took T to **0.272** (setup now uses a lower floor on testnet; only A's live floor was changed).
 - **Improvements 6-14 (26 Nov):** stronger fixed opponent and attack table (`make attacks`), 120-agent simulation (`make sim`), who-paid panel on drawer pages (`buyerStats`), pay-per-request API (`paid-api`), worked example, alerts (`alerts`; Telegram needs a bot token), security notes (Slither, coverage, threat model), error-path tests, accessibility pass.
 - **Tests:** 145 pass (139 local, 6 fork); 131 are Kibble's.
 
 Not done:
-- **Lower the live drawers' activity floor and run a few sales windows** so T grows on testnet (needs the user's OK for gas).
 - Telegram with a real bot (token from the user). `/connect` with a real wallet (user).
 - Outside testers: none yet.
 - **Video (#15), last:** re-record on the new drawers, finish or revert the uncommitted real-model scene, update "97 tests" and every number and address. Don't render until then.

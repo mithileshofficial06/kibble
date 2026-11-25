@@ -178,12 +178,14 @@ Factory [`0x296a2e00…2afe`](https://explorer-test.qday.info/address/0x296a2e00
 | | Fixed | Kibble |
 |---|---|---|
 | Sales served / turned away (10 windows) | 63 / 0 | 63 / 0 |
-| Limit after 10 windows | 0.050 | **0.200, not grown yet** |
+| Limit after 10 windows | 0.050 | 0.200 |
+| Limit after 5 more, with the lower floor | 0.050 | **0.272** (earned) |
 | Profit in the vault | 0.000 | 0.378 |
 | Bad strategy | lost 0.108, still Healthy | paused itself 93 s after the price jump |
 | Hijack: overbought | 0.150, still Healthy | 0.000, paused after 2 s (exposure 0.200 → 0.000) |
 
-- **The limit didn't grow in this run.** Batches of sales straddled the 2-minute windows, so most windows fell under the 0.050 activity floor and didn't count; learning ended in the last window. The floor is a demo setting and is now lower for new testnet drawers. Growth on these contracts is shown on the fork only (2.00 → 10.00 over 30 windows).
+- **The limit didn't grow in those 10 windows.** Batches of sales straddled the 2-minute windows, so most windows fell under the 0.050 activity floor and didn't count; learning ended in the last window. The floor is a demo setting, now lower for new testnet drawers.
+- **It grew in the next five.** The owner lowered drawer A's floor to 0.016 and five more sales windows ran: T **0.200 → 0.212 → 0.224 → 0.239 → 0.254 → 0.272**, Watch back to Healthy after two clean windows, 24 of 24 sales served on both sides, 0.080 to the vault. The fixed limit stayed at 0.050, and its exposure was 0.572 against Kibble's 0.248.
 - **Hijack:** Nemotron 3 Ultra asked to pay the attacker in this run too; both sides refused (approval threshold).
 - **Work credits:** T 0.200 → 0.302 over five accepted reports; the sixth, not accepted, dropped W to Watch at 0.182.
 - **Controls:** threshold lowered, owner-signed payment (receipt #13), replay refused, guardian freeze, two-key resume.
