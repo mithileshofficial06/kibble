@@ -77,11 +77,11 @@ export default function AssistantPage() {
         eyebrow={mode.data?.model ? "A real model, reading the chain" : "Reading the chain"}
         live
         title="Ask your agent's *wallet.*"
-        lede="Why was it paused? What could a thief take? The assistant reads the drawer and answers. It can prepare a change, but it holds no key: you sign, and the contract decides."
+        lede="Why was it paused? What could a thief take? The assistant reads the agent's record and answers. It can prepare a change, but it holds no key: you sign, and the contract decides."
       />
 
       <section className="stack">
-        <SecHead n="01" title="Pick a *drawer,* then ask" note="Any Kibble drawer on this network works, including yours." />
+        <SecHead n="01" title="Pick an *agent,* then ask" note="Any agent on Kibble works, including yours." />
         <div className="chat-grid">
           <Reveal className="card chat-side">
             <div className="form">
@@ -89,7 +89,7 @@ export default function AssistantPage() {
                 <span>Agent</span>
                 <select value={Object.values(dep.data?.drawers ?? {}).includes(chosen as Address) ? chosen : ""} onChange={(e) => choose(e.target.value)}>
                   <option value="" disabled>
-                    Your own drawer
+                    Your own agent
                   </option>
                   {(Object.entries(dep.data?.drawers ?? {}) as [AgentName, Address][]).map(([name, a]) => (
                     <option key={name} value={a}>
@@ -99,16 +99,16 @@ export default function AssistantPage() {
                 </select>
               </label>
               <label>
-                <span>Or paste a drawer address</span>
+                <span>Or paste an agent&apos;s address</span>
                 <input className="mono" placeholder="0x…" value={picked} onChange={(e) => choose(e.target.value)} />
               </label>
             </div>
             <dl className="kv chat-kv">
               <dt>State</dt>
-              <dd>{v.data ? <StatePill state={v.data.state} /> : v.error ? "not a drawer" : "…"}</dd>
+              <dd>{v.data ? <StatePill state={v.data.state} /> : v.error ? "not a Kibble agent" : "…"}</dd>
               <dt>Limit</dt>
               <dd>{amt(v.data?.limitT)}</dd>
-              <dt>Exposed now</dt>
+              <dt>A thief could take</dt>
               <dd>{amt(v.data?.maxLossNow)}</dd>
             </dl>
             {drawer && (
@@ -163,7 +163,7 @@ export default function AssistantPage() {
             </form>
             <p className="fine">
               {mode.data?.model
-                ? "Answers come from a model given this drawer's public chain data. It can be wrong: check the numbers on the drawer page."
+                ? "Answers come from an AI model reading this agent's public record. It can be wrong: check the numbers on the agent's page."
                 : "No model is switched on for this server, so these are built-in answers from chain data."}
             </p>
           </Reveal>

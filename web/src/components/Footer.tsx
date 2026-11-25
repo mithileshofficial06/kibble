@@ -11,10 +11,10 @@ export function Footer() {
         </p>
         <div className="foot-col">
           <p>See it</p>
-          <Link href="/#replay">The replay</Link>
-          <Link href="/live">Live desk</Link>
-          <Link href="/playground">Playground</Link>
-          <Link href="/assistant">Assistant</Link>
+          <Link href="/tour">Start here</Link>
+          <Link href="/live">Live agents</Link>
+          <Link href="/playground">Try it</Link>
+          <Link href="/assistant">Ask the assistant</Link>
         </div>
         <div className="foot-col">
           <p>Learn</p>

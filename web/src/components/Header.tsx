@@ -10,10 +10,10 @@ import { Atmosphere } from "./ui";
 import { useNetwork } from "@/lib/network";
 
 const links = [
-  { href: "/live", label: "Live desk" },
-  { href: "/playground", label: "Playground" },
-  { href: "/assistant", label: "Assistant" },
-  { href: "/agents", label: "Agents" },
+  { href: "/tour", label: "Start here" },
+  { href: "/live", label: "Live" },
+  { href: "/playground", label: "Try it" },
+  { href: "/assistant", label: "Ask" },
   { href: "/connect", label: "Connect" },
   { href: "/docs", label: "How it works" },
 ];
@@ -36,7 +36,7 @@ export function Header() {
           </Link>
           <nav className="nav" aria-label="Main">
             {links.map((l) => {
-              const active = pathname.startsWith(l.href) || (l.href === "/live" && pathname.startsWith("/drawer"));
+              const active = pathname.startsWith(l.href) || (l.href === "/live" && /^\/(drawer|agents)/.test(pathname));
               return (
                 <Link key={l.href} href={l.href} aria-current={active ? "page" : undefined}>
                   {l.label}

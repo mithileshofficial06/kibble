@@ -30,6 +30,8 @@ Done, committed and pushed:
 - **Improvements 6-14 (26 Nov):** stronger fixed opponent and attack table (`make attacks`), 120-agent simulation (`make sim`), who-paid panel on drawer pages (`buyerStats`), pay-per-request API (`paid-api`), worked example, alerts (`alerts`; Telegram needs a bot token), security notes (Slither, coverage, threat model), error-path tests, accessibility pass.
 - **Tests:** 145 pass (139 local, 6 fork); 131 are Kibble's.
 
+- **UI made understandable (26 Nov):** animated two-lane story (live runs, instant replays, guided `/tour`), a plain “why” for every agent, plain names and hints, three-card owner controls with a guided two-key restart (signatures survive account switches and reloads), corrected landing claims. Checked: nine wallet checks on the fork with a simulated wallet, a live Playground run on the fork, 0 axe violations on desktop and phone. Replays are recorded on the fork and say so.
+
 Not done:
 - Telegram with a real bot (token from the user). `/connect` was tested with a real wallet on testnet by the author on 26 Nov (vault, drawer, approve, fund: all fine; not an outside tester).
 - Outside testers: none yet.

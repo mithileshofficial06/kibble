@@ -14,6 +14,7 @@ import {
 import { privateKeyToAccount } from "viem/accounts";
 import { aevumFork, aevumTestnet, localAnvil } from "@aevum-kit/aevum";
 import { fmt, units, type Wallet } from "@kibble/sdk";
+import type { StoryTeller } from "./story";
 
 /** Demo roles. Keys come from the wallets file (never from the repo). */
 export const ROLES = ["OWNER", "GUARDIAN", "AGENT_A", "AGENT_B", "SUPPLIER", "BUYER", "RELAYER"] as const;
@@ -40,6 +41,8 @@ export type Ctx = {
   f: (value: bigint) => string;
   /** Where scenario output goes (the console, or the web playground's log). */
   log: (...args: unknown[]) => void;
+  /** Set when a run is being shown or recorded as a story. */
+  story?: StoryTeller;
 };
 
 /** Scale a bigint amount (e.g. a contract default) by the demo scale. */

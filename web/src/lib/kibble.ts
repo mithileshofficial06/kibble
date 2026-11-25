@@ -23,11 +23,11 @@ export type Deployment = {
 
 /** The demo agents, as set up by `pnpm --filter agents setup-demo`. */
 export const AGENTS: Record<AgentName, { label: string; mode: "FIXED" | "EARNED"; about: string }> = {
-  A_FIXED: { label: "A′ summarizer (fixed limit)", mode: "FIXED", about: "Sells summaries, buys a model call per sale. A flat limit refilled every window." },
-  A: { label: "A summarizer (Kibble)", mode: "EARNED", about: "The same agent and traffic. Its limit is earned from cleared sales." },
-  B_FIXED: { label: "B′ bad reseller (fixed limit)", mode: "FIXED", about: "Its supplier's price is above its sale price. Keeps paying until a human reacts." },
-  B: { label: "B bad reseller (Kibble)", mode: "EARNED", about: "The same losing strategy. The wallet walks Watch → Braked → Paused on its own." },
-  W: { label: "W research agent (Kibble)", mode: "EARNED", about: "Sells nothing. Earns budget when a client signs that a report was accepted." },
+  A_FIXED: { label: "Good seller · fixed limit", mode: "FIXED", about: "Sells document summaries. Its limit is refilled every round, however it does." },
+  A: { label: "Good seller · Kibble", mode: "EARNED", about: "The same seller and the same customers. Its limit is earned from its sales." },
+  B_FIXED: { label: "Losing seller · fixed limit", mode: "FIXED", about: "Sells for less than it pays. Keeps paying until a person notices." },
+  B: { label: "Losing seller · Kibble", mode: "EARNED", about: "The same losing business. Its wallet checks every payment." },
+  W: { label: "Researcher · Kibble", mode: "EARNED", about: "Sells nothing. It earns spending money when a client signs that its report is good." },
 };
 
 /** The side-by-side pairs on the dashboard: fixed on the left, Kibble on the right. */

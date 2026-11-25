@@ -20,18 +20,17 @@ export function Nav() {
           kibble<span aria-hidden="true">.</span>
         </Link>
         <div className="k-nav-links">
-          <a href="#replay">The replay</a>
           <Link href="/live">Live</Link>
-          <Link href="/playground">Playground</Link>
-          <Link href="/assistant">Assistant</Link>
+          <Link href="/playground">Try it</Link>
+          <Link href="/assistant">Ask</Link>
           <Link href="/connect">Connect</Link>
           <Link href="/docs">How it works</Link>
           <a href={repoUrl} target="_blank" rel="noreferrer">
             GitHub
           </a>
         </div>
-        <Link href="/live" className="k-nav-cta">
-          Open app
+        <Link href="/tour" className="k-nav-cta">
+          Start here
         </Link>
       </nav>
     </header>

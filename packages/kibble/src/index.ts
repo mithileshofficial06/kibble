@@ -4,4 +4,5 @@ export * from "./typed-data";
 export * from "./client";
 export * from "./connect";
 export * from "./buyers";
+export * from "./story";
 export * from "./paid-fetch";

@@ -7,10 +7,10 @@ import { amt, useDeployment, useDrawers } from "@/lib/kibble";
 import { Odometer } from "./Odometer";
 
 /*
- * The hero replays testnet run 2 on Aevum: two agents with the same traffic and the same attack.
- * Kibble agent A's limit grows with cleared sales (0.200 → 0.260). Then its key is stolen: every
- * buy hits the cost ceiling and the wallet pauses it after 4 s. The fixed-limit twin pays 0.100
- * to the attacker and carries on.
+ * The hero replays real numbers from the current contracts on Aevum testnet (EVIDENCE.md, 25-26 Nov):
+ * Kibble agent A's limit grows with cleared sales (0.200 → 0.272), and in the hijack run every buy was
+ * refused and the wallet paused it after 2 s, while the fixed-limit twin paid out 0.150. They are two
+ * runs of the same drawers, shown one after the other.
  */
 
 type Phase = "earn" | "hijack" | "paused";
@@ -67,7 +67,7 @@ function reducer(s: State, a: Act): State {
 /** [delay before, action] */
 const SCRIPT: [number, Act][] = (() => {
   const s: [number, Act][] = [];
-  const limits: Record<number, string> = { 3: "0.209", 6: "0.218", 9: "0.239", 12: "0.260" };
+  const limits: Record<number, string> = { 2: "0.212", 4: "0.224", 7: "0.239", 9: "0.254", 12: "0.272" };
   for (let i = 1; i <= 12; i++) {
     s.push([i === 1 ? 1100 : 560, { t: "sale" }]);
     if (limits[i]) s.push([120, { t: "limit", v: limits[i] }]);
@@ -75,7 +75,7 @@ const SCRIPT: [number, Act][] = (() => {
   s.push([1200, { t: "phase", p: "hijack" }]);
   s.push([1300, { t: "attack", fixedLost: "0.050" }]);
   s.push([900, { t: "attack", fixedLost: "0.100" }]);
-  s.push([900, { t: "attack" }]);
+  s.push([900, { t: "attack", fixedLost: "0.150" }]);
   s.push([1000, { t: "phase", p: "paused" }]);
   s.push([450, { t: "limit", v: "0.000" }]);
   return s;
@@ -134,9 +134,9 @@ function useReplay(active: boolean) {
 }
 
 const STEPS: { key: Phase; n: string; title: string; caption: string }[] = [
-  { key: "earn", n: "01", title: "Earn", caption: "Every sale that clears raises how much the agent is allowed to spend." },
-  { key: "hijack", n: "02", title: "Hijack", caption: "Someone steals the agent's key and starts buying. Each buy hits the cost ceiling and is refused." },
-  { key: "paused", n: "03", title: "Paused", caption: "Four seconds in, the wallet pauses the agent on its own. Its spending limit drops to zero." },
+  { key: "earn", n: "01", title: "Earn", caption: "Every profitable round raises how much the agent is allowed to spend." },
+  { key: "hijack", n: "02", title: "Hijack", caption: "Someone steals the agent's key and grabs what they can. Each grab is more than the agent has earned, so it's refused." },
+  { key: "paused", n: "03", title: "Paused", caption: "Two seconds in, the wallet stops the agent on its own. The key can't spend anything now." },
 ];
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -217,25 +217,25 @@ export function Hero() {
 
           <motion.p className="k-sub" initial={{ opacity: 0, y: 14 }} animate={on({ opacity: 1, y: 0 })} transition={{ duration: 0.8, delay: 0.8, ease: EASE }}>
             AI agents now pay for things by themselves. Kibble is the wallet that decides how much: an agent may only spend what its sales have
-            earned. If it starts losing money, or its key gets stolen, the wallet stops it. No human has to be watching.
+            earned. If it starts losing money, or a thief grabs its key and overspends, the wallet stops it on its own.
           </motion.p>
 
           <motion.div className="k-ctas" initial={{ opacity: 0, y: 14 }} animate={on({ opacity: 1, y: 0 })} transition={{ duration: 0.8, delay: 0.95, ease: EASE }}>
-            <Link href="/live" className="k-btn">
-              <span>See it live</span>
+            <Link href="/tour" className="k-btn">
+              <span>Take the two-minute tour</span>
               <svg viewBox="0 0 16 16" aria-hidden="true">
                 <path d="M3 8h10M9 4l4 4-4 4" />
               </svg>
             </Link>
-            <Link href="/docs" className="k-link">
-              How it works
+            <Link href="/playground" className="k-link">
+              Try it yourself
             </Link>
           </motion.div>
 
           <motion.dl className="k-facts" initial={{ opacity: 0 }} animate={on({ opacity: 1 })} transition={{ delay: 1.2, duration: 0.8 }}>
-            <Fact run={show} to={4} suffix=" s" label="to pause a hijacked agent" />
-            <Fact run={show} to={0} decimals={3} label="overbought by the attacker" />
-            <Fact run={show} to={105} label="tests, on a live testnet" />
+            <Fact run={show} to={2} suffix=" s" label="to stop a grab with a stolen key" />
+            <Fact run={show} to={0} decimals={3} label="taken in that grab" />
+            <Fact run={show} to={145} label="tests, on a live testnet" />
           </motion.dl>
         </div>
 
@@ -254,7 +254,7 @@ export function Hero() {
 
           <div className="k-panel-top">
             <span className="k-panel-tag">
-              <span className="k-rec" aria-hidden="true" /> Replay · testnet run 2
+              <span className="k-rec" aria-hidden="true" /> Replay · testnet numbers
             </span>
             <button type="button" className="k-replay" onClick={() => jump("earn")} disabled={reduce}>
               ↻ Replay

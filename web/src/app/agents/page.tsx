@@ -47,7 +47,7 @@ export default function AgentsPage() {
         eyebrow="Read from the factory"
         live
         title="Every agent, in the *open.*"
-        lede="Each drawer's earnings, spending and state, straight from the chain. Drawers owned by Kibble's own demo wallets are marked as demos."
+        lede="What each agent earned, spent and is allowed to spend, straight from the chain. Kibble's own demo agents are marked."
         aside={
           <Link className="btn" href="/connect">
             Connect yours
@@ -56,7 +56,7 @@ export default function AgentsPage() {
       />
       <Reveal className="stats">
         <div className="stat">
-          <span className="stat-label">Drawers</span>
+          <span className="stat-label">Agents</span>
           <Num className="big" value={list.data ? String(list.data.total) : undefined} />
           <span className="stat-sub">made by this factory</span>
         </div>
@@ -72,14 +72,14 @@ export default function AgentsPage() {
         </div>
       </Reveal>
       <section className="stack">
-        <SecHead n="01" title="All *drawers.*" note={list.data && list.data.total > MAX ? `The newest ${MAX}.` : "Newest first."} />
+        <SecHead n="01" title="All *agents.*" note={list.data && list.data.total > MAX ? `The newest ${MAX}.` : "Newest first."} />
         <Reveal className="card flush">
           {rows.length ? (
             <div className="table-wrap" tabIndex={0} role="region" aria-label="Table, scrolls sideways">
               <table className="docs-table mono-cells">
                 <thead>
                   <tr>
-                    <th>Drawer</th>
+                    <th>Agent</th>
                     <th>Owner</th>
                     <th>Mode</th>
                     <th>State</th>
@@ -87,7 +87,7 @@ export default function AgentsPage() {
                     <th>Earned</th>
                     <th>Spent</th>
                     <th>Payments</th>
-                    <th>Exposed now</th>
+                    <th>A thief could take</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -112,7 +112,7 @@ export default function AgentsPage() {
               </table>
             </div>
           ) : (
-            <p className="fine">{list.error ? explain(list.error) : list.isLoading ? "Reading…" : "No drawers yet."}</p>
+            <p className="fine">{list.error ? explain(list.error) : list.isLoading ? "Reading…" : "No agents yet."}</p>
           )}
         </Reveal>
         <p className="fine">

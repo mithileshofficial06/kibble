@@ -18,8 +18,11 @@ const RUNS_PER_DAY = Number(process.env.PLAYGROUND_RUNS_PER_DAY ?? 10);
 /** Below this many beats of gas left, the page says so. */
 const FUEL_LOW = 5;
 const MAX_LINES = 400;
+const MAX_EVENTS = 800;
 
-type Job = { id: number; beat: string; startedAt: number; expectedSeconds: number; finishedAt?: number; ok?: boolean; lines: string[] };
+import type { StoryEvent } from "@kibble/sdk";
+
+type Job = { id: number; beat: string; startedAt: number; expectedSeconds: number; finishedAt?: number; ok?: boolean; lines: string[]; events: StoryEvent[] };
 type State = {
   job?: Job;
   nextId: number;
@@ -87,14 +90,21 @@ async function refreshFuel(force = false) {
   }
 }
 
-function view() {
+/** The job as sent to the page: only the events after `since`, so polling stays light. */
+function jobView(since: number) {
+  if (!state.job) return undefined;
+  const { events, ...rest } = state.job;
+  return { ...rest, events: events.slice(since), eventCount: events.length };
+}
+
+function view(since = 0) {
   rollDay();
   const running = Boolean(state.job && state.job.finishedAt === undefined);
   const fuel = state.fuel?.beats;
   return {
     enabled: enabled(),
     running,
-    job: state.job,
+    job: jobView(since),
     cooldownEndsAt: running || !state.lastEnd ? null : state.lastEnd + COOLDOWN_MS,
     runsLeftToday: Math.max(0, RUNS_PER_DAY - state.runs),
     /** Roughly how many more runs the demo wallets' testnet gas pays for; null if unknown. */
@@ -109,10 +119,11 @@ async function loadBeats() {
   return import("@kibble/agents/playground");
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const { BEATS } = await loadBeats();
   await refreshFuel();
-  return NextResponse.json({ ...view(), beats: publicBeats(BEATS) });
+  const since = Math.max(0, Math.floor(Number(req.nextUrl.searchParams.get("since")) || 0));
+  return NextResponse.json({ ...view(since), beats: publicBeats(BEATS) });
 }
 
 export async function POST(req: NextRequest) {
@@ -138,7 +149,7 @@ export async function POST(req: NextRequest) {
   }
 
   const beat = body.beat;
-  const job: Job = { id: state.nextId++, beat, startedAt: now, expectedSeconds: estimate(BEATS, beat), lines: [] };
+  const job: Job = { id: state.nextId++, beat, startedAt: now, expectedSeconds: estimate(BEATS, beat), lines: [], events: [] };
   state.job = job;
   state.runs++;
   state.perIp.set(ip, (state.perIp.get(ip) ?? 0) + 1);
@@ -147,7 +158,10 @@ export async function POST(req: NextRequest) {
     if (job.lines.length > MAX_LINES) job.lines.splice(0, job.lines.length - MAX_LINES);
   };
   // Runs in the background; the page polls GET for the log.
-  void runBeat(beat, { rpcUrl: rpcUrl(), log })
+  const event = (e: StoryEvent) => {
+    if (job.events.length < MAX_EVENTS) job.events.push(e);
+  };
+  void runBeat(beat, { rpcUrl: rpcUrl(), log, event })
     .then(() => {
       job.ok = true;
       state.took[beat] = Math.round((Date.now() - job.startedAt) / 1000);

@@ -24,24 +24,29 @@ export async function handleSale(
   const supplier = ctx.address("SUPPLIER");
   try {
     await sendDrawer(ctx.pub, ctx.wallet("BUYER"), drawer, "buy", [billRef, price]);
+    await ctx.story?.sale(drawer, "sale", price);
   } catch {
+    await ctx.story?.sale(drawer, "closed", price);
     return { status: "turned-away", why: "drawer not taking orders (paused)" };
   }
   const pay = await payOnce({ pub: ctx.pub, wallet: ctx.wallet(opts.agentRole), drawer, payee: supplier, amount: cost, billRef });
+  await ctx.story?.pay(drawer, pay, cost, supplier);
   if (pay.status !== "paid") {
-    await sendDrawer(ctx.pub, ctx.wallet(opts.agentRole), drawer, "refund", [billRef]).catch(() => undefined);
+    const back = await sendDrawer(ctx.pub, ctx.wallet(opts.agentRole), drawer, "refund", [billRef]).catch(() => undefined);
+    if (back) await ctx.story?.sale(drawer, "refund", price);
     return { status: "turned-away", why: pay.text };
   }
   const ok = await verifyPaid(ctx, { txHash: pay.txHash, drawer, billRef, amount: cost, supplier });
   if (!ok) throw new Error(`supplier could not verify payment for ${billRef}`);
   runModelCall(opts.prompt ?? "customer document");
   await sendDrawer(ctx.pub, ctx.wallet("BUYER"), drawer, "ackDelivery", [billRef]);
+  await ctx.story?.sale(drawer, "earned", price);
   return { status: "served", pay };
 }
 
 /** A plain agent purchase (no sale behind it): the hijack and bad-strategy beats use this. */
 export async function agentPay(ctx: Ctx, opts: { drawer: Address; agentRole: Role; payee: Address; amount: bigint; billRef?: Hex }) {
-  return payOnce({
+  const r = await payOnce({
     pub: ctx.pub,
     wallet: ctx.wallet(opts.agentRole),
     drawer: opts.drawer,
@@ -49,6 +54,8 @@ export async function agentPay(ctx: Ctx, opts: { drawer: Address; agentRole: Rol
     amount: opts.amount,
     billRef: opts.billRef ?? newBillRef("buy"),
   });
+  await ctx.story?.pay(opts.drawer, r, opts.amount, opts.payee);
+  return r;
 }
 
 export async function sync(ctx: Ctx, drawer: Address) {

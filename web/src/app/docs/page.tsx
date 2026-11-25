@@ -85,7 +85,7 @@ export default function DocsPage() {
             </h2>
             <ol className="how">
               <li>
-                <strong>The drawer</strong> (one contract per agent) holds the agent&apos;s money. The agent&apos;s key holds nothing: it can
+                <strong>The drawer</strong> (one contract per agent; the app calls it a cash box) holds the agent&apos;s money. The agent&apos;s key holds nothing: it can
                 only ask the drawer to pay.
               </li>
               <li>

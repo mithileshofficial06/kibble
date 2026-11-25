@@ -7,10 +7,12 @@ import type { DrawerView } from "@kibble/sdk";
 import { Arrow, EASE, Num, PageHead, Reveal, SecHead, StatePill } from "@/components/ui";
 import { AGENTS, PAIRS, amt, pct, short, useDeployment, useDrawerHistory, useDrawers, type AgentName, type Deployment } from "@/lib/kibble";
 import { useNetwork } from "@/lib/network";
+import { whyState } from "@/lib/plain";
+import { Term } from "@/components/Term";
 
 const PAIR_COPY: Record<string, { title: string; note: string }> = {
-  A: { title: "Same sales, *different* limits.", note: "A′ gets a flat limit refilled every window. A earns its limit from cleared sales, and stops when its key is stolen." },
-  B: { title: "A losing strategy, *braked.*", note: "Both buy above their sale price. The fixed one keeps paying until a human reacts; Kibble walks Watch → Braked → Paused." },
+  A: { title: "Same sales, *different* limits.", note: "The same business twice. One has a fixed limit. The other earns its limit." },
+  B: { title: "A losing strategy, *braked.*", note: "Both sell for less than they pay. Only one of them is stopped." },
 };
 
 /** Split screen: fixed limit on the left, Kibble on the right, the same contract code and traffic. */
@@ -26,10 +28,10 @@ export default function DashboardPage() {
       eyebrow={`Live on ${net.chain.name}`}
       live
       title="A fixed limit is a *guess.* Kibble's is earned."
-      lede="Each agent spends from its own drawer contract. Fixed on the left, Kibble on the right: the same code and the same traffic. Every number here is read from the chain every few seconds."
+      lede="These agents run on Aevum testnet right now. Fixed limit on the left, Kibble on the right: the same code and the same customers."
       aside={
         <Link href="/playground" className="btn">
-          Run a demo yourself <Arrow />
+          Run one yourself <Arrow />
         </Link>
       }
     />
@@ -68,10 +70,10 @@ export default function DashboardPage() {
           <span className="pulse live" aria-hidden="true" /> Live
         </span>
         <span>
-          Owner vault <b>{amt(live.data?.vault)}</b> tUSD8 of swept profit
+          Profit in the owner&apos;s vault <b>{amt(live.data?.vault)}</b> tUSD8
         </span>
         <span>
-          <b>{live.data ? receipts : "…"}</b> receipts on chain
+          <b>{live.data ? receipts : "…"}</b> payments made
         </span>
         <span>
           <b>{Object.keys(d.drawers).length}</b> agents
@@ -82,7 +84,7 @@ export default function DashboardPage() {
       </Reveal>
 
       <section className="stack">
-        <SecHead n="00" title="The *scoreboard.*" note="Hijack exposure is the most a stolen agent key could take right now." />
+        <SecHead n="00" title="How they're *doing.*" note="Read from the chain every few seconds. Amounts are test money (tUSD8)." />
         <Scoreboard dep={d} drawers={drawers} vault={live.data?.vault} />
       </section>
 
@@ -107,7 +109,7 @@ export default function DashboardPage() {
       ))}
 
       <section className="stack">
-        <SecHead n="03" title="Work that's *accepted* earns budget." note="W sells nothing. A client signs that a report was accepted, and the drawer credits it." />
+        <SecHead n="03" title="Paid by *accepted* work." note="This one sells nothing. It earns when a client signs that its report is good." />
         <Reveal>
           <AgentCard name="W" dep={d} v={drawers.W} />
         </Reveal>
@@ -127,12 +129,12 @@ function Scoreboard({ dep, drawers, vault }: { dep: Deployment; drawers: Partial
             <tr>
               <th>Agent</th>
               <th>State</th>
-              <th>Limit T</th>
-              <th>Value earned</th>
+              <th>Why</th>
+              <th>Limit</th>
+              <th>Earned</th>
               <th>Spent</th>
               <th>Profit</th>
-              <th title="The most a stolen agent key could take right now">Hijack exposure</th>
-              <th>Receipts</th>
+              <th>A thief could take</th>
             </tr>
           </thead>
           <tbody>
@@ -147,12 +149,12 @@ function Scoreboard({ dep, drawers, vault }: { dep: Deployment; drawers: Partial
                   <td>
                     <StatePill state={v?.state} />
                   </td>
+                  <td className="why-cell">{v ? whyState(v) : "…"}</td>
                   <td>{amt(v?.limitT)}</td>
                   <td>{amt(v?.lifetimeValue)}</td>
                   <td>{amt(v?.lifetimeSpend)}</td>
                   <td style={{ color: profit === undefined ? undefined : profit < 0n ? "var(--coral)" : "var(--mint)" }}>{amt(profit)}</td>
                   <td>{amt(v?.maxLossNow)}</td>
-                  <td>{v?.receiptCount.toString() ?? "…"}</td>
                 </tr>
               );
             })}
@@ -160,7 +162,7 @@ function Scoreboard({ dep, drawers, vault }: { dep: Deployment; drawers: Partial
         </table>
       </div>
       <p className="fine" style={{ padding: "14px clamp(18px, 2vw, 28px) 18px", borderTop: "1px solid var(--line)" }}>
-        Owner vault {short(dep.vault)} holds <strong>{amt(vault)} tUSD8</strong> of swept profit. The agent keys can never reach it.
+        Profit is moved to the owner&apos;s vault ({short(dep.vault)}), now <strong>{amt(vault)} tUSD8</strong>. The agents&apos; keys can never reach it. <Link href="/agents">See every agent</Link>.
       </p>
     </Reveal>
   );
@@ -177,7 +179,7 @@ function AgentCard({ name, dep, v }: { name: AgentName; dep: Deployment; v?: Dra
       <div className="agent-top">
         <div>
           <p className="agent-mode">
-            <i aria-hidden="true" /> {earned ? "Kibble · earned limit" : "Fixed limit · with alerts"}
+            <i aria-hidden="true" /> {earned ? "Kibble" : "Fixed limit"}
           </p>
           <h2>
             <Link href={`/drawer/${addr}`}>{meta.label}</Link>
@@ -186,14 +188,19 @@ function AgentCard({ name, dep, v }: { name: AgentName; dep: Deployment; v?: Dra
         <StatePill state={v?.state} />
       </div>
       <p className="agent-about">{meta.about}</p>
+      {v && <p className={`why ${v.state}`}>{whyState(v)}</p>}
 
       <div className="agent-nums">
         <div>
-          <span className="stat-label">{earned ? "Earned limit T" : "Flat limit"}</span>
+          <span className="stat-label">
+            <Term k="limit" />
+          </span>
           <Num className={`big ${paused ? "coral" : ""}`} value={v ? amt(v.limitT) : undefined} />
         </div>
         <div>
-          <span className="stat-label">Hijack exposure</span>
+          <span className="stat-label">
+            <Term k="exposure" />
+          </span>
           <Num className={`big mid ${v && v.maxLossNow === 0n ? "mint" : ""}`} value={v ? amt(v.maxLossNow) : undefined} />
         </div>
       </div>
@@ -204,7 +211,7 @@ function AgentCard({ name, dep, v }: { name: AgentName; dep: Deployment; v?: Dra
             <span style={{ width: `${share}%` }} />
           </div>
           <p className="fine">
-            T is {share.toFixed(0)}% of its ceiling {amt(v.tMax)}
+            It can grow to {amt(v.tMax)}
             {v.strikes > 0n && ` · ${v.strikes} strike${v.strikes === 1n ? "" : "s"}`}
           </p>
         </div>
@@ -216,9 +223,9 @@ function AgentCard({ name, dep, v }: { name: AgentName; dep: Deployment; v?: Dra
           <p className="fine">Reading…</p>
         ) : (
           <dl className="kv">
-            <dt>Allowance left</dt>
+            <dt>Can spend now</dt>
             <dd>{amt(v.allowance)}</dd>
-            <dt>Hijack exposure (maxLossNow)</dt>
+            <dt>A thief could take (maxLossNow)</dt>
             <dd>
               <strong>{amt(v.maxLossNow)}</strong>
             </dd>
@@ -230,13 +237,13 @@ function AgentCard({ name, dep, v }: { name: AgentName; dep: Deployment; v?: Dra
                 </dd>
               </>
             )}
-            <dt>This window</dt>
+            <dt>This round</dt>
             <dd>
               #{v.windowIndex.toString()}: value {amt(v.windowValue)}, spent {amt(v.windowSpend)}
             </dd>
             {v.pendingTotal > 0n && (
               <>
-                <dt>Income not yet cleared</dt>
+                <dt>Sales not confirmed yet</dt>
                 <dd>{amt(v.pendingTotal)}</dd>
               </>
             )}
@@ -248,7 +255,7 @@ function AgentCard({ name, dep, v }: { name: AgentName; dep: Deployment; v?: Dra
             )}
             {v.runway > 0n && (
               <>
-                <dt>Runway grant</dt>
+                <dt>Advance from the owner</dt>
                 <dd>{amt(v.runway)}</dd>
               </>
             )}
@@ -273,9 +280,9 @@ function TimeLapse(props: { left: AgentName; right: AgentName; dep: Deployment }
       <summary>
         <span>
           <span className="card-label" style={{ display: "block", marginBottom: 6 }}>
-            Time-lapse
+            Round by round
           </span>
-          {AGENTS[props.left].label} vs {AGENTS[props.right].label}, window by window
+          {AGENTS[props.left].label} vs {AGENTS[props.right].label}
         </span>
       </summary>
       {open && <TimeLapseBody {...props} />}
@@ -293,7 +300,7 @@ function TimeLapseBody({ left, right, dep }: { left: AgentName; right: AgentName
   const rw = r.data?.windows ?? [];
   const rows = Math.max(lw.length, rw.length);
   if (rows === 0) {
-    return <p className="fine">{l.isLoading || r.isLoading ? "Reading the window history…" : "No closed windows in the last ~5 hours."}</p>;
+    return <p className="fine">{l.isLoading || r.isLoading ? "Reading the history…" : "No finished rounds in the last 5 hours or so."}</p>;
   }
   const maxT = [...lw, ...rw].reduce((m, w) => (w.limitT > m ? w.limitT : m), 1n);
   const W = Math.max(rows - 1, 1) * 10;

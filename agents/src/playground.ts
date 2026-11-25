@@ -5,14 +5,16 @@ import { readDrawer } from "@kibble/sdk";
 import { atDeploymentScale, connect, type Ctx } from "./chain";
 import { requireDeployment, type AgentName, type Deployment } from "./deployments";
 import { badStrategy, hijack, resume, timelapse } from "./scenarios";
+import type { StoryEvent } from "@kibble/sdk";
+import { STORY_PAIR, StoryTeller } from "./story";
 import { beatsAffordable, gasBalances, rebalanceGas, recycleTusd8, SENDERS, tq, type Sender } from "./upkeep";
 
 const m = (milli: number) => BigInt(milli) * 10n ** 15n; // milli-tQDAY in wei
 
 export const BEATS = {
   "sales-rush": {
-    title: "Sales rush",
-    about: "Two windows of rising demand through the fixed-limit agent and the Kibble agent.",
+    title: "A busy day",
+    about: "Customers keep coming. See which agent can serve them, and whose limit grows.",
     drawers: ["A", "A_FIXED"],
     /** Rough length on Aevum testnet (2-minute windows, 1 s blocks). The server replaces it with the last real run. */
     estSeconds: 300,
@@ -20,15 +22,15 @@ export const BEATS = {
     gas: { BUYER: m(9), AGENT_A: m(8), RELAYER: m(2) },
   },
   "bad-strategy": {
-    title: "Bad strategy",
-    about: "The supplier's price jumps above the sale price. The fixed side keeps paying; Kibble brakes itself.",
+    title: "A losing day",
+    about: "Every sale starts losing money. One agent keeps paying. The other is stopped by its wallet.",
     drawers: ["B", "B_FIXED"],
     estSeconds: 420,
     gas: { BUYER: m(11), AGENT_B: m(11), RELAYER: m(2) },
   },
   hijack: {
-    title: "Hijack",
-    about: "A prompt injection, then the attacker overbuys with the stolen agent key for 60 s.",
+    title: "A stolen key",
+    about: "A web page tricks the AI, then a thief uses its key. See how much each wallet gives away.",
     drawers: ["A", "A_FIXED"],
     estSeconds: 210,
     gas: { AGENT_A: m(10), RELAYER: m(2) },
@@ -80,7 +82,7 @@ export async function fuel(rpcUrl: string) {
  * Run one beat. Drawers a previous run paused are resumed first (owner + guardian co-sign), so every
  * visitor sees the full story.
  */
-export async function runBeat(beat: Beat, opts: { rpcUrl: string; log: (line: string) => void }) {
+export async function runBeat(beat: Beat, opts: { rpcUrl: string; log: (line: string) => void; event?: (e: StoryEvent) => void }) {
   const log = (...args: unknown[]) => opts.log(args.map(String).join(" "));
   const raw = await connect(opts.rpcUrl, log);
   const dep = requireDeployment(raw.chain.id);
@@ -93,8 +95,14 @@ export async function runBeat(beat: Beat, opts: { rpcUrl: string; log: (line: st
       log(`Reset: ${name} was ${v.state}; owner + guardian co-signed resumeNow -> ${after.state}`);
     }
   }
+  const [fixed, kibble] = STORY_PAIR[beat];
+  if (opts.event) {
+    ctx.story = new StoryTeller(ctx, dep, opts.event);
+    await ctx.story.start(dep.drawers[fixed]!, dep.drawers[kibble]!);
+  }
   if (beat === "sales-rush") await timelapse(ctx, dep, 2);
   else if (beat === "bad-strategy") await badStrategy(ctx, dep, 3);
   // Always the scripted model here: visitors can never spend API keys that are on the server.
   else await hijack(ctx, dep, "scripted");
+  await ctx.story?.end(dep.drawers[fixed]!, dep.drawers[kibble]!);
 }

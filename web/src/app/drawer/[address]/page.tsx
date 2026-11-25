@@ -3,12 +3,15 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import { encodeAbiParameters, erc20Abi, isAddress, isHex, maxUint256, type Address, type Hex } from "viem";
+import { encodeAbiParameters, erc20Abi, isAddress, isHex, type Address, type Hex } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 import { PARAMS, Param, decodeDrawerLogs, sendDrawer, signResume, units, type Wallet } from "@kibble/sdk";
 import { explain } from "@/lib/errors";
 import { AGENTS, amt, pct, short, useBuyers, useDeployment, useDrawer, useDrawerConfig, useDrawerHistory, usePub, useReceipts, type AgentName } from "@/lib/kibble";
 import { useNetwork } from "@/lib/network";
+import { whyState } from "@/lib/plain";
+import { SimpleControls } from "@/components/SimpleControls";
+import { Term } from "@/components/Term";
 import { Num, PageHead, Reveal, SecHead, StatePill } from "@/components/ui";
 
 /** One drawer: its numbers, receipts, track record and the owner/guardian controls. Also the "verify" page. */
@@ -29,53 +32,225 @@ export default function DrawerPage() {
   const d = v.data;
   const c = cfg.data;
   const paused = d?.state === "Paused" || d?.state === "Revoked";
+  // the contract's own reason for the last change of state, if it's recent enough to have been read
+  const lastChange = history.data?.feed.find((e) => /^\w+ → /.test(e.text))?.text.split(": ").slice(1).join(": ");
 
   return (
     <main className="shell">
       <PageHead
         n="K—03"
-        rail={`Drawer · ${short(address)}`}
+        rail={`Agent · ${short(address)}`}
         eyebrow={
           <>
-            <Link href="/live">Live desk</Link> / Drawer
+            <Link href="/live">Live agents</Link> / {name ? "Demo agent" : "Agent"}
           </>
         }
         live
         title={name ? AGENTS[name].label : short(address)}
         lede={
           <>
-            {name ? `${AGENTS[name].about} ` : ""}Contract <Explorer address={address} />. Every number, receipt and decision of this drawer is
-            public: this page is its track record.
+            {name ? `${AGENTS[name].about} ` : "An agent on Kibble. "}Everything it earned, paid and was refused is public. Contract <Explorer address={address} />.
           </>
         }
         aside={d && <StatePill state={d.state} />}
       />
 
+      {d && <p className={`why big-why ${d.state}`}>{whyState(d, lastChange)}</p>}
+
       <Reveal className="stats">
         <div className="stat">
-          <span className="stat-label">{d?.mode === "FIXED" ? "Flat limit" : "Earned limit T"}</span>
+          <span className="stat-label">
+            <Term k="limit" />
+          </span>
           <Num className={`big ${paused ? "coral" : ""}`} value={d ? amt(d.limitT) : undefined} />
-          <span className="stat-sub">ceiling {amt(d?.tMax)}</span>
+          <span className="stat-sub">{d?.mode === "FIXED" ? "the same every round" : `can grow to ${amt(d?.tMax)}`}</span>
         </div>
         <div className="stat">
-          <span className="stat-label">Hijack exposure</span>
+          <span className="stat-label">
+            <Term k="exposure" />
+          </span>
           <Num className={`big mid ${d?.maxLossNow === 0n ? "mint" : ""}`} value={d ? amt(d.maxLossNow) : undefined} />
-          <span className="stat-sub">most a stolen key could take now</span>
+          <span className="stat-sub">right now, with the agent&apos;s key</span>
         </div>
         <div className="stat">
-          <span className="stat-label">Allowance</span>
+          <span className="stat-label">
+            <Term k="canSpend" />
+          </span>
           <Num className="big mid" value={d ? amt(d.allowance) : undefined} />
-          <span className="stat-sub">strikes {d?.strikes.toString() ?? "…"}</span>
+          <span className="stat-sub">{d ? `${d.strikes} of 3 strikes` : "…"}</span>
         </div>
         <div className="stat">
-          <span className="stat-label">Balance</span>
+          <span className="stat-label">In the box</span>
           <Num className="big mid" value={d ? amt(d.balance) : undefined} />
-          <span className="stat-sub">tUSD8 in the drawer</span>
+          <span className="stat-sub">tUSD8, test money</span>
         </div>
       </Reveal>
 
+      {c && d && (
+        <section className="stack">
+          <SecHead n="01" title="Take *control.*" note="Only the owner and guardian can. The contract checks, not this page." />
+          <SimpleControls
+            drawer={address}
+            d={d}
+            owner={c.owner}
+            guardian={c.guardian}
+            approvalThreshold={c.approvalThreshold}
+            maxWeeklyLoss={c.maxWeeklyLoss}
+            resumeNonce={c.resumeNonce}
+          />
+          <details className="advanced">
+            <summary>Advanced controls</summary>
+            <Controls drawer={address} owner={c.owner} guardian={c.guardian} resumeNonce={c.resumeNonce} />
+          </details>
+        </section>
+      )}
+
       <section className="stack">
-        <SecHead n="01" title="Now, and its *settings.*" note="Refreshed every few seconds from the contract." />
+        <SecHead n="02" title="Who actually *paid?*" note="From its latest sales. Earnings alone don't prove customers." />
+        <Reveal className="card">
+          {!buyers.data ? (
+            <p className="fine">{buyers.error ? explain(buyers.error) : "Reading…"}</p>
+          ) : buyers.data.sales === 0 ? (
+            <p className="fine">No sales yet.</p>
+          ) : (
+            <>
+              <dl className="kv">
+                <dt>Sales read</dt>
+                <dd>
+                  {buyers.data.sales} of {buyers.data.totalSales} (refunded {buyers.data.refunded})
+                </dd>
+                <dt>Different buyers</dt>
+                <dd>{buyers.data.buyers}</dd>
+                <dt>From the biggest buyer</dt>
+                <dd>
+                  {(buyers.data.topShare * 100).toFixed(1)}% {buyers.data.topBuyer && <Explorer address={buyers.data.topBuyer} />}
+                </dd>
+                <dt>From the owner, guardian or agent themselves</dt>
+                <dd>{(buyers.data.insiderShare * 100).toFixed(1)}%</dd>
+                <dt>From unknown senders (plain transfers)</dt>
+                <dd>{(buyers.data.unknownShare * 100).toFixed(1)}%</dd>
+              </dl>
+              <p className="fine">
+                {buyers.data.buyers <= 1 || buyers.data.topShare > 0.8 || buyers.data.insiderShare > 0.2
+                  ? "Concentrated: treat this track record as activity, not as proof of customers."
+                  : "Spread over several buyers. That's harder to fake, not impossible: one person can use many wallets."}
+              </p>
+            </>
+          )}
+        </Reveal>
+      </section>
+
+      <section className="stack">
+        <SecHead n="03" title="What it *paid.*" note="The latest 25 payments." />
+        <Reveal className="card flush">
+        {receipts.data?.length ? (
+          <div className="table-wrap" tabIndex={0} role="region" aria-label="Table, scrolls sideways">
+            <table className="docs-table mono-cells">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Time</th>
+                  <th>Payee</th>
+                  <th>Amount</th>
+                  <th>State then</th>
+                  <th>T then</th>
+                  <th>Window value / spent</th>
+                  <th>Approved by</th>
+                </tr>
+              </thead>
+              <tbody>
+                {receipts.data.map((r) => (
+                  <tr key={r.id}>
+                    <td>{r.id}</td>
+                    <td>{new Date(Number(r.time) * 1000).toLocaleString()}</td>
+                    <td>{short(r.payee)}</td>
+                    <td>{amt(r.amount)}</td>
+                    <td>
+                      <StatePill state={r.state} />
+                    </td>
+                    <td>{amt(r.limitT)}</td>
+                    <td>
+                      {amt(r.windowValue)} / {amt(r.windowSpend)}
+                    </td>
+                    <td>{c && r.approvedBy.toLowerCase() === c.owner.toLowerCase() ? "owner" : "agent"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="fine">{receipts.isLoading ? "Reading…" : "No payments yet."}</p>
+        )}
+        </Reveal>
+      </section>
+
+      <section className="stack">
+        <SecHead n="04" title="What the wallet *decided.*" note="Every refusal and change, with the contract's reason." />
+        <div className="grid-2">
+        <Reveal className="card flush">
+          <h2>Track record</h2>
+          <p className="fine">
+            One row per closed window (TrackRecord events), blocks {history.data?.from.toString()}–{history.data?.head.toString()}.{" "}
+            <label>
+              Read the last{" "}
+              <select value={range.toString()} onChange={(e) => setRange(BigInt(e.target.value))}>
+                <option value="20000">~6 hours</option>
+                <option value="90000">~1 day</option>
+                <option value="300000">~3 days</option>
+              </select>
+            </label>
+          </p>
+          {history.data?.windows.length ? (
+            <div className="table-wrap" tabIndex={0} role="region" aria-label="Table, scrolls sideways">
+              <table className="docs-table mono-cells">
+                <thead>
+                  <tr>
+                    <th>Window</th>
+                    <th>Value</th>
+                    <th>Spent</th>
+                    <th>Profit</th>
+                    <th>T</th>
+                    <th>State</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.data.windows.map((w) => (
+                    <tr key={w.index.toString()}>
+                      <td>{w.index.toString()}</td>
+                      <td>{amt(w.value)}</td>
+                      <td>{amt(w.spend)}</td>
+                      <td>{amt(w.profit)}</td>
+                      <td>{amt(w.limitT)}</td>
+                      <td>
+                        <StatePill state={w.state} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="fine">{history.isLoading ? "Reading…" : "No closed windows in this range."}</p>
+          )}
+        </Reveal>
+        <Reveal className="card" delay={0.1}>
+          <h2>Decisions</h2>
+          {history.data?.feed.length ? (
+            <ul className="feed">
+              {history.data.feed.slice(0, 40).map((e, i) => (
+                <li key={i} className={/Paused|Braked|Alert|refus|over|ceiling/i.test(e.text) ? "bad" : ""}>
+                  <Explorer tx={e.tx} label={`#${e.block}`} /> {e.text}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="fine">{history.isLoading ? "Reading…" : "No refusals, state changes or alerts in this range."}</p>
+          )}
+        </Reveal>
+        </div>
+      </section>
+      <section className="stack">
+        <SecHead n="05" title="Every *number.*" note="For the curious. Read from the contract every few seconds." />
         <div className="grid-2">
         <Reveal className="card">
           <h2>Now</h2>
@@ -160,157 +335,6 @@ export default function DrawerPage() {
         </div>
       </section>
 
-      {c && (
-        <section className="stack">
-          <SecHead n="02" title="Owner and guardian *controls.*" note="Anyone can see them. Only the contract decides who may act." />
-          <Controls drawer={address} owner={c.owner} guardian={c.guardian} resumeNonce={c.resumeNonce} />
-        </section>
-      )}
-
-      <section className="stack">
-        <SecHead n="03" title="Who actually *paid?*" note="From the drawer's latest sales. Earnings alone don't prove customers." />
-        <Reveal className="card">
-          {!buyers.data ? (
-            <p className="fine">{buyers.error ? explain(buyers.error) : "Reading…"}</p>
-          ) : buyers.data.sales === 0 ? (
-            <p className="fine">No sales yet.</p>
-          ) : (
-            <>
-              <dl className="kv">
-                <dt>Sales read</dt>
-                <dd>
-                  {buyers.data.sales} of {buyers.data.totalSales} (refunded {buyers.data.refunded})
-                </dd>
-                <dt>Different buyers</dt>
-                <dd>{buyers.data.buyers}</dd>
-                <dt>From the biggest buyer</dt>
-                <dd>
-                  {(buyers.data.topShare * 100).toFixed(1)}% {buyers.data.topBuyer && <Explorer address={buyers.data.topBuyer} />}
-                </dd>
-                <dt>From the owner, guardian or agent themselves</dt>
-                <dd>{(buyers.data.insiderShare * 100).toFixed(1)}%</dd>
-                <dt>From unknown senders (plain transfers)</dt>
-                <dd>{(buyers.data.unknownShare * 100).toFixed(1)}%</dd>
-              </dl>
-              <p className="fine">
-                {buyers.data.buyers <= 1 || buyers.data.topShare > 0.8 || buyers.data.insiderShare > 0.2
-                  ? "Concentrated: treat this track record as activity, not as proof of customers."
-                  : "Spread over several buyers. That's harder to fake, not impossible: one person can use many wallets."}
-              </p>
-            </>
-          )}
-        </Reveal>
-      </section>
-
-      <section className="stack">
-        <SecHead n="04" title="Every *receipt.*" note="The latest 25 payments, read from the drawer's storage." />
-        <Reveal className="card flush">
-        {receipts.data?.length ? (
-          <div className="table-wrap" tabIndex={0} role="region" aria-label="Table, scrolls sideways">
-            <table className="docs-table mono-cells">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Time</th>
-                  <th>Payee</th>
-                  <th>Amount</th>
-                  <th>State then</th>
-                  <th>T then</th>
-                  <th>Window value / spent</th>
-                  <th>Approved by</th>
-                </tr>
-              </thead>
-              <tbody>
-                {receipts.data.map((r) => (
-                  <tr key={r.id}>
-                    <td>{r.id}</td>
-                    <td>{new Date(Number(r.time) * 1000).toLocaleString()}</td>
-                    <td>{short(r.payee)}</td>
-                    <td>{amt(r.amount)}</td>
-                    <td>
-                      <StatePill state={r.state} />
-                    </td>
-                    <td>{amt(r.limitT)}</td>
-                    <td>
-                      {amt(r.windowValue)} / {amt(r.windowSpend)}
-                    </td>
-                    <td>{c && r.approvedBy.toLowerCase() === c.owner.toLowerCase() ? "owner" : "agent"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="fine">{receipts.isLoading ? "Reading…" : "No payments yet."}</p>
-        )}
-        </Reveal>
-      </section>
-
-      <section className="stack">
-        <SecHead n="05" title="What the wallet *decided.*" note="Closed windows, and every refusal, state change and alert from the contract's events." />
-        <div className="grid-2">
-        <Reveal className="card flush">
-          <h2>Track record</h2>
-          <p className="fine">
-            One row per closed window (TrackRecord events), blocks {history.data?.from.toString()}–{history.data?.head.toString()}.{" "}
-            <label>
-              Read the last{" "}
-              <select value={range.toString()} onChange={(e) => setRange(BigInt(e.target.value))}>
-                <option value="20000">~6 hours</option>
-                <option value="90000">~1 day</option>
-                <option value="300000">~3 days</option>
-              </select>
-            </label>
-          </p>
-          {history.data?.windows.length ? (
-            <div className="table-wrap" tabIndex={0} role="region" aria-label="Table, scrolls sideways">
-              <table className="docs-table mono-cells">
-                <thead>
-                  <tr>
-                    <th>Window</th>
-                    <th>Value</th>
-                    <th>Spent</th>
-                    <th>Profit</th>
-                    <th>T</th>
-                    <th>State</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.data.windows.map((w) => (
-                    <tr key={w.index.toString()}>
-                      <td>{w.index.toString()}</td>
-                      <td>{amt(w.value)}</td>
-                      <td>{amt(w.spend)}</td>
-                      <td>{amt(w.profit)}</td>
-                      <td>{amt(w.limitT)}</td>
-                      <td>
-                        <StatePill state={w.state} />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="fine">{history.isLoading ? "Reading…" : "No closed windows in this range."}</p>
-          )}
-        </Reveal>
-        <Reveal className="card" delay={0.1}>
-          <h2>Decisions</h2>
-          {history.data?.feed.length ? (
-            <ul className="feed">
-              {history.data.feed.slice(0, 40).map((e, i) => (
-                <li key={i} className={/Paused|Braked|Alert|refus|over|ceiling/i.test(e.text) ? "bad" : ""}>
-                  <Explorer tx={e.tx} label={`#${e.block}`} /> {e.text}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="fine">{history.isLoading ? "Reading…" : "No refusals, state changes or alerts in this range."}</p>
-          )}
-        </Reveal>
-        </div>
-      </section>
     </main>
   );
 }
@@ -473,7 +497,7 @@ function Controls({ drawer, owner, guardian, resumeNonce }: { drawer: Address; o
                 const token = await pub!.readContract({ address: drawer, abi: [{ type: "function", name: "token", inputs: [], outputs: [{ type: "address" }], stateMutability: "view" }], functionName: "token" });
                 const have = await pub!.readContract({ address: token, abi: erc20Abi, functionName: "allowance", args: [w.account.address, drawer] });
                 if (have < units(fund)) {
-                  const h = await w.writeContract({ address: token, abi: erc20Abi, functionName: "approve", args: [drawer, maxUint256], type: "legacy" } as never);
+                  const h = await w.writeContract({ address: token, abi: erc20Abi, functionName: "approve", args: [drawer, units(fund)], type: "legacy" } as never);
                   await pub!.waitForTransactionReceipt({ hash: h });
                 }
                 await sendDrawer(pub!, w, drawer, "fundAllowance", [units(fund)]);

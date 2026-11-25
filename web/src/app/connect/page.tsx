@@ -75,7 +75,7 @@ export default function ConnectPage() {
       const owner = wallet as Wallet;
       const factory = dep.data.factory;
       const vault = await vaultOf(pub, factory, owner.account.address);
-      say(vault ? `Using your vault ${short(vault)}. Confirm the drawer in your wallet.` : "Confirm two transactions: your vault, then the drawer.");
+      say(vault ? `Using your vault ${short(vault)}. Confirm the cash box in your wallet.` : "Confirm two transactions: your vault, then the cash box.");
       const d = await createDrawer(pub, owner, factory, {
         label: label.trim().slice(0, 60),
         agent: agent as Address,
@@ -85,7 +85,7 @@ export default function ConnectPage() {
         timing,
       });
       setDrawer(d);
-      say(`Drawer created: ${short(d)}. Confirm the first allowance (${amt(units(loss) / 10n)} tUSD8, two transactions).`);
+      say(`Cash box created: ${short(d)}. Confirm the first allowance (${amt(units(loss) / 10n)} tUSD8, two transactions).`);
       await fundDrawer(pub, owner, d, units(loss) / 10n);
       say("Funded. Your agent can ask it to pay.");
     } catch (e) {
@@ -101,8 +101,8 @@ export default function ConnectPage() {
         n="K—05"
         rail="Connect your agent"
         eyebrow="Five minutes, test money"
-        title="Give your agent a *drawer.*"
-        lede="Set one number: the most you're willing to lose in a week. Your agent gets a key that can only ask. The drawer decides."
+        title="Give your agent a cash *box.*"
+        lede="Set one number: the most you're willing to lose in a week. Your agent gets a key that can only ask. The cash box decides."
       />
 
       <section className="stack">
@@ -149,7 +149,7 @@ export default function ConnectPage() {
               </label>
               <div className="row">
                 <button className="btn" type="submit" disabled={Boolean(problem) || busy || !wallet || Boolean(drawer)}>
-                  {busy ? "Working…" : drawer ? "Created" : "Create the drawer"}
+                  {busy ? "Working…" : drawer ? "Created" : "Create it"}
                 </button>
                 <span className="fine">{drawer ? "Reload the page to make another." : (problem ?? "Ready.")}</span>
               </div>
@@ -158,9 +158,9 @@ export default function ConnectPage() {
           <Reveal className="card" delay={0.1}>
             <h2>What you get</h2>
             <dl className="kv">
-              <dt>Starting limit T</dt>
+              <dt>Starting limit</dt>
               <dd>{MONEY.test(loss) ? `${amt(units(loss) / 10n)} tUSD8` : "…"}</dd>
-              <dt>T can grow to</dt>
+              <dt>It can grow to</dt>
               <dd>{MONEY.test(loss) ? `${amt(units(loss) / 2n)} tUSD8` : "…"}</dd>
               <dt>Payments above this need your signature</dt>
               <dd>{MONEY.test(loss) ? `${amt(units(loss) / 10n)} tUSD8` : "…"}</dd>
@@ -178,7 +178,7 @@ export default function ConnectPage() {
               {error && <p className="fine bad-text" role="alert">{error}</p>}
               {drawer && (
                 <p className="fine">
-                  <Link href={`/drawer/${drawer}`}>Open your drawer</Link>: receipts, track record and your controls.
+                  <Link href={`/drawer/${drawer}`}>Open your agent&apos;s page</Link>: receipts, track record and your controls.
                 </p>
               )}
             </div>
@@ -187,7 +187,7 @@ export default function ConnectPage() {
       </section>
 
       <section className="stack">
-        <SecHead n="02" title="From the command *line.*" note="Makes test keys in your home folder, then the vault, drawer and first allowance." />
+        <SecHead n="02" title="From the command *line.*" note="Makes test keys in your home folder, then the vault, cash box and first spending money." />
         <div className="grid-2">
           <Reveal className="card">
             <h2>Four lines</h2>

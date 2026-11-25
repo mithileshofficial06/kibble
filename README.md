@@ -170,6 +170,10 @@ On 25 Nov 2026 both NVIDIA-hosted models we tried obeyed the hidden instruction 
 - [A worked example](docs/customer-story.md): a small business in numbers (illustrative people, real runs).
 - [Alerts](docs/alerts.md) on Telegram or the console, for the quiet attacks a pause doesn't catch.
 
+## The app in two minutes
+
+Start at **Start here** (`/tour`): three short animated stories show two agents going through the same day, one with a fixed limit and one with Kibble. **Try it** replays them or runs them for real on Aevum, with every payment and refusal in plain words. The replays are recordings of the real contracts on a local copy of the testnet, and say so.
+
 ## The owner's assistant
 
 The app's **Assistant** page answers questions about any drawer ("Why was it paused?", "What could a thief take?") from live chain data, and can **prepare** a protective change: freeze, sync, resume, or lower one setting. It holds no key. Every proposal is checked in code against the chain (it can never raise anything), the owner signs it in their own wallet, and the contract decides. `KIBBLE_ASSISTANT=nvidia|claude` switches the model on, with per-visitor and daily limits; unset, it gives built-in answers with no model. It's tested with Nemotron 3 Ultra; Claude hasn't been run.
