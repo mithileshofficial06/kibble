@@ -1,6 +1,6 @@
 # Progress
 
-## Current state (24 Nov 2026, day 9 of 26)
+## Current state (25 Nov 2026, day 10 of 26)
 
 Done, committed and pushed:
 - **Contracts** (all v5.1 must-ship and should-ship items): drawer in both modes, vault, factory, earned T, cost ceiling, strikes with cooldown, brake ladder, rolling drawdown, learning period + `maxWeeklyLoss`, work credits (V1), `maxLossNow` (V3), income on fulfilment + refunds (V4), runway grants (V5), `TrackRecord` events (V6), approval, receipts, pay-once, freeze/revoke, tighten/queue/cancel, two-key `resumeNow`, gasless EIP-3009 buying.
@@ -16,17 +16,18 @@ Done, committed and pushed:
 
 - **Demo video (24 Nov), `video/`:** 3:37, 1080p60, made in Remotion with WebGL grain fields on the GPU (ANGLE). It has four chapters (problem, idea, live on Aevum, proof), captions on every word, and an original score and sound design synthesized in Python, ducked under the narration (edge-tts, Ava) and loudness-normalised to −14 LUFS. The footage is real: a fresh testnet run of all three Playground demos on 24 Nov through the app (sales rush 4:14; bad strategy 7:27, Kibble B paused 66 s after the price jump; hijack 3:40, Kibble A overbought 0.000 and paused after 2 s, exposure 0.219 → 0.000, fixed A′ overbought 0.150 and stayed Healthy), plus the live desk and the drawer page. Scripted model, no API credits. Pipeline in `video/README.md`; raw footage and renders are not in git.
 
+- **Real-model hijack (25 Nov):** NVIDIA-hosted models supported in `agents/src/injection.ts`. Nemotron 3 Ultra and Bolt E4B obeyed the injection in 10/10 trials; fork runs with both and one testnet run with Ultra (Kibble A overbought 0.000, paused after 2 s; fixed A′ 0.200, still Healthy). See EVIDENCE.md. The Playground is now always scripted, in code.
+- **Gas topped up (25 Nov):** the owner holds 6.29 tQDAY, about 359 Playground runs.
+
 Not done:
 - **Hosting** the web app (needs a long-running server for the playground).
-- The injection beat with a real model needs `ANTHROPIC_API_KEY` (uses the user's API credits). So far the scripted model ran.
 - Outside test agents; DoraHacks submission.
 
 ## Next steps
 1. UI: landing (grain loader, living-wordmark hero, replay section) and all app pages restyled on 23 Nov; iterate on the user's feedback.
-2. Host the app (`next start` on a small server, Railway suggested; `KIBBLE_PLAYGROUND=on` with the demo keys) and do a logged-out dry run: time each demo on testnet. A faucet claim (~1 tQDAY to the owner) adds ~50 runs.
-3. Optional: a run with `ANTHROPIC_API_KEY` for the real-model injection beat.
-4. Review the video with the user (voice, music and pacing are each one step to redo), upload it (YouTube, unlisted), and put the link in the README; submit by 10 Dec.
+2. Host the app (`next start` on a small server, Railway suggested; `KIBBLE_PLAYGROUND=on` with the demo keys) and do a logged-out dry run: time each demo on testnet.
+3. Review the video with the user (voice, music and pacing are each one step to redo), upload it (YouTube, unlisted), and put the link in the README; submit by 10 Dec.
 
 ## Testnet notes
-- Gas per full run: ~0.05 tQDAY (agent A), ~0.07 (buyer), ~0.03 (agent B). Another faucet claim (a different Discord account) adds more if needed.
+- Gas per full run: ~0.05 tQDAY (agent A), ~0.07 (buyer), ~0.03 (agent B). The Discord faucet allows one claim per account and per address (don't use a second account); the web faucet gives 5 tQDAY per 24 h to addresses holding mainnet ETH, USDT or USDC.
 - After `setup-demo --fresh`, rebuild the web app: it imports `deployments/44005.json` at build time.

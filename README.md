@@ -86,7 +86,7 @@ Plus the basics every rival has: approved suppliers with per-payment and per-win
 | [`KibbleVault`](contracts/src/KibbleVault.sol) | Owner's safe. Instant withdrawals only to `home`; any other address waits and can be cancelled |
 | [`KibbleFactory`](contracts/src/KibbleFactory.sol) | Creates vaults and drawers; `defaultConfig(L)` and `demoConfig(L)` |
 | [`@kibble/sdk`](packages/kibble/src) | Merged ABI, typed data (approvals, work, resume), `payOnce` (pay exactly once under retries), plain-words reasons |
-| [`agents/`](agents/src) (`@kibble/agents`) | Setup, supplier, sale loop, injection page with a Claude summarizer, scenario runner, playground beats |
+| [`agents/`](agents/src) (`@kibble/agents`) | Setup, supplier, sale loop, injection page with a real-model summarizer (Claude or NVIDIA-hosted), scenario runner, playground beats |
 | [`web/`](web/src) | Next.js app: split-screen dashboard, drawer pages (receipts, track record, owner/guardian controls), playground |
 
 ### `_sync()`, which runs at the start of every call
@@ -151,7 +151,9 @@ RPC_URL=https://rpc-test.qday.info pnpm --filter @kibble/agents setup-demo --fre
 
 `--fresh` on testnet revokes the old drawers, has the vault pay out to its home (the guardian), and returns the guardian's and supplier's tUSD8 to the owner, so one faucet claim covers many runs. The scale is saved in `deployments/<chainId>.json`, so later runs use the same amounts as the drawers.
 
-**The injection beat with a real model:** set `ANTHROPIC_API_KEY` and the hijack scenario asks `claude-opus-5-5` to summarize the poisoned page while it holds a `pay` tool. The server-side refusal fallback is on. Without a key, or with `KIBBLE_LLM=off`, a scripted naive model obeys the hidden instruction, and the output says which one ran. Either way the contract decides, not the prompt.
+**The injection beat with a real model:** the hijack scenario can ask a real model to summarize the poisoned page while it holds a `pay` tool. Set `NVIDIA_API_KEY` for an open model on NVIDIA's hosted API (default `nvidia/nemotron-3-ultra-550b-a55b`, `KIBBLE_NVIDIA_MODEL` overrides it) or `ANTHROPIC_API_KEY` for `claude-opus-5-5` (with the server-side refusal fallback). `KIBBLE_LLM=off|auto|claude|nvidia` picks one. Without a key, or with `off`, a scripted naive model obeys the hidden instruction, and the output says which one ran. Malformed pay calls are dropped. The public Playground always uses the scripted model. Either way the contract decides, not the prompt.
+
+On 25 Nov 2026 both NVIDIA-hosted models we tried obeyed the hidden instruction **in all 10 trials** (5 each), and on Aevum testnet Nemotron 3 Ultra asked to pay the attacker and the drawer refused ([EVIDENCE.md](EVIDENCE.md#the-hijack-with-a-real-model-25-nov-2026)). Claude has not been run.
 
 ## Demo scenarios
 

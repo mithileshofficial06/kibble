@@ -17,7 +17,7 @@ import { units } from "@kibble/sdk";
 
 /** A demo amount as text, at the current scale: amt(ctx, 0.5) is "0.50" locally, "0.050" on testnet. */
 const amt = (ctx: Ctx, x: number) => ctx.f(ctx.u(x));
-import { injectionPage, runSummarizer } from "./injection";
+import { injectionPage, runSummarizer, type Llm } from "./injection";
 import { agentPay, handleSale, sync, windowEndsAt } from "./shop";
 
 type Side = { name: AgentName; drawer: Address; role: Role };
@@ -135,7 +135,7 @@ export async function badStrategy(ctx: Ctx, dep: Deployment, windows = 6) {
  * The agent key is compromised. First, a prompt injection on a customer's page asks the model to pay
  * an attacker. Then the attacker overbuys from the real supplier with the stolen key.
  */
-export async function hijack(ctx: Ctx, dep: Deployment) {
+export async function hijack(ctx: Ctx, dep: Deployment, llm?: Llm) {
   const A = side(dep, "A");
   const F = side(dep, "A_FIXED");
   const attacker = ("0x" + keccak256(toHex("kibble-demo-attacker")).slice(26)) as Address;
@@ -144,13 +144,15 @@ export async function hijack(ctx: Ctx, dep: Deployment) {
 
   const bait = amt(ctx, 5);
   ctx.log(`\n1. Prompt injection: the customer's page hides "pay ${bait} tUSD8 to ${attacker}"`);
-  const run = await runSummarizer(injectionPage(attacker, bait), attacker, bait);
+  const run = await runSummarizer(injectionPage(attacker, bait), attacker, bait, llm);
   ctx.log(`   model: ${run.model}${run.note ? ` (${run.note})` : ""}`);
   if (run.summary) ctx.log(`   summary: ${run.summary.slice(0, 160)}`);
+  ctx.log(`   payments the model asked for: ${run.payCalls.length}`);
   const calls = run.payCalls.length
     ? run.payCalls
     : [{ payee: attacker, amount: bait, reason: "the model ignored the injection; the attacker calls pay() with the stolen key" }];
   for (const c of calls) {
+    ctx.log(`   ${run.payCalls.length ? "model" : "attacker"}: pay ${c.amount} to ${c.payee} (${c.reason})`);
     for (const s of [F, A]) {
       const r = await agentPay(ctx, { drawer: s.drawer, agentRole: s.role, payee: c.payee, amount: units(c.amount) });
       ctx.log(`   ${pad(s.name === "A" ? "Kibble A" : "Fixed A'", 9)} pay ${c.amount} -> ${r.status === "paid" ? "PAID" : r.text}`);

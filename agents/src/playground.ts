@@ -95,5 +95,6 @@ export async function runBeat(beat: Beat, opts: { rpcUrl: string; log: (line: st
   }
   if (beat === "sales-rush") await timelapse(ctx, dep, 2);
   else if (beat === "bad-strategy") await badStrategy(ctx, dep, 3);
-  else await hijack(ctx, dep);
+  // Always the scripted model here: visitors can never spend API keys that are on the server.
+  else await hijack(ctx, dep, "scripted");
 }
