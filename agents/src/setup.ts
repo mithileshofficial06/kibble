@@ -27,7 +27,7 @@ async function deployContract(ctx: Ctx, name: string, args: unknown[] = []): Pro
   const owner = ctx.wallet("OWNER");
   const hash = await owner.deployContract({ abi, bytecode, args, type: "legacy" } as never);
   const r = await ctx.pub.waitForTransactionReceipt({ hash });
-  if (!r.contractAddress) throw new Error(`${name} deploy failed`);
+  if (r.status !== "success" || !r.contractAddress) throw new Error(`${name} deploy failed`);
   console.log(`  ${name.padEnd(14)} ${r.contractAddress}`);
   return r.contractAddress;
 }
@@ -83,6 +83,9 @@ async function main() {
   let dep = loadDeployment(ctx.chain.id);
   const roles = Object.fromEntries(ROLES.map((r) => [r, ctx.address(r)]));
 
+  // Before the old addresses are replaced: bring their tUSD8 back (a redeploy would otherwise strand it).
+  if (redeploy && !ctx.local && dep?.vault && dep.drawers.A) await reclaim(ctx, dep);
+
   if (redeploy || !dep || !(await ctx.pub.getCode({ address: dep.factory }))) {
     console.log("Deploying Kibble contracts:");
     const tusd8Code = await ctx.pub.getCode({ address: TUSD8 });
@@ -99,7 +102,7 @@ async function main() {
 
   if (ctx.local) await dealLocal(ctx, dep.token);
   else if (needDrawersFor(dep, fresh)) {
-    if (dep.drawers.A) await reclaim(ctx, dep);
+    if (!redeploy && dep.drawers.A) await reclaim(ctx, dep);
     await shareOut(ctx, dep.token);
   }
 
