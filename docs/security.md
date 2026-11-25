@@ -28,19 +28,19 @@ Testnet only. **Not audited by anyone outside the project.** Everything here can
 
 ## Automated checks
 
-**Tests:** 167 in total. 161 run locally (unit, fuzz, attack and 10 invariants over 128,000 calls) and 6 on a fork of Aevum with the real tUSD8; see the count in [EVIDENCE.md](../EVIDENCE.md).
+**Tests:** 181 in total. 175 run locally (unit, fuzz, attack and 10 invariants over 128,000 calls) and 6 on a fork of Aevum with the real tUSD8; see the count in [EVIDENCE.md](../EVIDENCE.md).
 
 **Coverage** (`forge coverage`, without the invariant, attack, fork and benchmark suites, so a floor):
 
 | Contract | Lines | Branches |
 |---|---|---|
 | KibbleFactory | 100% | 100% |
-| KibbleVault | 100% | 78% |
-| KibbleCore | 95% | 80% |
+| KibbleVault | 100% | 89% |
+| KibbleCore | 100% | 95% |
 | KibbleAdmin | 100% | 100% |
-| KibbleDrawer | 88% | 86% |
+| KibbleDrawer | 100% | 100% |
 
-KibbleAdmin was the weak spot (46% of branches); [`KibbleAdmin.t.sol`](../contracts/test/KibbleAdmin.t.sol) now covers every owner and guardian path: each setting's bounds, the queue, and every bad signature on the two-key resume.
+KibbleAdmin was the weak spot (46% of branches); [`KibbleAdmin.t.sol`](../contracts/test/KibbleAdmin.t.sol) now covers every owner and guardian path: each setting's bounds, the queue, and every bad signature on the two-key resume. [`KibbleEdges.t.sol`](../contracts/test/KibbleEdges.t.sol) covers the rare states: unexplained outflows, income while paused, rolling drawdown, bad set-ups.
 
 **Slither 0.11.6** (`slither . --filter-paths "lib|test|mocks|Checkout" --exclude-informational --exclude-optimization`): 44 results, and none that we consider exploitable. We went through every high and medium one:
 

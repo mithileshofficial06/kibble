@@ -192,4 +192,4 @@ Factory [`0x296a2e00…2afe`](https://explorer-test.qday.info/address/0x296a2e00
 
 ## Tests now
 
-167 run in CI style: 161 local and 6 on a fork of Aevum (153 are Kibble's, 14 the starter kit's). `make attacks` and `make sim` add the [attack table](docs/attacks.md) and the [simulation](docs/simulation.md). See [docs/security.md](docs/security.md) for coverage and Slither.
+181 run in CI style: 175 local and 6 on a fork of Aevum (167 are Kibble's, 14 the starter kit's). `make attacks` and `make sim` add the [attack table](docs/attacks.md) and the [simulation](docs/simulation.md). See [docs/security.md](docs/security.md) for coverage and Slither.
