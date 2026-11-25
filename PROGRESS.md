@@ -8,7 +8,8 @@ The user's go-ahead: everything except the demo video, YouTube, the submission a
 - [x] Live "A stolen key" on testnet through the page, 3D view (Kibble 0.000, paused after 2 s; fixed 0.150)
 - [x] Discord webhook (private server "Kibble alerts", link only in the wallets file) and test message delivered
 - [x] Live "A busy day" on testnet (limit 0.272 to 0.291, 8 of 8 served)
-- [ ] Live "A losing day" on testnet; paid API on testnet
+- [x] Paid API on testnet: 15 of 15
+- [ ] Live "A losing day" on testnet
 - [x] More tests: KibbleCore, KibbleDrawer, KibbleVault (14)
 - [ ] Every page, desktop and phone; overlapping labels in the 3D scene
 - [ ] Focused code check

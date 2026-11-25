@@ -35,7 +35,9 @@ export function PinDriver({ stage, layer }: { stage: Stage; layer: RefObject<HTM
       let on = v.current.z < 1 && x > 20 && x < size.width - 20 && y > 10 && y < size.height - 10;
       const s = stage.sides[side];
       if (what === "name") on &&= stage.shot === "both";
-      else if (what === "customers" || what === "supplier") on &&= TAGGED.has(stage.shot);
+      // the thief stands where the customers' label goes: one label at a time
+      else if (what === "customers") on &&= TAGGED.has(stage.shot) && stage.thief <= 0.5;
+      else if (what === "supplier") on &&= TAGGED.has(stage.shot);
       else if (what === "thief") on &&= stage.thief > 0.5 && (TAGGED.has(stage.shot) || stage.shot === "thief");
       else if (what === "num") {
         on &&= stage.numbers && stage.shot !== "end";

@@ -190,6 +190,15 @@ Factory [`0x296a2e00…2afe`](https://explorer-test.qday.info/address/0x296a2e00
 - **Work credits:** T 0.200 → 0.302 over five accepted reports; the sixth, not accepted, dropped W to Watch at 0.182.
 - **Controls:** threshold lowered, owner-signed payment (receipt #13), replay refused, guardian freeze, two-key resume.
 
+## Overnight checks on testnet (26 Nov 2026)
+
+Through the Playground page, as a visitor would, with the 3D view:
+
+- **A stolen key:** both sides refused the injected 0.500 payment and the two 0.090 ones; then the thief overbought from the real supplier. Fixed A′ 0.150, still Healthy (exposure 0.422). Kibble A 0.000, Paused after 2 s, exposure 0.248 → 0.000.
+- **A busy day:** 8 of 8 sales served on both sides; Kibble's limit 0.279 → 0.291 (fixed: 0.050), 0.080 to the vault.
+- **Pay-per-request API** (`pnpm --filter @kibble/agents paid-api`): 15 of 15 checks on testnet. A buyer with no gas paid exactly the price; replays, tampered signatures, a bill reused for another document, too little money and a made-up bill were all refused with nothing taken.
+- **Alerts:** a test message reached a private Discord server through a webhook.
+
 ## Tests now
 
 181 run in CI style: 175 local and 6 on a fork of Aevum (167 are Kibble's, 14 the starter kit's). `make attacks` and `make sim` add the [attack table](docs/attacks.md) and the [simulation](docs/simulation.md). See [docs/security.md](docs/security.md) for coverage and Slither.
