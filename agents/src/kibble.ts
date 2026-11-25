@@ -28,10 +28,15 @@ const flag = (name: string) => {
 };
 const has = (name: string) => rest.includes(`--${name}`);
 
+/** Stop with a message. Not process.exit: on Windows, Node aborts if a connection is still closing. */
+class Stop extends Error {}
 function fail(msg: string): never {
-  console.error(`\n${msg}\n`);
-  process.exit(1);
+  throw new Stop(msg);
 }
+process.on("uncaughtException", (e) => {
+  console.error(e instanceof Stop ? `\n${e.message}\n` : e);
+  process.exitCode = 1;
+});
 
 type Keys = Record<string, string>;
 function loadKeys(): Keys {

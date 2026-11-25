@@ -77,5 +77,6 @@ if (!serve) {
   console.log(`\nDrawer A: ${v.state}. Last ${s.sales} sales: ${s.buyers} buyer(s), top buyer ${(s.topShare * 100).toFixed(1)}%, insiders ${(s.insiderShare * 100).toFixed(1)}%, refunded ${s.refunded}`);
   console.log(failures ? `${failures} FAILED` : "all passed");
   server.close();
-  process.exit(failures ? 1 : 0);
+  server.closeAllConnections();
+  process.exitCode = failures ? 1 : 0;
 }

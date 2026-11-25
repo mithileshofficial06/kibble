@@ -141,7 +141,8 @@ async function main() {
   if (process.argv[2] === "test") {
     const ok = await send([{ level: "info", text: "Kibble alerts are connected. This is a test." }]);
     console.log(ok ? "Delivered to Discord." : "Not delivered to Discord (see above).");
-    process.exit(ok ? 0 : 1);
+    process.exitCode = ok ? 0 : 1; // not process.exit: on Windows, Node aborts if a connection is still closing
+    return;
   }
   const rpc = process.env.RPC_URL?.trim() || "https://rpc-test.qday.info";
   const pub = createPublicClient({ transport: http(rpc) }) as PublicClient;
