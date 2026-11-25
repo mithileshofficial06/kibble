@@ -1,6 +1,20 @@
 # Progress
 
-## Current state (25 Nov 2026, day 10 of 26)
+## Overnight run (26 Nov 2026)
+
+The user's go-ahead: everything except the demo video, YouTube, the submission and deploying. Vercel is prepared only.
+
+- [x] KibbleAdmin tests (22)
+- [x] Live "A stolen key" on testnet through the page, 3D view (Kibble 0.000, paused after 2 s; fixed 0.150)
+- [ ] Discord webhook and test message
+- [ ] Live "A busy day" and "A losing day" on testnet; paid API on testnet
+- [ ] More tests: KibbleCore, KibbleDrawer, KibbleVault
+- [ ] Every page, desktop and phone; overlapping labels in the 3D scene
+- [ ] Focused code check
+- [ ] Vercel preparation (no deploy)
+- [ ] Fresh-clone test, README and EVIDENCE
+
+## Current state (26 Nov 2026)
 
 Done, committed and pushed:
 - **Contracts** (all v5.1 must-ship and should-ship items): drawer in both modes, vault, factory, earned T, cost ceiling, strikes with cooldown, brake ladder, rolling drawdown, learning period + `maxWeeklyLoss`, work credits (V1), `maxLossNow` (V3), income on fulfilment + refunds (V4), runway grants (V5), `TrackRecord` events (V6), approval, receipts, pay-once, freeze/revoke, tighten/queue/cancel, two-key `resumeNow`, gasless EIP-3009 buying.
