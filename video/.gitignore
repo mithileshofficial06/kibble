@@ -3,3 +3,6 @@ out/
 footage/
 public/clips/
 public/audio/
+public/film/clips/
+public/film/mix.wav
+public/film/premix.wav

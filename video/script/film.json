@@ -1,0 +1,23 @@
+{
+ "voice": "en-US-AvaMultilingualNeural",
+ "rate": "-4%",
+ "scenes": [
+  {"id": "hook", "text": "AI agents can now spend real money. They buy data, tools, and help from other agents. All on their own."},
+  {"id": "limit", "text": "So how much should we let them spend? Most people pick a fixed limit. Say, fifty dollars a day.", "cap": "So how much should we let them spend? Most people pick a fixed limit. Say, $50 _ a day."},
+  {"id": "guess", "text": "But that number is just a guess. A great agent runs out, and turns customers away. A bad agent wastes all of it, every single day. And if a thief steals the agent's key, the thief gets all of it too."},
+  {"id": "reveal", "text": "This is Kibble. Like treats for a puppy, the agent earns its spending, one piece at a time."},
+  {"id": "box", "text": "The agent's money sits in a locked box, on the blockchain. The agent can't open it. It can only ask the box to pay."},
+  {"id": "tray", "text": "The box gives it a small tray to spend from. And the tray refills only when a real customer pays."},
+  {"id": "safe", "text": "Anything extra goes straight into the owner's safe. The agent can never touch it."},
+  {"id": "grow", "text": "When the agent makes money, its tray grows. When it loses money, the tray shrinks. The limit is earned, step by step."},
+  {"id": "brakes", "text": "And when things go wrong, the box hits the brakes by itself. Healthy. Watch. Braked. Paused. Nobody has to be watching."},
+  {"id": "owner", "text": "The owner sets just one number: the most they are willing to lose in a week. Kibble works out the rest."},
+  {"id": "test", "text": "We put it to the test on the Q Day Ayvum testnet, a real blockchain. Two agents. Same code, same customers. One with a fixed limit, one with Kibble.", "cap": "We put it to the test on the QDay _ Aevum testnet, a real blockchain. Two agents. Same code, same customers. One with a fixed limit, one with Kibble."},
+  {"id": "busy", "text": "On a busy day, both agents served every customer. Kibble's limit grew, and the profit went to the owner's safe."},
+  {"id": "losing", "text": "On a losing day, every sale lost money. The fixed agent kept paying, again and again. Kibble stopped itself, seventy seconds after the price jump.", "cap": "On a losing day, every sale lost money. The fixed agent kept paying, again and again. Kibble stopped itself, 70 seconds after the price jump."},
+  {"id": "thief", "text": "Then we handed a thief the agent's key. With the fixed limit, the thief kept spending, and nothing stopped it. With Kibble, the thief got nothing. The box locked itself in two seconds.", "cap": "Then we handed a thief the agent's key. With the fixed limit, the thief kept spending, and nothing stopped it. With Kibble, the thief got nothing. The box locked itself in 2 seconds."},
+  {"id": "real", "text": "These are real recordings, not a mock-up. Every payment and every refusal is written on chain. And anyone can try it, in the playground."},
+  {"id": "proof", "text": "Behind it: one hundred and eighty-one tests. And the worst case is never a guess. It's a number anyone can read, at any moment.", "cap": "Behind it: 181 _ _ _ tests. And the worst case is never a guess. It's a number anyone can read, at any moment."},
+  {"id": "close", "text": "A fixed limit is a guess. Kibble's limit is earned. Don't give your agent a budget. Let it earn one."}
+ ]
+}
