@@ -18,11 +18,16 @@ The user's go-ahead: everything except the demo video, YouTube, the submission a
 
 Left for the user: decide on deploying (steps in docs/deploy.md), YouTube and the DoraHacks submission.
 
+## Website polish (26 Nov 2026)
+
+- [x] Square corners everywhere, polish layer (contrast, type, buttons, cards, grid), story-card pictures from the 3D replays; every page checked on desktop and phone (0 axe violations)
+
 ## The 3D demo film (26 Nov 2026)
 
 - [x] New plain-language script, voice, original 3D world, score and sound (`video/src/film`, `video/README.md`)
 - [x] Real recordings of the app on testnet on the in-film screens
-- [ ] Full render `video/out/kibble-film.mp4` and the user's review (voice, music, pacing)
+- [x] Full render `video/out/kibble-film.mp4` (3:05, 1080p60, RTX 3050 about 25 min)
+- [ ] The user's review (voice, music, pacing)
 - [ ] Upload (YouTube, unlisted) and link it in the README, only when the user says so
 
 ## Current state (26 Nov 2026)

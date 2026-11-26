@@ -186,10 +186,14 @@ export default function PlaygroundPage() {
             const b = s?.beats[c.id];
             return (
               <Reveal key={c.id} className={`card beat ${view?.mode === "replay" && view.id === c.id ? "on" : ""}`} delay={i * 0.1}>
-                <svg className="beat-icon" viewBox="0 0 32 32" aria-hidden="true">
-                  {c.icon}
-                </svg>
-                <h2>{c.title}</h2>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img className="beat-shot" src={`/shots/${c.id}.webp`} alt="" width={1280} height={720} loading="lazy" decoding="async" />
+                <h2 className="beat-title">
+                  <svg className="beat-icon" viewBox="0 0 32 32" aria-hidden="true">
+                    {c.icon}
+                  </svg>
+                  {c.title}
+                </h2>
                 <p className="fine" style={{ fontSize: 15, lineHeight: 1.6 }}>
                   {c.about}
                 </p>
