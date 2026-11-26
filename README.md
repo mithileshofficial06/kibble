@@ -82,7 +82,7 @@ Amounts are test money (tUSD8). Every step is a transaction you can open on the 
 |---|---|
 | **1. User experience and presentation** | [The live app](https://kibble-two-pi.vercel.app): a self-running [tour](https://kibble-two-pi.vercel.app/tour) with voice, plain words first (technical names are hints), every refusal explained in a sentence ("over the cost ceiling: spend too high for the value earned"), state shown as Healthy / Watch / Braked / Paused. Checked on desktop and phone with no accessibility violations (axe). A 3-minute animated film explains it for non-experts. |
 | **2. Demo, on chain** | Three demos run for real on Aevum testnet from the [Playground](https://kibble-two-pi.vercel.app/playground) (busy day, losing day, stolen key), with transaction links in the run log. [15 transactions to check](EVIDENCE.md#transactions-to-check-on-the-explorer), one per core action, each with its explorer link. Every payment and refusal is on each [drawer page](https://kibble-two-pi.vercel.app/drawer/0xea44B3a2481ceA281B1Cad4fFf631868D2b50cB3) and on the [explorer](https://explorer-test.qday.info/address/0xea44B3a2481ceA281B1Cad4fFf631868D2b50cB3). Results with numbers: [EVIDENCE.md](EVIDENCE.md). |
-| **3. Documentation** | This README: [architecture and flowcharts](#architecture), [environment variables](#environment-variables), [testnet addresses](#deployments), [step-by-step run](#run-it), [API](#contract-api), [Aevum integration](#why-aevum-and-how-kibble-uses-it), [known limits](#known-limits), [roadmap](#roadmap). Plus [connect your agent](docs/connect-your-agent.md), [security](docs/security.md), [attacks](docs/attacks.md), [deploy](docs/deploy.md). |
+| **3. Documentation** | This README: [architecture and flowcharts](#architecture), [environment variables](#environment-variables), [testnet addresses](#deployments), [step-by-step run](#run-it), [code examples](#code-examples), [API](#contract-api), [Aevum integration](#why-aevum-and-how-kibble-uses-it), [known limits](#known-limits), [roadmap](#roadmap). Plus [connect your agent](docs/connect-your-agent.md), [security](docs/security.md), [attacks](docs/attacks.md), [deploy](docs/deploy.md). |
 | **4. Innovation** | The limit is **earned**: it grows only from verified income (cleared sales, or work a client signed) and shrinks with losses, and the wallet brakes the agent by itself. Not a fixed allowance, not an alert. Plus an HTTP 402 [pay-per-request API](#sell-by-the-request-http-402) where a buyer with no gas pays with one signature. |
 | **5. Technical quality and platform integration** | Spending limits, a scoped agent key (it can only ask its own drawer to pay, holds no money, and is capped), owner approvals (EIP-712), gasless tUSD8 payments (EIP-3009, `permit`), a `TrackRecord` event as the agent's on-chain history. 181 tests, 10 invariants over 128,000 random calls, fork tests on the real tUSD8, 100% line coverage of the Kibble contracts, Slither. Pay-once per bill makes retries safe; transactions wait for receipts with a gas margin. |
 | **6. Real-world utility** | For teams whose agents buy model calls, data and services, and for sellers who want agents as customers. [Who it's for and the business model](#who-its-for-and-the-business-model). Five-minute setup: `pnpm kibble new`. |
@@ -98,6 +98,7 @@ Amounts are test money (tUSD8). Every step is a transaction you can open on the 
 - [Architecture](#architecture)
 - [What a hijacker can take](#what-a-hijacker-can-take)
 - [Run it](#run-it)
+- [Code examples](#code-examples)
 - [Demo scenarios](#demo-scenarios)
 - [The web app](#the-web-app)
 - [Contract API](#contract-api)
@@ -299,6 +300,67 @@ pnpm kibble try                              # one sale, one purchase, one refus
 ```
 
 Keys go to `~/.kibble`, never into the repo. Guide: [docs/connect-your-agent.md](docs/connect-your-agent.md). The app's **Connect** page does the same from a wallet, and **Agents** lists every drawer the factory has made.
+
+## Code examples
+
+TypeScript with [viem](https://viem.sh) and `@kibble/sdk` ([`packages/kibble`](packages/kibble/src)). Test keys only.
+
+**1. The owner gives an agent a drawer.** One number, the most you'll lose in a week; everything else is derived.
+
+```ts
+import { createPublicClient, createWalletClient, http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { aevumTestnet } from "@aevum-kit/aevum";
+import { createDrawer, fundDrawer, units } from "@kibble/sdk";
+
+const pub = createPublicClient({ chain: aevumTestnet, transport: http() });
+const owner = createWalletClient({ account: privateKeyToAccount(process.env.OWNER_KEY as `0x${string}`), chain: aevumTestnet, transport: http() });
+
+const drawer = await createDrawer(pub, owner, "0x296a2e00c0b934dfea4384572972cd4e46322afe", {
+  label: "Research agent",
+  agent: "0xAgent…", // the key your agent signs with; it will hold no money
+  guardian: "0xGuardian…", // co-signs a resume, can cancel a raise
+  maxWeeklyLoss: units("2"), // tUSD8
+  suppliers: [{ payee: "0xSupplier…", perPayment: units("0.05"), perWindow: 0n }],
+  timing: "daily",
+});
+await fundDrawer(pub, owner, drawer, units("0.2")); // the first allowance
+```
+
+**2. The agent pays through its drawer.** A refusal is an answer, not an exception, and the same bill is never paid twice, even if you retry.
+
+```ts
+import { KibbleAgent } from "@kibble/sdk";
+
+const kibble = new KibbleAgent(pub, agentWallet, drawer);
+
+const r = await kibble.pay("0xSupplier…", "0.004", "order-1042");
+if (r.status === "paid") console.log("paid, receipt", r.receiptId, r.txHash);
+else console.log("refused:", r.text); // e.g. "over the cost ceiling: spend too high for the value earned"
+
+const s = await kibble.status();
+console.log(s.state, s.limitT, s.maxLossNow); // maxLossNow: the most a thief with this key could take right now
+```
+
+**3. A buyer pays by the request, with no gas.** The seller answers `402 Payment Required`; `paidFetch` signs one EIP-3009 authorization bound to that bill, within your price limit, and retries.
+
+```ts
+import { paidFetch, units } from "@kibble/sdk";
+
+const res = await paidFetch("https://seller.example/summarize", { method: "POST", body: JSON.stringify({ url }) }, {
+  pub,
+  account: privateKeyToAccount(process.env.BUYER_KEY as `0x${string}`),
+  maxPrice: units("0.02"),
+});
+```
+
+**Check any drawer from the command line** (Foundry's `cast`): the worst case is a number on chain.
+
+```bash
+cast call 0xea44B3a2481ceA281B1Cad4fFf631868D2b50cB3 "maxLossNow()(uint256)" --rpc-url https://rpc-test.qday.info
+```
+
+The same in five minutes from a terminal: `pnpm kibble new`, `pnpm kibble try`, `pnpm kibble status` ([guide](docs/connect-your-agent.md)).
 
 ## Demo scenarios
 
