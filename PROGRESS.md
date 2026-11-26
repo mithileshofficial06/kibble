@@ -16,7 +16,7 @@ The user's go-ahead: everything except the demo video, YouTube, the submission a
 - [x] Vercel preparation, not deployed: [docs/deploy.md](docs/deploy.md)
 - [x] Fresh-clone test (26 Nov, 07:30 IST): clone --recursive, pnpm install --frozen-lockfile, forge build, Shanghai check (12 blobs), 175/175 local tests, typecheck, web build; README and EVIDENCE updated
 
-Left for the user: decide on deploying (steps in docs/deploy.md), YouTube and the DoraHacks submission.
+Deployed by the user on 26 Nov: https://kibble-two-pi.vercel.app (checked: every page, desktop and phone). Left: YouTube and the DoraHacks submission.
 
 ## Website polish (26 Nov 2026)
 

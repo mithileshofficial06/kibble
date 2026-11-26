@@ -2,6 +2,8 @@
 
 ## Vercel (no keys)
 
+Live at [kibble-two-pi.vercel.app](https://kibble-two-pi.vercel.app) since 26 Nov 2026, with these settings. Checked after deploy: every page on desktop and phone, no errors, 0 axe violations; the Playground API answers "switched off" and the assistant answers without a model key.
+
 The film, the replays, the live dashboard, drawer pages, Connect and the assistant's built-in answers all work without a server key. This is the set-up to put online.
 
 1. **New Project → Import** the GitHub repo.

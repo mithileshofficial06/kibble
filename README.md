@@ -2,6 +2,8 @@
 
 **The earned spending limit for AI agents.** On QDay Aevum testnet (chain 44005), in tUSD8.
 
+**Try it:** [kibble-two-pi.vercel.app](https://kibble-two-pi.vercel.app) (no wallet needed: the tour, the live desk reading the chain, and the Playground's recorded runs).
+
 > ### For judges, in 60 seconds
 > - **The idea:** a fixed limit ("$50 a day") is a guess that treats a winning, a losing and a hijacked agent the same. Kibble makes the agent **earn** its budget: it spends from a small allowance capped at a limit **T** that refills only from **verified value**, meaning cleared sales or work an approved client signed off. Profit is swept to a vault the agent can't call. **The wallet brakes the agent**: overspending walks it Healthy → Watch → Braked → Paused, with no human watching.
 > - **The owner sets one number**, the most they'll lose in a week. Everything else is derived or learned in the first windows.
