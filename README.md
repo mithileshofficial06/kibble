@@ -10,6 +10,7 @@
 </p>
 
 <p align="center">
+  <a href="https://youtu.be/87PI4CCjGYQ"><img alt="Watch the film" src="https://img.shields.io/badge/watch-the_3--minute_film-ff4d3d?style=for-the-badge&logo=youtube&logoColor=white&labelColor=1c1622"></a>
   <a href="https://kibble-two-pi.vercel.app"><img alt="Live app" src="https://img.shields.io/badge/live_app-kibble--two--pi.vercel.app-ffb000?style=for-the-badge&logo=vercel&logoColor=white&labelColor=1c1622"></a>
   <a href="https://explorer-test.qday.info/address/0x296a2e00c0b934dfea4384572972cd4e46322afe"><img alt="Contracts verified on Aevum" src="https://img.shields.io/badge/contracts-verified_on_Aevum-6ee7a8?style=for-the-badge&logo=ethereum&logoColor=white&labelColor=1c1622"></a>
 </p>
@@ -24,6 +25,7 @@
 
 <p align="center">
   <a href="https://kibble-two-pi.vercel.app"><b>Try it</b></a> (no wallet needed)
+  &nbsp;·&nbsp; <a href="https://youtu.be/87PI4CCjGYQ"><b>Watch the film</b></a>
   &nbsp;·&nbsp; <a href="#how-kibble-meets-the-judging-criteria"><b>For judges</b></a>
   &nbsp;·&nbsp; <a href="EVIDENCE.md"><b>Evidence</b></a>
   &nbsp;·&nbsp; <a href="#deployments"><b>Addresses</b></a>
@@ -80,7 +82,7 @@ Amounts are test money (tUSD8). Every step is a transaction you can open on the 
 
 | Criterion | Where to see it |
 |---|---|
-| **1. User experience and presentation** | [The live app](https://kibble-two-pi.vercel.app): a self-running [tour](https://kibble-two-pi.vercel.app/tour) with voice, plain words first (technical names are hints), every refusal explained in a sentence ("over the cost ceiling: spend too high for the value earned"), state shown as Healthy / Watch / Braked / Paused. Checked on desktop and phone with no accessibility violations (axe). A 3-minute animated film explains it for non-experts. |
+| **1. User experience and presentation** | [The live app](https://kibble-two-pi.vercel.app): a self-running [tour](https://kibble-two-pi.vercel.app/tour) with voice, plain words first (technical names are hints), every refusal explained in a sentence ("over the cost ceiling: spend too high for the value earned"), state shown as Healthy / Watch / Braked / Paused. Checked on desktop and phone with no accessibility violations (axe). A [3-minute animated film](https://youtu.be/87PI4CCjGYQ) explains it for non-experts. |
 | **2. Demo, on chain** | Three demos run for real on Aevum testnet from the [Playground](https://kibble-two-pi.vercel.app/playground) (busy day, losing day, stolen key), with transaction links in the run log. [15 transactions to check](EVIDENCE.md#transactions-to-check-on-the-explorer), one per core action, each with its explorer link. Every payment and refusal is on each [drawer page](https://kibble-two-pi.vercel.app/drawer/0xea44B3a2481ceA281B1Cad4fFf631868D2b50cB3) and on the [explorer](https://explorer-test.qday.info/address/0xea44B3a2481ceA281B1Cad4fFf631868D2b50cB3). Results with numbers: [EVIDENCE.md](EVIDENCE.md). |
 | **3. Documentation** | This README: [architecture and flowcharts](#architecture), [environment variables](#environment-variables), [testnet addresses](#deployments), [step-by-step run](#run-it), [code examples](#code-examples), [API](#contract-api), [Aevum integration](#why-aevum-and-how-kibble-uses-it), [known limits](#known-limits), [roadmap](#roadmap). Plus [connect your agent](docs/connect-your-agent.md), [security](docs/security.md), [attacks](docs/attacks.md), [deploy](docs/deploy.md). |
 | **4. Innovation** | The limit is **earned**: it grows only from verified income (cleared sales, or work a client signed) and shrinks with losses, and the wallet brakes the agent by itself. Not a fixed allowance, not an alert. Plus an HTTP 402 [pay-per-request API](#sell-by-the-request-http-402) where a buyer with no gas pays with one signature. |

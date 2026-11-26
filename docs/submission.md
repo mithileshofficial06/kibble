@@ -16,7 +16,7 @@ Kibble gives every AI agent a locked tUSD8 drawer on Aevum. The agent's key hold
 **Links**
 - GitHub: https://github.com/mithileshofficial06/kibble
 - Live app: https://kibble-two-pi.vercel.app
-- Demo video: *(YouTube link, unlisted; add after upload)*
+- Demo video: https://youtu.be/87PI4CCjGYQ (unlisted, 3:05)
 - Contracts on the explorer (verified): https://explorer-test.qday.info/address/0x296a2e00c0b934dfea4384572972cd4e46322afe
 - Transactions to check: https://github.com/mithileshofficial06/kibble/blob/main/EVIDENCE.md#transactions-to-check-on-the-explorer
 
@@ -93,7 +93,7 @@ Solidity 0.8.24, Foundry, OpenZeppelin, Slither; QDay Aevum testnet and tUSD8; T
 | Open-source codebase | https://github.com/mithileshofficial06/kibble (MIT) |
 | Aevum integration evidence | Verified contracts and the transaction list above |
 | Live deployment | https://kibble-two-pi.vercel.app |
-| Short demo | The film (YouTube link above) |
+| Short demo | https://youtu.be/87PI4CCjGYQ |
 | Project documentation (problem, architecture, workflows, technologies) | The README, with flowcharts, environment variables, addresses, code examples and the judging-criteria map |
 | No malicious code | Test keys only; no keys in the repository |
 

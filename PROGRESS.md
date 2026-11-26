@@ -28,7 +28,7 @@ Deployed by the user on 26 Nov: https://kibble-two-pi.vercel.app (checked: every
 - [x] Real recordings of the app on testnet on the in-film screens
 - [x] Full render `video/out/kibble-film.mp4` (3:05, 1080p60, RTX 3050 about 25 min)
 - [ ] The user's review (voice, music, pacing)
-- [ ] Upload (YouTube, unlisted) and link it in the README, only when the user says so
+- [x] Uploaded to YouTube, unlisted: https://youtu.be/87PI4CCjGYQ (linked in the README and docs/submission.md)
 
 ## Current state (26 Nov 2026)
 
