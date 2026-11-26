@@ -226,8 +226,8 @@ export const Overlay = ({ captions = true }: { captions?: boolean }) => {
       <Proof f={f} />
       <Close f={f} />
 
-      <Chapter f={f} />
-      <Captions f={f} />
+      {captions && <Chapter f={f} />}
+      {captions && <Captions f={f} />}
       {/* dips to night between sets */}
       <AbsoluteFill style={{ background: K.night, opacity: dip(f) }} />
       <AbsoluteFill style={{ background: "radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(2,3,10,.35))" }} />

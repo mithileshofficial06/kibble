@@ -8,7 +8,7 @@ const args = process.argv.slice(2);
 const want = args.length ? args : tl.scenes.map((s) => `${s.id}@0.6`);
 const serveUrl = await bundle({ entryPoint: path.resolve("src/index.ts") });
 const chromiumOptions = { gl: "angle" };
-const composition = await selectComposition({ serveUrl, id: "FilmSilent", chromiumOptions });
+const composition = await selectComposition({ serveUrl, id: process.env.COMP ?? "FilmSilent", chromiumOptions });
 fs.mkdirSync("out/film-stills", { recursive: true });
 for (const w of want) {
   let frame, name;

@@ -13,6 +13,7 @@ export const Root: React.FC = () => (
     <Composition id="Film" component={Film} durationInFrames={FILM_TOTAL} fps={FILM_FPS} width={W} height={H} defaultProps={{ audio: "mix" as const }} />
     <Composition id="FilmVO" component={Film} durationInFrames={FILM_TOTAL} fps={FILM_FPS} width={W} height={H} defaultProps={{ audio: "vo" as const }} />
     <Composition id="FilmSilent" component={Film} durationInFrames={FILM_TOTAL} fps={FILM_FPS} width={W} height={H} defaultProps={{ audio: "none" as const }} />
+    <Composition id="FilmStill" component={Film} durationInFrames={FILM_TOTAL} fps={FILM_FPS} width={W} height={H} defaultProps={{ audio: "none" as const, clean: true }} />
     <Composition id="Test" component={Test} durationInFrames={300} fps={FPS} width={W} height={H} />
   </>
 );

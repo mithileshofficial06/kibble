@@ -1,8 +1,69 @@
-# kibble
+<p align="center">
+  <img src="docs/img/banner.jpg" alt="kibble. Spending power, earned grain by grain." width="100%">
+</p>
 
-**The earned spending limit for AI agents.** On QDay Aevum testnet (chain 44005), in tUSD8.
+<h3 align="center">The earned spending limit for AI agents</h3>
 
-**Try it:** [kibble-two-pi.vercel.app](https://kibble-two-pi.vercel.app) (no wallet needed: the tour, the live desk reading the chain, and the Playground's recorded runs). **Verified source:** all four contracts are verified on the [Aevum explorer](https://explorer-test.qday.info/address/0x296a2e00c0b934dfea4384572972cd4e46322afe) ([addresses](#deployments)). **For judges:** [how Kibble meets each criterion](#how-kibble-meets-the-judging-criteria).
+<p align="center">
+  A wallet contract that makes an AI agent <b>earn</b> its budget from real sales,<br>
+  sends the profit to its owner, and <b>stops the agent by itself</b> when something goes wrong.
+</p>
+
+<p align="center">
+  <a href="https://kibble-two-pi.vercel.app"><img alt="Live app" src="https://img.shields.io/badge/live_app-kibble--two--pi.vercel.app-ffb000?style=for-the-badge&logo=vercel&logoColor=white&labelColor=1c1622"></a>
+  <a href="https://explorer-test.qday.info/address/0x296a2e00c0b934dfea4384572972cd4e46322afe"><img alt="Contracts verified on Aevum" src="https://img.shields.io/badge/contracts-verified_on_Aevum-6ee7a8?style=for-the-badge&logo=ethereum&logoColor=white&labelColor=1c1622"></a>
+</p>
+<p align="center">
+  <img alt="QDay Aevum testnet" src="https://img.shields.io/badge/QDay_Aevum-testnet_44005-8b7bff?style=flat-square&labelColor=1c1622">
+  <img alt="Paid in tUSD8" src="https://img.shields.io/badge/paid_in-tUSD8-ffb000?style=flat-square&labelColor=1c1622">
+  <img alt="181 tests passing" src="https://img.shields.io/badge/tests-181_passing-6ee7a8?style=flat-square&labelColor=1c1622">
+  <img alt="100% line coverage" src="https://img.shields.io/badge/line_coverage-100%25-6ee7a8?style=flat-square&labelColor=1c1622">
+  <img alt="Solidity 0.8.24" src="https://img.shields.io/badge/Solidity-0.8.24-ede8e3?style=flat-square&logo=solidity&logoColor=white&labelColor=1c1622">
+  <img alt="MIT license" src="https://img.shields.io/badge/license-MIT-ede8e3?style=flat-square&labelColor=1c1622">
+</p>
+
+<p align="center">
+  🚀 <a href="https://kibble-two-pi.vercel.app"><b>Try it</b></a> (no wallet needed)
+  &nbsp;·&nbsp; 🧭 <a href="#how-kibble-meets-the-judging-criteria"><b>For judges</b></a>
+  &nbsp;·&nbsp; 📊 <a href="EVIDENCE.md"><b>Evidence</b></a>
+  &nbsp;·&nbsp; 🔍 <a href="#deployments"><b>Addresses</b></a>
+  &nbsp;·&nbsp; 🔌 <a href="docs/connect-your-agent.md"><b>Connect your agent</b></a>
+</p>
+
+---
+
+## The idea in one picture
+
+<p align="center">
+  <img src="docs/img/how-it-works.jpg" alt="The agent, the locked box, the spending tray and the owner's safe" width="100%">
+</p>
+
+A fixed limit ("$50 a day") is a guess. A good agent runs out, a bad one wastes it every day, and a thief with the agent's key takes all of it. Kibble works like a shop:
+
+| | | |
+|:---:|---|---|
+| **1** | 🤖 **The agent** | Its own key holds **no money**. It can only *ask* the box to pay, and only suppliers the owner allowed. |
+| **2** | 🔒 **The locked box** | One smart contract per agent ([`KibbleDrawer`](contracts/src/KibbleDrawer.sol)). It holds all the agent's money and checks every payment. |
+| **3** | 🪙 **The spending tray** | A small allowance, capped at the limit **T**. It refills **only from sales that really cleared**. Profit grows T, a loss shrinks it: the limit is *earned*. |
+| **4** | 🏦 **The owner's safe** | Everything above the tray is swept to the owner's vault ([`KibbleVault`](contracts/src/KibbleVault.sol)), which the agent can never reach. |
+
+🚦 **And when things go wrong, the box brakes the agent by itself:** overspending walks it **Healthy → Watch → Braked → Paused**, with no human watching. The owner sets just **one number**: the most they'll lose in a week.
+
+## What happened on a real chain
+
+<p align="center">
+  <img src="docs/img/losing-day.jpg" alt="A losing day: the fixed limit lost 0.153 and kept paying; Kibble stopped itself 70 seconds after the price jump" width="100%">
+</p>
+
+Two agents with the same code and the same customers ran on **QDay Aevum testnet**: one with a fixed limit, one with Kibble. Above: the supplier raised its price above the sale price. The fixed agent kept paying and lost **0.153**; Kibble stopped itself **70 seconds** after the price jump.
+
+| Run on testnet (26 Nov 2026) | 🔴 Fixed limit | 🟢 Kibble |
+|---|---|---|
+| 📈 **A busy day** | the same limit, every round (0.050) | the limit **grew** 0.279 → 0.291, and 0.080 went to the owner's safe |
+| 📉 **A losing day** | lost **0.153**, and still paying | **stopped itself** 70 s after the price jump |
+| 🔑 **A stolen key** | the thief overbought **0.150**, still Healthy | the thief got **0.000**; the box locked in 2 s |
+
+Amounts are test money (tUSD8). Logs and every number: [EVIDENCE.md](EVIDENCE.md).
 
 > ### For judges, in 60 seconds
 > - **The idea:** a fixed limit ("$50 a day") is a guess that treats a winning, a losing and a hijacked agent the same. Kibble makes the agent **earn** its budget: it spends from a small allowance capped at a limit **T** that refills only from **verified value**, meaning cleared sales or work an approved client signed off. Profit is swept to a vault the agent can't call. **The wallet brakes the agent**: overspending walks it Healthy → Watch → Braked → Paused, with no human watching.
@@ -19,16 +80,19 @@
 
 | Criterion | Where to see it |
 |---|---|
-| **1. User experience and presentation** | [The live app](https://kibble-two-pi.vercel.app): a self-running [tour](https://kibble-two-pi.vercel.app/tour) with voice, plain words first (technical names are hints), every refusal explained in a sentence ("over the cost ceiling: spend too high for the value earned"), state shown as Healthy / Watch / Braked / Paused. Checked on desktop and phone with no accessibility violations (axe). A 3-minute animated film explains it for non-experts. |
-| **2. Demo, on chain** | Three demos run for real on Aevum testnet from the [Playground](https://kibble-two-pi.vercel.app/playground) (busy day, losing day, stolen key), with transaction links in the run log. Every payment and refusal is on each [drawer page](https://kibble-two-pi.vercel.app/drawer/0xea44B3a2481ceA281B1Cad4fFf631868D2b50cB3) and on the [explorer](https://explorer-test.qday.info/address/0xea44B3a2481ceA281B1Cad4fFf631868D2b50cB3). Results with numbers: [EVIDENCE.md](EVIDENCE.md). |
-| **3. Documentation** | This README: [architecture and flowcharts](#architecture), [environment variables](#environment-variables), [testnet addresses](#deployments), [step-by-step run](#run-it), [API](#contract-api), [Aevum integration](#why-aevum-and-how-kibble-uses-it), [known limits](#known-limits), [roadmap](#roadmap). Plus [connect your agent](docs/connect-your-agent.md), [security](docs/security.md), [attacks](docs/attacks.md), [deploy](docs/deploy.md). |
-| **4. Innovation** | The limit is **earned**: it grows only from verified income (cleared sales, or work a client signed) and shrinks with losses, and the wallet brakes the agent by itself. Not a fixed allowance, not an alert. Plus an HTTP 402 [pay-per-request API](#sell-by-the-request-http-402) where a buyer with no gas pays with one signature. |
-| **5. Technical quality and platform integration** | Spending limits, a scoped agent key (it can only ask its own drawer to pay, holds no money, and is capped), owner approvals (EIP-712), gasless tUSD8 payments (EIP-3009, `permit`), a `TrackRecord` event as the agent's on-chain history. 181 tests, 10 invariants over 128,000 random calls, fork tests on the real tUSD8, 100% line coverage of the Kibble contracts, Slither. Pay-once per bill makes retries safe; transactions wait for receipts with a gas margin. |
-| **6. Real-world utility** | For teams whose agents buy model calls, data and services, and for sellers who want agents as customers. [Who it's for and the business model](#who-its-for-and-the-business-model). Five-minute setup: `pnpm kibble new`. |
-| **7. Safety, trust and controls** | Least privilege (the agent key holds nothing; only allowed suppliers, capped per payment and per window; 1 tUSD8 lifetime to anyone else), owner approval above a threshold, instant freeze and revoke by owner or guardian, raises wait 24 h and the guardian can cancel, two-key resume. Prompt injection tested with real models ([EVIDENCE](EVIDENCE.md#the-hijack-with-a-real-model-25-nov-2026), [log](docs/runs/real-model-hijack-2026-11-25.txt)). The worst case a stolen key can do is on chain at any moment: `maxLossNow()`. Every payment leaves a receipt and every refusal an event. |
+| 🎨 **1. User experience and presentation** | [The live app](https://kibble-two-pi.vercel.app): a self-running [tour](https://kibble-two-pi.vercel.app/tour) with voice, plain words first (technical names are hints), every refusal explained in a sentence ("over the cost ceiling: spend too high for the value earned"), state shown as Healthy / Watch / Braked / Paused. Checked on desktop and phone with no accessibility violations (axe). A 3-minute animated film explains it for non-experts. |
+| 🎬 **2. Demo, on chain** | Three demos run for real on Aevum testnet from the [Playground](https://kibble-two-pi.vercel.app/playground) (busy day, losing day, stolen key), with transaction links in the run log. Every payment and refusal is on each [drawer page](https://kibble-two-pi.vercel.app/drawer/0xea44B3a2481ceA281B1Cad4fFf631868D2b50cB3) and on the [explorer](https://explorer-test.qday.info/address/0xea44B3a2481ceA281B1Cad4fFf631868D2b50cB3). Results with numbers: [EVIDENCE.md](EVIDENCE.md). |
+| 📚 **3. Documentation** | This README: [architecture and flowcharts](#architecture), [environment variables](#environment-variables), [testnet addresses](#deployments), [step-by-step run](#run-it), [API](#contract-api), [Aevum integration](#why-aevum-and-how-kibble-uses-it), [known limits](#known-limits), [roadmap](#roadmap). Plus [connect your agent](docs/connect-your-agent.md), [security](docs/security.md), [attacks](docs/attacks.md), [deploy](docs/deploy.md). |
+| 💡 **4. Innovation** | The limit is **earned**: it grows only from verified income (cleared sales, or work a client signed) and shrinks with losses, and the wallet brakes the agent by itself. Not a fixed allowance, not an alert. Plus an HTTP 402 [pay-per-request API](#sell-by-the-request-http-402) where a buyer with no gas pays with one signature. |
+| ⚙️ **5. Technical quality and platform integration** | Spending limits, a scoped agent key (it can only ask its own drawer to pay, holds no money, and is capped), owner approvals (EIP-712), gasless tUSD8 payments (EIP-3009, `permit`), a `TrackRecord` event as the agent's on-chain history. 181 tests, 10 invariants over 128,000 random calls, fork tests on the real tUSD8, 100% line coverage of the Kibble contracts, Slither. Pay-once per bill makes retries safe; transactions wait for receipts with a gas margin. |
+| 💼 **6. Real-world utility** | For teams whose agents buy model calls, data and services, and for sellers who want agents as customers. [Who it's for and the business model](#who-its-for-and-the-business-model). Five-minute setup: `pnpm kibble new`. |
+| 🛡️ **7. Safety, trust and controls** | Least privilege (the agent key holds nothing; only allowed suppliers, capped per payment and per window; 1 tUSD8 lifetime to anyone else), owner approval above a threshold, instant freeze and revoke by owner or guardian, raises wait 24 h and the guardian can cancel, two-key resume. Prompt injection tested with real models ([EVIDENCE](EVIDENCE.md#the-hijack-with-a-real-model-25-nov-2026), [log](docs/runs/real-model-hijack-2026-11-25.txt)). The worst case a stolen key can do is on chain at any moment: `maxLossNow()`. Every payment leaves a receipt and every refusal an event. |
 
 ## Contents
 
+- [The idea in one picture](#the-idea-in-one-picture)
+- [What happened on a real chain](#what-happened-on-a-real-chain)
+- [How Kibble meets the judging criteria](#how-kibble-meets-the-judging-criteria)
 - [The problem](#the-problem)
 - [How Kibble works](#how-kibble-works)
 - [Architecture](#architecture)
