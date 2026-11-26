@@ -16,7 +16,7 @@ Kibble gives every AI agent a locked tUSD8 drawer on Aevum. The agent's key hold
 **Links**
 - GitHub: https://github.com/mithileshofficial06/kibble
 - Live app: https://kibble-two-pi.vercel.app
-- Demo video: https://youtu.be/87PI4CCjGYQ (unlisted, 3:05)
+- Demo video: https://youtu.be/87PI4CCjGYQ (3:05)
 - Contracts on the explorer (verified): https://explorer-test.qday.info/address/0x296a2e00c0b934dfea4384572972cd4e46322afe
 - Transactions to check: https://github.com/mithileshofficial06/kibble/blob/main/EVIDENCE.md#transactions-to-check-on-the-explorer
 

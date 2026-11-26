@@ -28,7 +28,7 @@ Deployed by the user on 26 Nov: https://kibble-two-pi.vercel.app (checked: every
 - [x] Real recordings of the app on testnet on the in-film screens
 - [x] Full render `video/out/kibble-film.mp4` (3:05, 1080p60, RTX 3050 about 25 min)
 - [ ] The user's review (voice, music, pacing)
-- [x] Uploaded to YouTube, unlisted: https://youtu.be/87PI4CCjGYQ (linked in the README and docs/submission.md)
+- [x] Uploaded to YouTube, public (since 26 Nov): https://youtu.be/87PI4CCjGYQ (linked in the README and docs/submission.md)
 
 ## Current state (26 Nov 2026)
 
@@ -70,10 +70,12 @@ Not done:
 - **Video (#15), last:** re-record on the new drawers, finish or revert the uncommitted real-model scene, update "97 tests" and every number and address. Don't render until then.
 - **Hosting**, YouTube upload, DoraHacks submission.
 
-## Next steps
-1. UI: landing (grain loader, living-wordmark hero, replay section) and all app pages restyled on 23 Nov; iterate on the user's feedback.
-2. Host the app (`next start` on a small server, Railway suggested; `KIBBLE_PLAYGROUND=on` with the demo keys) and do a logged-out dry run: time each demo on testnet.
-3. Review the video with the user (voice, music and pacing are each one step to redo), upload it (YouTube, unlisted), and put the link in the README; submit by 10 Dec.
+## Next steps (as of 27 Nov)
+Done: hosted on Vercel, contracts verified, film public on YouTube, submission text in `docs/submission.md`.
+1. The user submits on DoraHacks from `docs/submission.md` (by 10 Dec; deadline 11 Dec 08:00 UTC).
+2. Optional: verify a phone on YouTube, then upload the three thumbnails (custom thumbnails need it).
+3. Optional: two or three outside testers on testnet, listed honestly in EVIDENCE.md.
+4. Demo Day (15 Dec 06:00 UTC, if top 5): rehearse.
 
 ## Testnet notes
 - Gas per full run: ~0.05 tQDAY (agent A), ~0.07 (buyer), ~0.03 (agent B). The Discord faucet allows one claim per account and per address (don't use a second account); the web faucet gives 5 tQDAY per 24 h to addresses holding mainnet ETH, USDT or USDC.
