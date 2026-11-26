@@ -40,7 +40,7 @@
 
 A fixed limit ("$50 a day") is a guess. A good agent runs out, a bad one wastes it every day, and a thief with the agent's key takes all of it. Kibble works like a shop:
 
-| | | |
+| # | Part | What it does |
 |:---:|---|---|
 | **1** | 🤖 **The agent** | Its own key holds **no money**. It can only *ask* the box to pay, and only suppliers the owner allowed. |
 | **2** | 🔒 **The locked box** | One smart contract per agent ([`KibbleDrawer`](contracts/src/KibbleDrawer.sol)). It holds all the agent's money and checks every payment. |
@@ -175,7 +175,7 @@ Plus the basics every rival has: approved suppliers with per-payment and per-win
 How a payment is decided:
 
 ```mermaid
-flowchart LR
+flowchart TD
   A[Agent asks the drawer to pay] --> S{"Sync: close the window if due<br/>clear sales, update T and the ladder"}
   S --> P{Paused, frozen<br/>or revoked?}
   P -- yes --> R1[Refused + event<br/>nothing moves]
