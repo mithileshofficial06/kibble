@@ -195,6 +195,7 @@ Factory [`0x296a2e00…2afe`](https://explorer-test.qday.info/address/0x296a2e00
 Through the Playground page, as a visitor would, with the 3D view:
 
 - **A stolen key:** both sides refused the injected 0.500 payment and the two 0.090 ones; then the thief overbought from the real supplier. Fixed A′ 0.150, still Healthy (exposure 0.422). Kibble A 0.000, Paused after 2 s, exposure 0.248 → 0.000.
+- **A losing day:** the supplier's price rose above the sale price. Fixed B′ stayed Healthy and kept paying through three windows (lost 0.126, 0.141, 0.153). Kibble B paused itself 70 s after the price jump, with 3 strikes and nothing more it could spend; no human was involved.
 - **A busy day:** 8 of 8 sales served on both sides; Kibble's limit 0.279 → 0.291 (fixed: 0.050), 0.080 to the vault.
 - **Pay-per-request API** (`pnpm --filter @kibble/agents paid-api`): 15 of 15 checks on testnet. A buyer with no gas paid exactly the price; replays, tampered signatures, a bill reused for another document, too little money and a made-up bill were all refused with nothing taken.
 - **Alerts:** a test message reached a private Discord server through a webhook.

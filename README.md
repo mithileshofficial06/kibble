@@ -169,6 +169,7 @@ On 25 Nov 2026 both NVIDIA-hosted models we tried obeyed the hidden instruction 
 - [Security notes and threat model](docs/security.md): Slither, coverage, and what we haven't fixed.
 - [A worked example](docs/customer-story.md): a small business in numbers (illustrative people, real runs).
 - [Alerts](docs/alerts.md) on Discord or the console, for the quiet attacks a pause doesn't catch.
+- [Deploying the web app](docs/deploy.md): Vercel with no keys, or one long-running server for live runs.
 
 ## The app in two minutes
 
