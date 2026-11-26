@@ -14,7 +14,9 @@ The user's go-ahead: everything except the demo video, YouTube, the submission a
 - [x] Every page, desktop and phone (no errors, no sideways scroll, 0 axe violations, custom 404); the 3D labels no longer overlap
 - [x] Focused code check (API routes, CLI exits on Windows)
 - [x] Vercel preparation, not deployed: [docs/deploy.md](docs/deploy.md)
-- [ ] Fresh-clone test, README and EVIDENCE
+- [x] Fresh-clone test (26 Nov, 07:30 IST): clone --recursive, pnpm install --frozen-lockfile, forge build, Shanghai check (12 blobs), 175/175 local tests, typecheck, web build; README and EVIDENCE updated
+
+Left for the user: decide on deploying (steps in docs/deploy.md), the demo video, YouTube and the DoraHacks submission.
 
 ## Current state (26 Nov 2026)
 
