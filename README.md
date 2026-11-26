@@ -2,7 +2,7 @@
 
 **The earned spending limit for AI agents.** On QDay Aevum testnet (chain 44005), in tUSD8.
 
-**Try it:** [kibble-two-pi.vercel.app](https://kibble-two-pi.vercel.app) (no wallet needed: the tour, the live desk reading the chain, and the Playground's recorded runs).
+**Try it:** [kibble-two-pi.vercel.app](https://kibble-two-pi.vercel.app) (no wallet needed: the tour, the live desk reading the chain, and the Playground's recorded runs). **Verified source:** all four contracts are verified on the [Aevum explorer](https://explorer-test.qday.info/address/0x296a2e00c0b934dfea4384572972cd4e46322afe) ([addresses](#deployments)). **For judges:** [how Kibble meets each criterion](#how-kibble-meets-the-judging-criteria).
 
 > ### For judges, in 60 seconds
 > - **The idea:** a fixed limit ("$50 a day") is a guess that treats a winning, a losing and a hijacked agent the same. Kibble makes the agent **earn** its budget: it spends from a small allowance capped at a limit **T** that refills only from **verified value**, meaning cleared sales or work an approved client signed off. Profit is swept to a vault the agent can't call. **The wallet brakes the agent**: overspending walks it Healthy → Watch → Braked → Paused, with no human watching.
@@ -15,6 +15,18 @@
 
 ---
 
+## How Kibble meets the judging criteria
+
+| Criterion | Where to see it |
+|---|---|
+| **1. User experience and presentation** | [The live app](https://kibble-two-pi.vercel.app): a self-running [tour](https://kibble-two-pi.vercel.app/tour) with voice, plain words first (technical names are hints), every refusal explained in a sentence ("over the cost ceiling: spend too high for the value earned"), state shown as Healthy / Watch / Braked / Paused. Checked on desktop and phone with no accessibility violations (axe). A 3-minute animated film explains it for non-experts. |
+| **2. Demo, on chain** | Three demos run for real on Aevum testnet from the [Playground](https://kibble-two-pi.vercel.app/playground) (busy day, losing day, stolen key), with transaction links in the run log. Every payment and refusal is on each [drawer page](https://kibble-two-pi.vercel.app/drawer/0xea44B3a2481ceA281B1Cad4fFf631868D2b50cB3) and on the [explorer](https://explorer-test.qday.info/address/0xea44B3a2481ceA281B1Cad4fFf631868D2b50cB3). Results with numbers: [EVIDENCE.md](EVIDENCE.md). |
+| **3. Documentation** | This README: [architecture and flowcharts](#architecture), [environment variables](#environment-variables), [testnet addresses](#deployments), [step-by-step run](#run-it), [API](#contract-api), [Aevum integration](#why-aevum-and-how-kibble-uses-it), [known limits](#known-limits), [roadmap](#roadmap). Plus [connect your agent](docs/connect-your-agent.md), [security](docs/security.md), [attacks](docs/attacks.md), [deploy](docs/deploy.md). |
+| **4. Innovation** | The limit is **earned**: it grows only from verified income (cleared sales, or work a client signed) and shrinks with losses, and the wallet brakes the agent by itself. Not a fixed allowance, not an alert. Plus an HTTP 402 [pay-per-request API](#sell-by-the-request-http-402) where a buyer with no gas pays with one signature. |
+| **5. Technical quality and platform integration** | Spending limits, a scoped agent key (it can only ask its own drawer to pay, holds no money, and is capped), owner approvals (EIP-712), gasless tUSD8 payments (EIP-3009, `permit`), a `TrackRecord` event as the agent's on-chain history. 181 tests, 10 invariants over 128,000 random calls, fork tests on the real tUSD8, 100% line coverage of the Kibble contracts, Slither. Pay-once per bill makes retries safe; transactions wait for receipts with a gas margin. |
+| **6. Real-world utility** | For teams whose agents buy model calls, data and services, and for sellers who want agents as customers. [Who it's for and the business model](#who-its-for-and-the-business-model). Five-minute setup: `pnpm kibble new`. |
+| **7. Safety, trust and controls** | Least privilege (the agent key holds nothing; only allowed suppliers, capped per payment and per window; 1 tUSD8 lifetime to anyone else), owner approval above a threshold, instant freeze and revoke by owner or guardian, raises wait 24 h and the guardian can cancel, two-key resume. Prompt injection tested with real models ([EVIDENCE](EVIDENCE.md#the-hijack-with-a-real-model-25-nov-2026), [log](docs/runs/real-model-hijack-2026-11-25.txt)). The worst case a stolen key can do is on chain at any moment: `maxLossNow()`. Every payment leaves a receipt and every refusal an event. |
+
 ## Contents
 
 - [The problem](#the-problem)
@@ -25,7 +37,10 @@
 - [Demo scenarios](#demo-scenarios)
 - [The web app](#the-web-app)
 - [Contract API](#contract-api)
-- [Platform findings (Aevum)](#platform-findings-aevum)
+- [Why Aevum, and how Kibble uses it](#why-aevum-and-how-kibble-uses-it)
+- [Environment variables](#environment-variables)
+- [Technologies](#technologies)
+- [Who it's for, and the business model](#who-its-for-and-the-business-model)
 - [Known limits](#known-limits)
 - [Roadmap](#roadmap)
 - [Credits and license](#credits-and-license)
@@ -90,6 +105,37 @@ Plus the basics every rival has: approved suppliers with per-payment and per-win
 | [`@kibble/sdk`](packages/kibble/src) | Merged ABI, typed data (approvals, work, resume), `payOnce` (pay exactly once under retries), plain-words reasons |
 | [`agents/`](agents/src) (`@kibble/agents`) | Setup, supplier, sale loop, injection page with a real-model summarizer (Claude or NVIDIA-hosted), scenario runner, playground beats |
 | [`web/`](web/src) | Next.js app: split-screen dashboard, drawer pages (receipts, track record, owner/guardian controls), playground |
+
+### Core flows
+
+How a payment is decided:
+
+```mermaid
+flowchart LR
+  A[Agent asks the drawer to pay] --> S{"Sync: close the window if due<br/>clear sales, update T and the ladder"}
+  S --> P{Paused, frozen<br/>or revoked?}
+  P -- yes --> R1[Refused + event<br/>nothing moves]
+  P -- no --> Q{"Allowed supplier, within its caps?<br/>(else: stranger budget, 1 tUSD8 for life)"}
+  Q -- no --> R2[Refused + event]
+  Q -- yes --> C{"Within the allowance<br/>and the cost ceiling?"}
+  C -- no --> R3["Refused + event<br/>(over the cost ceiling: a strike;<br/>3 strikes: Paused)"]
+  C -- yes --> B{Above the approval<br/>threshold?}
+  B -- "yes, no owner signature" --> R4[Refused: owner must sign]
+  B -- "no, or signed" --> OK["Paid in tUSD8<br/>receipt stored and emitted"]
+```
+
+How money moves, and how the limit is earned:
+
+```mermaid
+flowchart LR
+  Buyer -- "buy (or gasless EIP-3009)" --> Pending[Pending income]
+  Pending -- "buyer confirms, or the hold ends" --> Cleared[Cleared value]
+  Client -- "signed WorkAccepted" --> Cleared
+  Cleared -- "refills, up to T" --> Allowance[Allowance]
+  Allowance -- "pay()" --> Supplier
+  Cleared -- "everything above the allowance" --> Vault[Owner's vault]
+  Cleared -. "window close: profit grows T,<br/>a loss shrinks it" .-> T[Limit T]
+```
 
 ### `_sync()`, which runs at the start of every call
 
@@ -265,21 +311,70 @@ Aevum testnet (chain 44005), deployed 25 Nov 2026, contracts as of commit `4ddaa
 | Demo owner vault | [`0x3a74A0D0847d3247B20f6782197c71B620ab0a72`](https://explorer-test.qday.info/address/0x3a74A0D0847d3247B20f6782197c71B620ab0a72) |
 | tUSD8 | [`0x456569838f1d43009A91ebA4263147Afd7233483`](https://explorer-test.qday.info/address/0x456569838f1d43009A91ebA4263147Afd7233483) |
 
-The current demo drawers and roles are in [`deployments/44005.json`](deployments/44005.json); the first version (22 Nov, before the refund-loophole fix, now revoked) is in [`docs/runs/testnet-v1-deployment-2026-11-22.json`](docs/runs/testnet-v1-deployment-2026-11-22.json). Explorer verification on Aevum doesn't work yet, so the source is this repository at the commit above. On a local fork, `pnpm --filter @kibble/agents setup-demo` deploys a fresh set each time.
+The current demo drawers and roles are in [`deployments/44005.json`](deployments/44005.json); the first version (22 Nov, before the refund-loophole fix, now revoked) is in [`docs/runs/testnet-v1-deployment-2026-11-22.json`](docs/runs/testnet-v1-deployment-2026-11-22.json). All four contracts are **verified on the Aevum explorer** (Blockscout, 26 Nov 2026). Each agent's drawer is an EIP-1167 clone, which the explorer resolves to the verified `KibbleDrawer`. On a local fork, `pnpm --filter @kibble/agents setup-demo` deploys a fresh set each time.
 
-## Platform findings (Aevum)
+## Why Aevum, and how Kibble uses it
 
-Checked on chain on 22 Nov 2026:
+Kibble is built for Aevum and everything in it runs there: the contracts, the demo agents, every test run and hundreds of payments, all on Aevum testnet in tUSD8 (the live desk shows the current count). How each piece of the platform is used:
+
+| Platform piece | How Kibble uses it |
+|---|---|
+| **tUSD8** (EIP-2612 `permit`, EIP-3009) | All money is tUSD8. A buyer with no gas pays a drawer with one signature (`receiveWithAuthorization`), and the authorization's nonce is bound to the bill, so a relayer can't reuse it. That's the [pay-per-request API](#sell-by-the-request-http-402) and the gasless buyer in the demos. |
+| **Smart contracts on Aevum** (Shanghai EVM) | Factory, drawer (one clone per agent), admin module and vault; verified on the explorer. The bytecode is checked for Shanghai opcodes (`tools/check-shanghai.mjs`). |
+| **Spending limits and scoped keys** | The drawer is the spending limit: the agent's key holds no money, can only ask its own drawer to pay, only to approved suppliers, inside caps that the owner can lower at once and raise only after a delay. |
+| **Identity and history** | No ERC-8004 registry is open for this challenge, so each window close emits a `TrackRecord` event: the agent's on-chain history, ready to post to ERC-8004 when a registry opens. |
+| **Aevum Starter Kit** | The project started from the kit (chain config, tUSD8 ABIs, the local fork with chain id 440050). |
+| **Post-quantum (QDay)** | On the roadmap: an ML-DSA guardian for the vault once QDay's precompile ships, so the owner's last line of defence uses post-quantum signatures. |
+
+What we found on the platform, checked on chain (22 Nov 2026 unless noted):
 
 - **tUSD8 now supports EIP-2612 `permit` and EIP-3009** (`nonces`, `authorizationState`; EIP-712 domain `"tUSD8"`, version `"2"`). Our 15 Nov check found neither. Kibble uses `receiveWithAuthorization` for gasless buying, with the nonce bound to the bill so a relayer can't reuse a signature.
 - **No supported bundler or paymaster.** The organizers say account abstraction is "not required and not supported". The agent uses a plain key with the agent role; the drawer enforces every rule, and the key holds no tokens.
 - **No ERC-8004 registry** is open for this challenge. The track record is the `TrackRecord` event emitted at every window close.
 - **Shanghai EVM**: compiled with `evm_version = shanghai`; `tools/check-shanghai.mjs` checks the bytecode.
 - **1,000-block `eth_getLogs` limit** and **no WebSocket RPC**: read with `getLogsChunked` and poll over HTTPS.
-- **Explorer verification is down**: addresses and commit go in this README.
+- **Explorer verification**: down on 22 Nov, working again on 26 Nov; all four Kibble contracts are verified (`forge verify-contract --verifier blockscout --verifier-url https://explorer-test.qday.info/api/`).
 - A local fork reports a gas price around 2,000 gwei (Aevum itself is about 1 gwei), so local demo wallets get large test balances.
 
+## Environment variables
+
+None are needed to view the app ([docs/deploy.md](docs/deploy.md)). Keys always live in a file **outside the repo**.
+
+| Variable | Where | What it does |
+|---|---|---|
+| `RPC_URL` | agents, CLI | The chain to use. Default for `pnpm kibble`: Aevum testnet; for the demo scripts: the local fork on 8555. |
+| `KIBBLE_WALLETS` | agents, web server | Path to the `.env` file with the demo keys (`OWNER_PRIVATE_KEY`, `GUARDIAN_PRIVATE_KEY`, `AGENT_A_PRIVATE_KEY`, …). Test wallets only. |
+| `KIBBLE_HOME` | CLI | Folder for `pnpm kibble` keys (default `~/.kibble`). |
+| `KIBBLE_SCALE` | agents | Demo amount scale (1 locally, 0.1 on testnet). |
+| `KIBBLE_LLM`, `KIBBLE_NVIDIA_MODEL`, `NVIDIA_API_KEY`, `ANTHROPIC_API_KEY` | agents | Which model reads the poisoned page in the hijack demo (`off`, `auto`, `claude`, `nvidia`). |
+| `DISCORD_WEBHOOK_URL`, `ALERT_POLL_S` | alerts | Where alerts go, and how often to poll. |
+| `KIBBLE_PLAYGROUND` | web server | `on` enables "Run it for real". Needs `KIBBLE_WALLETS` and one long-running server. |
+| `PLAYGROUND_COOLDOWN_S`, `PLAYGROUND_PER_IP_PER_DAY`, `PLAYGROUND_RUNS_PER_DAY`, `PLAYGROUND_RPC_URL` | web server | Limits and RPC for live runs (defaults: 60 s, 3 per visitor, 10 per day). |
+| `KIBBLE_ASSISTANT`, `ASSISTANT_PER_DAY`, `ASSISTANT_PER_IP_PER_DAY` | web server | The owner's assistant model (`nvidia` or `claude`; off by default) and its limits. |
+| `TRUSTED_IP_HEADER` | web server | Behind a proxy, the header that carries the client's IP. |
+| `NEXT_PUBLIC_WC_PROJECT_ID`, `NEXT_PUBLIC_NETWORKS`, `NEXT_PUBLIC_REPO_URL` | web build | WalletConnect for phone wallets, which networks the switcher shows, the repo link. |
+
+## Technologies
+
+- **Contracts:** Solidity 0.8.24 (Shanghai EVM), Foundry (unit, fuzz, invariant and fork tests, coverage), OpenZeppelin (clones, SafeERC20, EIP-712), Slither.
+- **Chain:** QDay Aevum testnet (chain 44005), tUSD8 with EIP-2612 and EIP-3009, Blockscout explorer.
+- **SDK and agents:** TypeScript, viem, pnpm workspaces; Claude or NVIDIA-hosted models for the agent demos and the owner's assistant.
+- **Web:** Next.js 16, React 19, RainbowKit and wagmi, React Three Fiber (the 3D replays), Motion; hosted on Vercel.
+- **Film:** Remotion with React Three Fiber, edge-tts narration, a score synthesized in Python.
+
+## Who it's for, and the business model
+
+**Who:** teams that let agents spend money on their own (model calls, data, APIs, other agents' work), and sellers who want agents as paying customers. Today they choose between a fixed card limit that a thief or a bad strategy uses up, and a human approving every payment. Kibble gives a limit that follows results, with the worst case readable on chain.
+
+**How it fits in:** one drawer per agent, created in five minutes (`pnpm kibble new` or the Connect page). The agent keeps its own logic and calls `pay()`; sellers take tUSD8 by the request over HTTP 402.
+
+**Business model (plan):** the contracts stay open source. Revenue would come from (1) a hosted control room for teams running many agents: alerts, the assistant, approvals and reports; and (2) a small fee on the sweeps to the owner's vault, taken only from profit. Neither is built yet.
+
+**Path to mainnet (February):** an external audit; many agents per owner with one total loss budget; signed attestations for off-chain revenue; the SDK on npm; ERC-8004 history once a registry opens; then mainnet with a few outside teams first.
+
 ## Known limits
+
+- **The agent key has no expiry date of its own.** It's limited by what it can do (its own drawer, allowed suppliers, caps). The owner or guardian can freeze or revoke it at once, and the owner can replace it (`SetAgent`, after the delay). Runway grants do expire.
 
 - **Refunds after spending need the owner.** If an agent has bought the input for a sale and then can't deliver, its key may not be able to refund that sale; the owner always can, before it clears.
 - **The skim.** An attacker who spends at exactly the agent's normal cost share can take at most (costBps − real cost share) × value per window. The learned share and `skimBps()` make it visible; nothing stops it on chain.

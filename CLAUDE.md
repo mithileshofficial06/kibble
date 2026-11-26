@@ -46,5 +46,5 @@ Earned spending limit for AI agents: a per-agent "drawer" contract, an owner vau
 
 ## Platform facts (verified 22 Nov 2026)
 - tUSD8 `0x456569838f1d43009A91ebA4263147Afd7233483`, 6 decimals, **supports EIP-2612 permit and EIP-3009** (domain "tUSD8", version "2").
-- No supported bundler/paymaster; no ERC-8004 registry; explorer verification broken.
+- No supported bundler/paymaster; no ERC-8004 registry. Explorer verification works again since 26 Nov (Blockscout: `forge verify-contract --verifier blockscout --verifier-url https://explorer-test.qday.info/api/`); all four Kibble contracts are verified.
 - A local fork reports a gas price of ~2,000 gwei: local roles get 10^24 wei of test balance.
