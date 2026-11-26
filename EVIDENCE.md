@@ -199,6 +199,7 @@ Through the Playground page, as a visitor would, with the 3D view:
 - **A busy day:** 8 of 8 sales served on both sides; Kibble's limit 0.279 → 0.291 (fixed: 0.050), 0.080 to the vault.
 - **Pay-per-request API** (`pnpm --filter @kibble/agents paid-api`): 15 of 15 checks on testnet. A buyer with no gas paid exactly the price; replays, tampered signatures, a bill reused for another document, too little money and a made-up bill were all refused with nothing taken.
 - **Alerts:** a test message reached a private Discord server through a webhook.
+- **A stolen key, again (recorded for the film, 26 Nov, 12:30 IST):** the fixed agent let the thief overbuy 0.200 and stayed Healthy (could still take 0.270); Kibble A gave the thief 0.000 and paused after 2 s (exposure 0.208 → 0.000).
 
 ## Tests now
 

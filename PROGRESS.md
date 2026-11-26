@@ -16,7 +16,14 @@ The user's go-ahead: everything except the demo video, YouTube, the submission a
 - [x] Vercel preparation, not deployed: [docs/deploy.md](docs/deploy.md)
 - [x] Fresh-clone test (26 Nov, 07:30 IST): clone --recursive, pnpm install --frozen-lockfile, forge build, Shanghai check (12 blobs), 175/175 local tests, typecheck, web build; README and EVIDENCE updated
 
-Left for the user: decide on deploying (steps in docs/deploy.md), the demo video, YouTube and the DoraHacks submission.
+Left for the user: decide on deploying (steps in docs/deploy.md), YouTube and the DoraHacks submission.
+
+## The 3D demo film (26 Nov 2026)
+
+- [x] New plain-language script, voice, original 3D world, score and sound (`video/src/film`, `video/README.md`)
+- [x] Real recordings of the app on testnet on the in-film screens
+- [ ] Full render `video/out/kibble-film.mp4` and the user's review (voice, music, pacing)
+- [ ] Upload (YouTube, unlisted) and link it in the README, only when the user says so
 
 ## Current state (26 Nov 2026)
 
