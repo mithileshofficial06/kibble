@@ -132,7 +132,7 @@ export const World = () => {
         intensity={2.3}
         color="#fff4e6"
         castShadow
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[4096, 4096]}
         shadow-bias={-0.0003}
         shadow-normalBias={0.025}
         shadow-radius={6}
@@ -155,7 +155,7 @@ export const World = () => {
       {f >= CH.end[0] && <SetShop f={f} mode="end" />}
       <ComposerGate composer={composer} />
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <EffectComposer ref={composer as any} multisampling={4} enableNormalPass={false}>
+      <EffectComposer ref={composer as any} multisampling={8} enableNormalPass={false}>
         <N8AO aoRadius={0.7} distanceFalloff={0.6} intensity={2.2} quality="high" halfRes={false} color="#02030a" />
         <DepthOfField target={focus} worldFocusRange={reveal ? 1.2 : 4.5} bokehScale={bokeh} />
         <Bloom mipmapBlur intensity={0.85} luminanceThreshold={0.95} luminanceSmoothing={0.25} radius={0.7} />

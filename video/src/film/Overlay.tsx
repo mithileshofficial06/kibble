@@ -105,7 +105,7 @@ const Captions = ({ f }: { f: number }) => {
 const CHAPTERS = [
   { n: "01", name: "The problem", from: 0, to: at("reveal") },
   { n: "02", name: "How Kibble works", from: at("box"), to: at("test") },
-  { n: "03", name: "Tested on a real blockchain", from: at("test"), to: at("proof") },
+  { n: "03", name: "Tested on a real blockchain", from: at("test"), to: at("real") },
 ];
 const Chapter = ({ f }: { f: number }) => {
   const c = CHAPTERS.find((x) => f >= x.from && f < x.to);
@@ -257,7 +257,7 @@ const Proof = ({ f }: { f: number }) => {
   const a = at("proof", 0.3), b = end("proof");
   if (f < a || f > b) return null;
   const t = Math.min(p(f, a, a + 20), 1 - p(f, b - 14, b));
-  const n = Math.round(lerp(0, 181, p(f, w("proof", "one") - 6, w("proof", "tests") + 6, EASE.out)));
+  const n = Math.round(lerp(1, 181, p(f, a + 4, w("proof", "tests") + 6, EASE.inOut)));
   const second = p(f, w("proof", "worst") - 6, w("proof", "worst") + 20);
   return (
     <>
